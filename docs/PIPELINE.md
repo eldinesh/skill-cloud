@@ -100,7 +100,7 @@ _UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 
 
 - If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `~/.skillcloud/repo/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
 - If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `~/.skillcloud/repo/CHANGELOG.md` in 3–5 bullets. Then continue.
-- If `PROJECT_CONTEXT: missing`: create a minimal `ux/project-context.md` from the template in `engagement-guardrails` — infer the project name and domain from the material at hand, state the inference in one line so the user can correct it, and continue. Do not block on questions; refine the file as real facts emerge.
+- If `PROJECT_CONTEXT: missing`: create a minimal `ux/project-context.md` from the template in `engagement-guardrails` — infer the project name and domain from the material at hand, state the inference in one line so the user can correct it, and continue. Never ask administrative questions (project type, classification, permissions — defaults exist); but if something material to the work itself is unclear — who the participants are, what decision the output should inform — ask that one sharp question before producing.
 ````
 
 Everything is failure-safe (`|| true`) — offline, Cowork, or a missing install must never break the skill.
@@ -113,6 +113,7 @@ Every research/design skill starts its workflow with:
 2. Data rules (full rules in `engagement-guardrails`): if the file **explicitly restricts** AI processing of this project's material → STOP, say so, point to `engagement-guardrails`. Otherwise proceed — de-identifying people data on intake as a standing habit (people → codes, orgs/systems → glossary codenames, identifiers stripped; industry-specific identifier categories, e.g. PHI in healthcare, live in `engagement-guardrails`).
 3. Domain awareness: apply the project's domain from project-context to examples, registers, heuristics, and logistics. Healthcare playbooks ship as the worked example throughout — adapt to the actual domain, never assume it. Domain unknown → infer it from the material and state the inference in one line.
 4. Read this skill's **Consumes** artifacts if present; if missing, say exactly what's missing and offer to either run the upstream skill or proceed with what the user provides.
+5. Questions: never administrative (project type, permissions — defaults exist), always substantive when it matters — if an ambiguity would change the output, ask one sharp question first (§4.7). Everything produced lands as `status: draft` with gaps and assumptions flagged; humans promote to reviewed/final.
 
 ### 4.4 Contract block (pipeline skills, required — validate.sh checks it)
 
