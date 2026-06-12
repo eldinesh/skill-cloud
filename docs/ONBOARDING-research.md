@@ -5,8 +5,8 @@ Everything you need to start working with SkillCloud today. Ten minutes, once.
 ## Install
 
 ```bash
-git clone <org-remote-url> ~/SkillCloud
-cd ~/SkillCloud && ./setup.sh
+git clone --single-branch --depth 1 git@github.com:eldinesh/skill-cloud.git ~/.claude/skills/skill-cloud
+cd ~/.claude/skills/skill-cloud && ./setup
 ```
 
 Pick **1) Researcher**. That links 14 skills (4 core + 10 research) into `~/.claude/skills/` and they're live in Claude Code immediately. Coming from a personal skill-pack setup? Do [CLEANUP.md](CLEANUP.md) right after — fifteen minutes, once, and your setup stays boring.

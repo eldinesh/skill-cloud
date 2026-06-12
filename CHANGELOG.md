@@ -11,4 +11,4 @@ Initial internal release candidate.
 - Design bundle (10 skills): design-brief → critique/heuristic-evaluation/accessibility-audit/ux-writing/component-spec → design-rationale → handoff-spec → design-qa-checklist, plus figma-hygiene.
 - Pipeline artifact contracts: every skill reads `ux/project-context.md`, consumes upstream artifacts, produces standard outputs, suggests the next step (see `docs/PIPELINE.md`).
 - gstack-style self-update: skills check `VERSION` against origin on invocation and prompt to upgrade (snooze and auto-upgrade supported).
-- `setup.sh` role-based install (researcher / designer / both) symlinking into `~/.claude/skills/` — works in Claude Code and Cowork from one install.
+- `setup` role-based install (researcher / designer / both) symlinking into `~/.claude/skills/` — works in Claude Code and Cowork from one install.

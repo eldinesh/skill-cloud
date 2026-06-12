@@ -3,8 +3,8 @@
 ## Install (2 minutes)
 
 ```bash
-git clone <org-remote-url> ~/SkillCloud
-cd ~/SkillCloud && ./setup.sh        # pick: 2) Designer
+git clone --single-branch --depth 1 git@github.com:eldinesh/skill-cloud.git ~/.claude/skills/skill-cloud
+cd ~/.claude/skills/skill-cloud && ./setup    # pick: 2) Designer
 ```
 
 Skills are now live in **Claude Code and Cowork** — same install, both surfaces. Updates announce themselves the next time you use a skill; pick "Always keep me up to date" once and never think about it again.

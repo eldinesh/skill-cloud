@@ -146,7 +146,7 @@ re-enable.
 ### Step 3 — run the update
 
 ```bash
-bash "${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/setup.sh" --update
+bash "${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/setup" --update
 ```
 
 What it does: `git pull --ff-only`, relinks skills for the saved role, writes the
@@ -213,13 +213,13 @@ Grade it:
 
 | Signal | Verdict | One-line fix |
 |---|---|---|
-| `repo_pointer: BROKEN` | FAIL | Re-run `setup.sh` from the SkillCloud clone — it restores `~/.skillcloud/repo`. |
-| `version: UNREADABLE` | FAIL | The clone moved or is damaged — re-clone, then re-run `setup.sh`. |
+| `repo_pointer: BROKEN` | FAIL | Re-run `setup` from the SkillCloud clone — it restores `~/.skillcloud/repo`. |
+| `version: UNREADABLE` | FAIL | The clone moved or is damaged — re-clone, then re-run `setup`. |
 | `git_remote: UNREACHABLE` | WARN — offline is normal, never a FAIL | Check network/VPN or git credentials; update checks resume silently once reachable. |
 | `role: UNSET` | WARN | Set it via **Switching role** below. |
-| `linked_skills: 0` | FAIL | Re-run `setup.sh` — nothing is linked, so no SkillCloud skill can trigger. |
-| anything under `broken_symlinks:` | WARN | Re-run `setup.sh` — it relinks the role's skills and prunes dead links. |
-| anything under `collisions:` | WARN | A real file or folder in `~/.claude/skills` shadows a SkillCloud skill — remove or rename it, or re-run `setup.sh --force` to replace it. |
+| `linked_skills: 0` | FAIL | Re-run `setup` — nothing is linked, so no SkillCloud skill can trigger. |
+| anything under `broken_symlinks:` | WARN | Re-run `setup` — it relinks the role's skills and prunes dead links. |
+| anything under `collisions:` | WARN | A real file or folder in `~/.claude/skills` shadows a SkillCloud skill — remove or rename it, or re-run `setup --force` to replace it. |
 
 Report as a short PASS/WARN/FAIL list with the fix attached to every WARN and FAIL.
 When explaining impact, remember the blast radius: `~/.claude/skills` is read by
@@ -241,7 +241,7 @@ echo "update_check: $("$SC/repo/bin/skillcloud-config" get update_check)"
   the user just asked for the update, so asking "upgrade now?" again is a wasted
   question.
 - `JUST_UPGRADED <old> <new>` → an update already completed out-of-band (e.g.
-  `setup.sh --update` run in a terminal); announce it per the preamble bullet.
+  `setup --update` run in a terminal); announce it per the preamble bullet.
 - No output and `update_check: true` → say **"You're on the latest (v{X})."** with the
   local version. (Suspect you're offline? **Doctor** checks remote reachability.)
 - No output and `update_check: false` → checks are disabled, so origin was never
@@ -259,7 +259,7 @@ Roles decide which bundles get linked: `researcher` = core + research, `designer
 core + design, `both` = all three, `core` = core only.
 
 ```bash
-bash "${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/setup.sh" --role designer   # researcher | designer | both | core
+bash "${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/setup" --role designer   # researcher | designer | both | core
 ```
 
 Prune behavior, so there are no surprises: the script links the new selection, then
@@ -277,9 +277,9 @@ the skills), and the `~/.skillcloud/repo` pointer goes away. The git clone itsel
 Once they confirm:
 
 ```bash
-bash "${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/setup.sh" --uninstall
+bash "${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/setup" --uninstall
 ```
 
 Afterwards: to finish removal completely, delete the clone and `~/.skillcloud/`; to
-come back later, re-run `setup.sh` from the clone — the saved role makes reinstall one
+come back later, re-run `setup` from the clone — the saved role makes reinstall one
 keypress.

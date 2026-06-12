@@ -41,7 +41,7 @@ How to spot the pattern: open `~/.claude/CLAUDE.md`, look for skill names that n
 
 ## 4. Personal skills that collide
 
-If `setup.sh` reported `skipping '<name>' — something else already lives there`: look at the folder, keep your version (SkillCloud skips it) or adopt the company one (`rm -rf ~/.claude/skills/<name>` then re-run `setup.sh`).
+If `setup` reported `skipping '<name>' — something else already lives there`: look at the folder, keep your version (SkillCloud skips it) or adopt the company one (`rm -rf ~/.claude/skills/<name>` then re-run `setup`).
 
 ## 5. Verify
 

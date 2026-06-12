@@ -2,12 +2,16 @@
 # SkillCloud installer — role-based symlinks into ~/.claude/skills/
 # (read by both Claude Code and Cowork, so one install covers both surfaces).
 #
+# Install:
+#   git clone --single-branch --depth 1 git@github.com:eldinesh/skill-cloud.git ~/.claude/skills/skill-cloud
+#   cd ~/.claude/skills/skill-cloud && ./setup
+#
 # Usage:
-#   ./setup.sh                      interactive role picker
-#   ./setup.sh --role researcher    researcher | designer | both | core
-#   ./setup.sh --update             pull latest + relink + mark "just upgraded"
-#   ./setup.sh --uninstall          remove SkillCloud symlinks and repo pointer
-#   ./setup.sh --force              replace non-SkillCloud files occupying our names
+#   ./setup                      interactive role picker
+#   ./setup --role researcher    researcher | designer | both | core
+#   ./setup --update             pull latest + relink + mark "just upgraded"
+#   ./setup --uninstall          remove SkillCloud symlinks and repo pointer
+#   ./setup --force              replace non-SkillCloud files occupying our names
 #
 # Compatible with macOS /bin/bash 3.2. Idempotent — safe to re-run anytime.
 
@@ -29,7 +33,7 @@ while [ $# -gt 0 ]; do
     --update) DO_UPDATE="yes"; shift ;;
     --uninstall) DO_UNINSTALL="yes"; shift ;;
     --force) FORCE="yes"; shift ;;
-    -h|--help) sed -n '2,12p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,16p' "$0"; exit 0 ;;
     *) echo "Unknown flag: $1 (try --help)"; exit 1 ;;
   esac
 done
@@ -69,6 +73,15 @@ uninstall_all() {
     fi
   done
   rm -f "$SC_HOME/repo"
+  # Strip the skillcloud section from ~/.claude/CLAUDE.md if present
+  CM="${SKILLCLOUD_CLAUDE_MD:-$HOME/.claude/CLAUDE.md}"
+  if grep -qF "<!-- SKILLCLOUD_START -->" "$CM" 2>/dev/null; then
+    tmp="$CM.tmp.$$"
+    awk '$0 == "<!-- SKILLCLOUD_START -->" { skip = 1; next }
+         $0 == "<!-- SKILLCLOUD_END -->"   { skip = 0; next }
+         skip != 1 { print }' "$CM" > "$tmp" && mv "$tmp" "$CM"
+    echo "Removed the skillcloud section from ~/.claude/CLAUDE.md."
+  fi
   echo "Removed $removed SkillCloud skill links and the repo pointer."
   echo "Config kept at $SC_HOME/config.yaml (delete it if you're done for good)."
 }
@@ -95,7 +108,7 @@ fi
 
 if [ -z "$ROLE" ]; then
   SAVED_ROLE=$("$CONFIG" get role)
-  echo "SkillCloud — company UX skills for Claude Code & Cowork"
+  echo "SkillCloud setup"
   echo ""
   echo "Which bundle fits your work?"
   echo "  1) Researcher   (core + research skills)"
@@ -148,6 +161,11 @@ SKIPPED=0
 for src in $SELECTED; do
   name=$(basename "$src")
   dst="$SKILLS_DIR/$name"
+  if [ -e "$dst" ] && [ "$dst" -ef "$REPO_ROOT" ]; then
+    echo "  ! '$name' would collide with the clone itself — clone the repo as ~/.claude/skills/skill-cloud (hyphenated), not '$name'"
+    SKIPPED=$((SKIPPED + 1))
+    continue
+  fi
   if [ -e "$dst" ] || [ -L "$dst" ]; then
     if link_points_to_repo "$dst"; then
       rm -f "$dst"
@@ -182,5 +200,57 @@ done
 
 VERSION=$(cat "$REPO_ROOT/VERSION" 2>/dev/null || echo "?")
 echo ""
-echo "SkillCloud v$VERSION installed — role: $ROLE ($LINKED skills linked, $SKIPPED skipped, $PRUNED pruned)."
-echo "Works in Claude Code and Cowork. Try: ask Claude 'what can skillcloud do?' or invoke /skillcloud."
+echo "SkillCloud v$VERSION — role: $ROLE ($LINKED skills linked, $SKIPPED skipped, $PRUNED pruned)."
+echo "Skills load in Claude Code and Cowork from ~/.claude/skills. Manage with /skillcloud."
+
+# --- CLAUDE.md section -------------------------------------------------------
+# Keep a marker-delimited "skillcloud" section in ~/.claude/CLAUDE.md so Claude
+# routes to the installed skills. Offered once; refreshed silently on re-runs
+# and role switches if the section already exists.
+
+SC_MARK_START="<!-- SKILLCLOUD_START -->"
+SC_MARK_END="<!-- SKILLCLOUD_END -->"
+CLAUDE_MD="${SKILLCLOUD_CLAUDE_MD:-$HOME/.claude/CLAUDE.md}"
+
+write_claude_md_section() {
+  mkdir -p "$(dirname "$CLAUDE_MD")"
+  touch "$CLAUDE_MD"
+  tmp="$CLAUDE_MD.tmp.$$"
+  awk -v s="$SC_MARK_START" -v e="$SC_MARK_END" '
+    $0 == s { skip = 1; next }
+    $0 == e { skip = 0; next }
+    skip != 1 { print }
+  ' "$CLAUDE_MD" > "$tmp"
+  {
+    echo "$SC_MARK_START"
+    echo "## skillcloud"
+    echo ""
+    echo "SkillCloud is installed (internal skill system; skills live in ~/.claude/skills and work in Claude Code and Cowork)."
+    echo "When a request matches one of these skills, invoke it via the Skill tool. When in doubt, invoke the skill."
+    echo "Client material is gated by the engagement AI tier in the project's ux/project-context.md — /engagement-guardrails is the rule."
+    echo "Manage/update with /skillcloud. Per-project routing rules: $REPO_ROOT/docs/ROUTING.md"
+    echo ""
+    printf "Available skills:"
+    for src in $SELECTED; do printf " /%s" "$(basename "$src")"; done
+    printf "\n"
+    echo "$SC_MARK_END"
+  } >> "$tmp"
+  mv "$tmp" "$CLAUDE_MD"
+}
+
+if grep -qF "$SC_MARK_START" "$CLAUDE_MD" 2>/dev/null; then
+  write_claude_md_section
+  echo "Refreshed the skillcloud section in ~/.claude/CLAUDE.md."
+elif [ "$("$CONFIG" get claude_md_offered)" != "true" ]; then
+  if [ -t 0 ]; then
+    printf "Add a skillcloud section to ~/.claude/CLAUDE.md so Claude routes to these skills? [Y/n] "
+    read -r ans
+    case "$ans" in
+      n|N|no) echo "Skipped. Routing rules to paste later: $REPO_ROOT/docs/ROUTING.md" ;;
+      *) write_claude_md_section; echo "Added the skillcloud section to ~/.claude/CLAUDE.md." ;;
+    esac
+  else
+    echo "Tip: add a skillcloud section to ~/.claude/CLAUDE.md (re-run ./setup interactively, or see $REPO_ROOT/docs/ROUTING.md)."
+  fi
+  "$CONFIG" set claude_md_offered true
+fi
