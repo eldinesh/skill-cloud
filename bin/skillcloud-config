@@ -1,0 +1,47 @@
+#!/bin/sh
+# skillcloud-config — read/write flat keys in ~/.skillcloud/config.yaml
+# Usage: skillcloud-config get <key>
+#        skillcloud-config set <key> <value>
+# Unknown keys return their built-in default on get.
+
+CONFIG_DIR="${SKILLCLOUD_HOME:-$HOME/.skillcloud}"
+CONFIG_FILE="$CONFIG_DIR/config.yaml"
+
+default_for() {
+  case "$1" in
+    role) echo "" ;;
+    repo_path) echo "" ;;
+    auto_upgrade) echo "false" ;;
+    update_check) echo "true" ;;
+    routing_declined) echo "false" ;;
+    *) echo "" ;;
+  esac
+}
+
+cmd="$1"; key="$2"; value="$3"
+
+case "$cmd" in
+  get)
+    [ -n "$key" ] || { echo "usage: skillcloud-config get <key>" >&2; exit 1; }
+    if [ -f "$CONFIG_FILE" ]; then
+      line=$(grep -E "^${key}:" "$CONFIG_FILE" 2>/dev/null | head -1 | sed "s/^${key}:[[:space:]]*//")
+      if [ -n "$line" ]; then echo "$line"; exit 0; fi
+    fi
+    default_for "$key"
+    ;;
+  set)
+    [ -n "$key" ] || { echo "usage: skillcloud-config set <key> <value>" >&2; exit 1; }
+    mkdir -p "$CONFIG_DIR"
+    touch "$CONFIG_FILE"
+    if grep -qE "^${key}:" "$CONFIG_FILE" 2>/dev/null; then
+      tmp="$CONFIG_FILE.tmp.$$"
+      sed "s|^${key}:.*|${key}: ${value}|" "$CONFIG_FILE" > "$tmp" && mv "$tmp" "$CONFIG_FILE"
+    else
+      echo "${key}: ${value}" >> "$CONFIG_FILE"
+    fi
+    ;;
+  *)
+    echo "usage: skillcloud-config get|set <key> [value]" >&2
+    exit 1
+    ;;
+esac

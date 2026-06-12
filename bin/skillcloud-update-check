@@ -1,0 +1,72 @@
+#!/bin/sh
+# skillcloud-update-check — gstack-pattern version check, failure-safe by design.
+#
+# Prints exactly one of:
+#   JUST_UPGRADED <old> <new>       once, right after an upgrade completed
+#   UPGRADE_AVAILABLE <old> <new>   origin has a newer VERSION than the local install
+#   (nothing)                       up to date, snoozed, disabled, offline, or not installed
+#
+# Flags: --force  bypass the 24h cache and snooze (used by /skillcloud update)
+# Test hook: SKILLCLOUD_TEST_REMOTE_VERSION=<ver> skips git and uses that as remote.
+# Every failure path exits 0 silently — this must never break a skill.
+
+SC_HOME="${SKILLCLOUD_HOME:-$HOME/.skillcloud}"
+REPO="${SKILLCLOUD_REPO:-$SC_HOME/repo}"
+BIN_DIR=$(cd "$(dirname "$0")" 2>/dev/null && pwd) || exit 0
+CONFIG="$BIN_DIR/skillcloud-config"
+
+# 1. Just-upgraded marker (shown once, then cleared)
+if [ -f "$SC_HOME/just-upgraded-from" ]; then
+  OLD=$(cat "$SC_HOME/just-upgraded-from" 2>/dev/null || echo "?")
+  NEW=$(cat "$REPO/VERSION" 2>/dev/null || echo "?")
+  rm -f "$SC_HOME/just-upgraded-from" 2>/dev/null
+  echo "JUST_UPGRADED $OLD $NEW"
+  exit 0
+fi
+
+# 2. Gates
+[ "$("$CONFIG" get update_check 2>/dev/null)" = "false" ] && exit 0
+[ -d "$REPO" ] || exit 0
+LOCAL=$(cat "$REPO/VERSION" 2>/dev/null | tr -d '[:space:]')
+[ -n "$LOCAL" ] || exit 0
+
+# 3. Remote version (test override, else cached git fetch — private repo, so git
+#    auth is the user's existing credentials; raw URLs would need a token)
+if [ -n "$SKILLCLOUD_TEST_REMOTE_VERSION" ]; then
+  REMOTE="$SKILLCLOUD_TEST_REMOTE_VERSION"
+else
+  CACHE="$SC_HOME/last-update-check"
+  NOW=$(date +%s)
+  if [ -f "$CACHE" ] && [ "$1" != "--force" ]; then
+    LAST=$(cat "$CACHE" 2>/dev/null || echo 0)
+    case "$LAST" in *[!0-9]*) LAST=0 ;; esac
+    [ $((NOW - LAST)) -lt 86400 ] && exit 0
+  fi
+  mkdir -p "$SC_HOME" 2>/dev/null
+  echo "$NOW" > "$CACHE" 2>/dev/null
+  git -C "$REPO" fetch --quiet origin 2>/dev/null || exit 0
+  BRANCH=$(git -C "$REPO" rev-parse --abbrev-ref HEAD 2>/dev/null || echo main)
+  REMOTE=$(git -C "$REPO" show "origin/$BRANCH:VERSION" 2>/dev/null | tr -d '[:space:]')
+fi
+[ -n "$REMOTE" ] || exit 0
+[ "$REMOTE" = "$LOCAL" ] && exit 0
+
+# Only prompt when remote is genuinely newer
+NEWEST=$(printf '%s\n%s\n' "$LOCAL" "$REMOTE" | sort -V | tail -1)
+[ "$NEWEST" = "$LOCAL" ] && exit 0
+
+# 4. Snooze: <version> <level> <epoch>; 1=24h, 2=48h, 3+=7d; new version resets it
+SNOOZE="$SC_HOME/update-snoozed"
+if [ -f "$SNOOZE" ] && [ "$1" != "--force" ]; then
+  SV=$(awk '{print $1}' "$SNOOZE" 2>/dev/null)
+  SL=$(awk '{print $2}' "$SNOOZE" 2>/dev/null)
+  ST=$(awk '{print $3}' "$SNOOZE" 2>/dev/null)
+  case "$SL" in *[!0-9]*|"") SL=1 ;; esac
+  case "$ST" in *[!0-9]*|"") ST=0 ;; esac
+  if [ "$SV" = "$REMOTE" ]; then
+    case "$SL" in 1) DUR=86400 ;; 2) DUR=172800 ;; *) DUR=604800 ;; esac
+    [ $(( $(date +%s) - ST )) -lt "$DUR" ] && exit 0
+  fi
+fi
+
+echo "UPGRADE_AVAILABLE $LOCAL $REMOTE"
