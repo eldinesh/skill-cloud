@@ -227,7 +227,7 @@ write_claude_md_section() {
     echo ""
     echo "SkillCloud is installed (internal skill system; skills live in ~/.claude/skills and work in Claude Code and Cowork)."
     echo "When a request matches one of these skills, invoke it via the Skill tool. When in doubt, invoke the skill."
-    echo "Client material is gated by the engagement AI tier in the project's ux/project-context.md — /engagement-guardrails is the rule."
+    echo "Project material follows the data rules in the project's ux/project-context.md — /engagement-guardrails is the rule."
     echo "Manage/update with /skillcloud. Per-project routing rules: $REPO_ROOT/docs/ROUTING.md"
     echo ""
     printf "Available skills:"

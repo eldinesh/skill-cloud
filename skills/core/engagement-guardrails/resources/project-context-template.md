@@ -1,51 +1,49 @@
 ---
 artifact: project-context
-project: <client codename>
+project: <project name or codename>
 created_by: skillcloud/engagement-guardrails v<VERSION>
-sources: [engagement manager confirmation]
-status: reviewed
+sources: [inferred from project material — corrections welcome]
+status: draft
 updated: <yyyy-mm-dd>
 ---
 
-# Project Context — <client codename>
+# Project Context — <project name>
 
-> Every SkillCloud skill reads this file before touching client material. Keep it current; it outranks memory.
+> Every SkillCloud skill reads this file before touching project material. Keep it current; it outranks memory. A project is a project — no internal/external distinction; only what's written here varies.
 
-## Engagement
+## Project
 
-- **Client codename:** <codename — real name stays out of artifacts on limited/prohibited engagements>
-- **Domain / product:** <one line, e.g. "inpatient care coordination platform for nurses">
-- **Engagement AI tier:** prohibited | limited | permitted
-- **Tier source:** <who confirmed + where it's written, e.g. "MSA §7, confirmed by EM (role), 2026-06">
-- **Stricter NDA clauses to honor:** <or "none known">
+- **Name / codename:** <use a codename if the data rules below call for one>
+- **Domain / industry:** <e.g. healthcare, fintech, logistics, IoT — drives identifier sweeps and which playbooks apply; inferred from material if not stated>
+- **What it is:** <one line>
+- **Data rules:** standard *(default — de-identify people data on intake; no other restrictions)*
+  <!-- If a contract bars AI processing, replace with: restricted — <what's barred>, source: <contract clause / who confirmed> -->
 
 ## Design & brand
 
-- **Design system:** <name; where tokens/components live, e.g. "Figma library 'Mercury v3'">
-- **Accessibility bar:** <e.g. WCAG 2.2 AA + Section 508>
-- **Voice & terminology:** <patient-facing register notes, banned/required terms>
+- **Design system:** <name; where tokens/components live — or "none yet">
+- **Accessibility bar:** <e.g. WCAG 2.2 AA; add 508/equivalents if the industry requires>
+- **Voice & terminology:** <registers, banned/required terms — or "TBD">
 
 ## Constraints
 
-- <compliance regime, tech stack realities, device context — e.g. "shared workstations, badge-tap auth, 15-min session timeout">
+- <environment realities that shape design: device classes, interruptions, compliance regimes, tech stack>
 
 ## Glossary (codenames — use these everywhere)
 
 | Real thing (category only) | Codename |
 |---|---|
-| The client organization | <codename> |
-| Primary system under design | <codename, e.g. "the EHR"> |
-| <site / product / team> | <codename> |
+| <the organization, if a codename is warranted> | <codename> |
+| <primary system under design> | <codename> |
 
 ## Stakeholders (roles only)
 
 | Role | Involvement |
 |---|---|
-| <e.g. Director of Clinical Informatics> | sponsor, monthly readouts |
-| <e.g. Charge nurse council> | research access, design feedback |
+| <e.g. product owner> | <sponsor, weekly reviews> |
 
 ## Project state pointers
 
-- Research repository: <Notion/Confluence link>
+- Docs/research repository: <link>
 - Figma project: <link>
 - Current focus: <one line, update as it changes>

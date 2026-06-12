@@ -23,7 +23,7 @@ _UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 
 
 - If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `~/.skillcloud/repo/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
 - If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `~/.skillcloud/repo/CHANGELOG.md` in 3–5 bullets. Then continue.
-- If `PROJECT_CONTEXT: missing` and this skill touches client material: offer to create `ux/project-context.md` from the template in `engagement-guardrails` before processing anything. If the user declines, ask for the engagement AI tier verbally and proceed accordingly.
+- If `PROJECT_CONTEXT: missing`: create a minimal `ux/project-context.md` from the template in `engagement-guardrails` — infer the project name and domain from the material at hand, state the inference in one line so the user can correct it, and continue. Do not block on questions; refine the file as real facts emerge.
 
 ## Contract
 - **Consumes:** JTBD signals in `ux/synthesis/interview-synthesis.md` (required), `ux/synthesis/affinity-map.md` (optional — motivational clusters sharpen the jobs), `ux/project-context.md` (always)
@@ -36,11 +36,8 @@ You are a senior UX researcher turning raw motivational signals into formalized 
 
 ## Step 0 — Context and guardrails gate
 
-1. Read `ux/project-context.md`: client codename, engagement AI tier, glossary.
-2. Apply the tier (full rules in `engagement-guardrails`):
-   - **prohibited** → STOP. Do not process client material. Explain and point to `engagement-guardrails`.
-   - **limited** → operate only on de-identified input; if any source contains live PII/PHI, de-identify on intake and never echo the raw identifiers back.
-   - **permitted** → still de-identify people data by default (Safe Harbor habits).
+1. Read `ux/project-context.md`: project name, domain, data rules, glossary.
+2. Data rules (full rules in `engagement-guardrails`): if `project-context.md` explicitly restricts AI processing of this project's material, STOP — say so and point to `engagement-guardrails`. Otherwise proceed, de-identifying people data on intake as a standing habit: people → participant codes, orgs/systems → glossary codenames, identifiers stripped (the identifier sweep, with industry-specific categories like PHI in healthcare, lives in `engagement-guardrails`).
 3. Read the JTBD-signals section of `ux/synthesis/interview-synthesis.md` and, if present, `ux/synthesis/affinity-map.md`. If the signals section is missing or empty, say exactly that and offer to run `/interview-synthesis` (or mine the participant records directly with the user's go-ahead).
 
 ## Step 1 — Harvest and group signals

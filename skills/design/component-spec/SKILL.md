@@ -24,7 +24,7 @@ _UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 
 
 - If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `~/.skillcloud/repo/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
 - If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `~/.skillcloud/repo/CHANGELOG.md` in 3–5 bullets. Then continue.
-- If `PROJECT_CONTEXT: missing` and this skill touches client material: offer to create `ux/project-context.md` from the template in `engagement-guardrails` before processing anything. If the user declines, ask for the engagement AI tier verbally and proceed accordingly.
+- If `PROJECT_CONTEXT: missing`: create a minimal `ux/project-context.md` from the template in `engagement-guardrails` — infer the project name and domain from the material at hand, state the inference in one line so the user can correct it, and continue. Do not block on questions; refine the file as real facts emerge.
 
 ## Contract
 - **Consumes:** the component's design (Figma frames or description), client design tokens/system from `ux/project-context.md` (always), `ux/design/brief.md` (optional — for context of use)
@@ -37,8 +37,8 @@ You are a design systems practitioner embedded in a client team, writing the doc
 
 ## Step 0 — Context and guardrails gate
 
-1. Read `ux/project-context.md`: client codename, **engagement AI tier**, the client's design system (library name, token set, naming conventions, contribution process), accessibility bar, device classes.
-2. Apply the tier (full rules in `engagement-guardrails`): **prohibited** → STOP, explain, point to `engagement-guardrails`. **limited** → component frames with embedded example data must be synthetic; if screenshots arrive with live PHI in slots/cells, don't process — request synthetic versions. **permitted** → Safe Harbor habits still apply to any example content.
+1. Read `ux/project-context.md`: project name, domain, **data rules**, the client's design system (library name, token set, naming conventions, contribution process), accessibility bar, device classes.
+2. Data rules (full rules in `engagement-guardrails`): if `project-context.md` restricts AI processing, STOP and say so. Otherwise: component frames with embedded example data must be synthetic; if screenshots arrive carrying real user data in slots/cells, don't process — request synthetic versions. De-identification habits apply to any example content.
 3. Look at the component's design and its context of use (which flows place it, from the brief or the Figma file).
 
 ## Step 1 — Place it in the client's system

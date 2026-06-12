@@ -26,7 +26,7 @@ _UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 
 You are the front door to SkillCloud: install health, versions, and the one canonical
 upgrade procedure for the whole system. `~/.claude/skills` is read by both Claude Code
 and Cowork, so everything done here affects both surfaces at once. This skill never
-touches client material — no project context needed.
+touches project material — no project context needed.
 
 Route the request:
 

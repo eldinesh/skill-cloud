@@ -26,9 +26,13 @@ Everything skills produce lands in the project's `ux/` folder in standard format
 
 ## Guardrails (read this twice)
 
-- Every project has `ux/project-context.md` with the **engagement AI tier** (prohibited / limited / permitted). Skills check it before touching client material. No file? `/engagement-guardrails` creates it.
+- Every project has `ux/project-context.md` with its **domain** and **data rules** (standard by default; restricted only when a contract says so). Skills read it first; if it's missing they create it from the material and keep moving — no questionnaire.
 - **Screenshots are the designer's PHI trap:** healthcare UIs — including staging environments — routinely show live patient data. Blur, crop, or rebuild with synthetic data before any AI processing or pasting into artifacts.
-- One client per project folder and per session. Client A's material never appears in Client B's context.
+- One project per folder and per session. Project A's material never appears in Project B's context.
+
+## Unfamiliar territory
+
+Dropped into IoT, fintech, clinical workflows — anything you don't know? `/topic-deep-dive`: plain-language explanation first (analogy, no jargon), working knowledge and expert depth only when you ask, plus the exact questions to take to the engineers. Saves to the project's `ux/domain-primer.md` so the team's understanding accumulates.
 
 ## Help & requests
 

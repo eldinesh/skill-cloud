@@ -24,7 +24,7 @@ _UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 
 
 - If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `~/.skillcloud/repo/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
 - If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `~/.skillcloud/repo/CHANGELOG.md` in 3–5 bullets. Then continue.
-- If `PROJECT_CONTEXT: missing` and this skill touches client material: offer to create `ux/project-context.md` from the template in `engagement-guardrails` before processing anything. If the user declines, ask for the engagement AI tier verbally and proceed accordingly.
+- If `PROJECT_CONTEXT: missing`: create a minimal `ux/project-context.md` from the template in `engagement-guardrails` — infer the project name and domain from the material at hand, state the inference in one line so the user can correct it, and continue. Do not block on questions; refine the file as real facts emerge.
 
 ## Contract
 - **Consumes:** `ux/insight-report.md` (declared input — if missing, say so and offer /insight-report, or proceed from what the user provides), `ux/personas/*.md` and `ux/journeys/*.md` (optional), `ux/project-context.md` (always)
@@ -37,11 +37,8 @@ You are a senior product designer writing the document that converts research in
 
 ## Step 0 — Context and guardrails gate
 
-1. Read `ux/project-context.md`: client codename, **engagement AI tier**, the client's design system (library name, token set), their accessibility bar, brand constraints, glossary.
-2. Apply the tier (full rules in `engagement-guardrails`):
-   - **prohibited** → STOP. Do not process client material; explain and point to `engagement-guardrails`.
-   - **limited** → work only from de-identified artifacts; if the user pastes raw stakeholder emails or research notes, de-identify on intake and never echo identifiers back.
-   - **permitted** → Safe Harbor habits still apply to any people data.
+1. Read `ux/project-context.md`: project name, domain, **data rules**, the client's design system (library name, token set), their accessibility bar, brand constraints, glossary.
+2. Data rules (full rules in `engagement-guardrails`): if `project-context.md` explicitly restricts AI processing of this project's material, STOP — say so and point to `engagement-guardrails`. Otherwise proceed, de-identifying people data on intake as a standing habit: people → participant codes, orgs/systems → glossary codenames, identifiers stripped (the identifier sweep, with industry-specific categories like PHI in healthcare, lives in `engagement-guardrails`).
 3. Read `ux/insight-report.md` — the declared input. If it's missing, say exactly that, then offer two honest paths:
    - run `/insight-report` first if synthesis artifacts exist in `ux/synthesis/`, or
    - build the brief from what the user can give you now (stakeholder ask, research summary, prior docs) — and tag every claim that lacks research backing `[unvalidated]` so the gap stays visible instead of laundered.
@@ -77,7 +74,7 @@ A metrics table, not aspirations. For each: metric, type (leading/lagging), base
 Constraints are design material, not fine print. Document:
 
 - **Client design system** — which library/tokens are mandatory, where deviation is negotiable, who approves deviations. Default stance for embedded work: design inside the client's system; deviations go in the rationale log later.
-- **Accessibility bar** — from `project-context.md`; default for healthcare-enterprise clients is **WCAG 2.2 AA, Section 508 compliant** (the Revised 508 standards incorporate WCAG AA — auditing to 2.2 AA covers it). State it in the brief so it's a requirement, not an audit surprise.
+- **Accessibility bar** — from `project-context.md`; when project-context doesn't state one, default to **WCAG 2.2 AA** (regulated industries — healthcare, government, finance — often add Section 508 or local equivalents, and Revised 508 incorporates WCAG AA). State it in the brief so it's a requirement, not an audit surprise.
 - **Technical** — platforms, browsers, EHR embedding (iframe? SMART on FHIR?), offline expectations, device classes (workstation-on-wheels, wall display, gloved tablet).
 - **Regulatory/process** — PHI display rules, audit-trail needs, SME/clinical review gates, legal review for patient-facing language.
 - **Time and people** — engagement end date, client review cadence, who signs off.

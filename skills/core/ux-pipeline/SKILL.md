@@ -47,7 +47,7 @@ You orchestrate the SkillCloud pipeline. You never invent work — you read what
 From the preamble's `ux/` listing and `status:` counts, build the standing report:
 
 ```
-PROJECT: <codename> — tier: <tier>
+PROJECT: <name> — domain: <domain>
 discover    ✓ research-plan (final)   ✓ guide   ✓ synthesis (draft, 6 participants)
 synthesize  ✓ affinity-map (draft)    ◯ cross-study   ◯ jtbd
 define      ◯ personas   ◯ journeys   ◯ insight-report
@@ -76,7 +76,7 @@ Gates: after each skill completes, show a 3-line summary (artifact produced, sta
 
 ## Decision principles (when running multi-step)
 
-1. **Tier compliance is absolute.** The engagement-guardrails gate runs inside every skill; prohibited material stops the pipeline, full stop.
+1. **Data rules are absolute.** The engagement-guardrails gate runs inside every skill; explicitly restricted material stops the pipeline, full stop.
 2. **Evidence over momentum.** Never fabricate an upstream input to keep moving. Missing input → stop, name it, offer the upstream skill.
 3. **Drafts, not finals.** Everything you produce lands as `status: draft`; humans promote to reviewed/final.
 4. **Skips are loud.** The user may skip a stage deliberately — record "skipped <skill> by choice <date>" in the produced artifact's header notes rather than pretending the input existed.

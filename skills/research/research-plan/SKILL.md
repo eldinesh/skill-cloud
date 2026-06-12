@@ -6,7 +6,7 @@ stage: discover
 description: |
   Turn a stakeholder brief or a pile of open questions into a focused research plan:
   research questions, method selection with rationale, participant criteria, a screener
-  outline, timeline, and success criteria — recruitment-realistic for clinical settings.
+  outline, timeline, and success criteria — recruitment-realistic for operational settings (clinical playbook shipped).
   Use when asked to "plan this research", "write a research plan", "what method should we
   use", "set up a study", or "who should we recruit".
   Proactively invoke when the user shares a kickoff brief, stakeholder questions, or a
@@ -24,7 +24,7 @@ _UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 
 
 - If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `~/.skillcloud/repo/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
 - If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `~/.skillcloud/repo/CHANGELOG.md` in 3–5 bullets. Then continue.
-- If `PROJECT_CONTEXT: missing` and this skill touches client material: offer to create `ux/project-context.md` from the template in `engagement-guardrails` before processing anything. If the user declines, ask for the engagement AI tier verbally and proceed accordingly.
+- If `PROJECT_CONTEXT: missing`: create a minimal `ux/project-context.md` from the template in `engagement-guardrails` — infer the project name and domain from the material at hand, state the inference in one line so the user can correct it, and continue. Do not block on questions; refine the file as real facts emerge.
 
 ## Contract
 - **Consumes:** stakeholder brief / open questions from the user (pasted or file path) (required), `ux/project-context.md` (always)
@@ -37,11 +37,8 @@ You are a senior UX researcher scoping a study someone will actually have to run
 
 ## Step 0 — Context and guardrails gate
 
-1. Read `ux/project-context.md`: client codename, engagement AI tier, domain, constraints, glossary.
-2. Apply the tier (full rules in `engagement-guardrails`):
-   - **prohibited** → STOP. Do not process client material. Explain and point to `engagement-guardrails`.
-   - **limited** → operate only on de-identified input; if the brief contains live PII/PHI, de-identify on intake and never echo the raw identifiers back.
-   - **permitted** → still de-identify people data by default (Safe Harbor habits).
+1. Read `ux/project-context.md`: project name, domain, data rules, domain, constraints, glossary.
+2. Data rules (full rules in `engagement-guardrails`): if `project-context.md` explicitly restricts AI processing of this project's material, STOP — say so and point to `engagement-guardrails`. Otherwise proceed, de-identifying people data on intake as a standing habit: people → participant codes, orgs/systems → glossary codenames, identifiers stripped (the identifier sweep, with industry-specific categories like PHI in healthcare, lives in `engagement-guardrails`).
 3. Read the stakeholder brief or questions the user provided. If there is no brief at all, ask one sharp question: **"What decision will this research inform, and who makes it?"** — then proceed with the answer.
 
 ## Step 1 — Frame the decision
@@ -73,7 +70,7 @@ Use `resources/method-selection-guide.md`. In the plan, record:
 
 Define **inclusion/exclusion criteria as behaviors**, not demographics: role, tenure band, tools used, frequency of the target activity, decision authority. Then outline the screener (5–8 questions) in the plan — the rules:
 
-- **PHI-free by construction.** Screen on role, tenure, tools, and activity frequency. Never collect patient-linked details, schedules tied to named patients, or any Safe Harbor identifier. The screener itself must be safe to forward.
+- **PHI-free by construction.** Screen on role, tenure, tools, and activity frequency. Never collect person-linked sensitive details (in healthcare: patient-linked data or any Safe Harbor identifier). The screener itself must be safe to forward.
 - Behavioral questions with non-obvious target answers (people game screeners); one distractor option per list.
 - **Healthcare recruitment realities** — put these in the plan, not in your head:
   - Recruit around clinical schedules: avoid shift change (roughly 7a/7p), never during rounds or med passes; offer 25–30 min slots for clinicians even if the method wants 60 — or split sessions.
@@ -86,8 +83,8 @@ Define **inclusion/exclusion criteria as behaviors**, not demographics: role, te
 ## Step 5 — Timeline, logistics, consent
 
 - Phase table: prep → recruit → fieldwork → synthesis → readout, with owners. Recruiting in clinical settings takes 2–3× consumer timelines; say so in the plan.
-- **Consent and recording:** state what will be recorded and how sessions will be processed. AI processing of recordings/transcripts follows the engagement AI tier in `ux/project-context.md` — the consent language must match it (rules in `engagement-guardrails`). Notes-only is the fallback where recording is refused or site-prohibited.
-- **Data handling:** raw notes/recordings live where the engagement's data terms say; everything entering `ux/` is de-identified on intake (Safe Harbor habits per `engagement-guardrails`).
+- **Consent and recording:** state what will be recorded and how sessions will be processed. AI processing of recordings/transcripts follows the project's data rules in `ux/project-context.md` — the consent language must match it (rules in `engagement-guardrails`). Notes-only is the fallback where recording is refused or site-prohibited.
+- **Data handling:** raw notes/recordings live where the engagement's data terms say; everything entering `ux/` is de-identified on intake (de-identification habits per `engagement-guardrails`).
 
 ## Step 6 — Success criteria and risks
 

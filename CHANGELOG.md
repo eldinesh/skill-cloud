@@ -2,6 +2,15 @@
 
 All notable changes to SkillCloud. Maintainers: bump `VERSION` and add an entry here in the same commit — the self-update prompt reads this file to show "what's new".
 
+## 0.9.1 — 2026-06-12
+
+A project is a project, any industry, plus a new core skill.
+
+- **No more client/internal classification.** Skills no longer decide or ask what kind of project something is. Each project's `ux/project-context.md` carries its domain and data rules; the default is *standard* (work normally, de-identify people data on intake), and *restricted* applies only when a contract bars AI processing — then skills refuse and say why.
+- **Missing context no longer interrogates you.** Skills create `ux/project-context.md` from the material at hand, state their inference in one line, and keep working — you correct the file, not answer a questionnaire.
+- **Industry-adaptive, not healthcare-hardwired.** The domain in project-context drives identifier sweeps, registers, heuristics, and field logistics. The healthcare playbooks remain as the shipped worked example; skills adapt them to whatever industry the project is in.
+- **New core skill: `topic-deep-dive`.** Plain-language explanations of unfamiliar technical/domain topics — analogy first, zero jargon — with working-knowledge and expert levels only on request, ready-to-ask SME questions, and a per-project `ux/domain-primer.md` that accumulates for the team.
+
 ## 0.9.0 — 2026-06-11
 
 Initial internal release candidate.

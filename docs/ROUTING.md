@@ -7,8 +7,9 @@ Claude routes to skills from their descriptions alone, but a routing block in th
 
 When the user's request matches a skill below, invoke it via the Skill tool. When in doubt, invoke the skill — a structured workflow beats an ad-hoc answer.
 
-- New client project, "can I use AI for this client", AI-tier questions → /engagement-guardrails
+- New project setup, "can I use AI on this material", data-rules questions → /engagement-guardrails
 - "Where are we", "what's next", run several steps end to end → /ux-pipeline
+- "What is X", explain a technical or domain topic simply, jargon decoding → /topic-deep-dive
 - Planning a study, "what method should we use" → /research-plan
 - Writing interview questions → /interview-guide
 - A transcript or session notes appear → /interview-synthesis
@@ -32,4 +33,4 @@ When the user's request matches a skill below, invoke it via the Skill tool. Whe
 - HR, PTO, expenses, company policy questions → /company-handbook
 ```
 
-Company policy and client-data rules always apply: the engagement AI tier in `ux/project-context.md` gates everything (see /engagement-guardrails).
+Company policy and data rules always apply: the project's `ux/project-context.md` gates everything (see /engagement-guardrails).

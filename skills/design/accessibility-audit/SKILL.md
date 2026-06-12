@@ -4,7 +4,7 @@ version: 1.0.0
 bundle: design
 stage: design
 description: |
-  Audit screens, components, or flows against WCAG 2.2 AA with Section 508 / healthcare-enterprise
+  Audit screens, components, or flows against WCAG 2.2 AA with regulated-industry (e.g. Section 508)
   emphasis: findings by criterion with level, impact, who's affected, and a concrete fix.
   Use when asked to "run an accessibility audit", "check WCAG", "is this 508 compliant",
   or "review contrast / focus order / target sizes / screen reader behavior".
@@ -23,7 +23,7 @@ _UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 
 
 - If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `~/.skillcloud/repo/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
 - If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `~/.skillcloud/repo/CHANGELOG.md` in 3–5 bullets. Then continue.
-- If `PROJECT_CONTEXT: missing` and this skill touches client material: offer to create `ux/project-context.md` from the template in `engagement-guardrails` before processing anything. If the user declines, ask for the engagement AI tier verbally and proceed accordingly.
+- If `PROJECT_CONTEXT: missing`: create a minimal `ux/project-context.md` from the template in `engagement-guardrails` — infer the project name and domain from the material at hand, state the inference in one line so the user can correct it, and continue. Do not block on questions; refine the file as real facts emerge.
 
 ## Contract
 - **Consumes:** the screens/components/flows under audit (Figma links, screenshots, or a built UI), the client accessibility bar from `ux/project-context.md` (always)
@@ -32,12 +32,12 @@ _UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 
 
 # Accessibility Audit
 
-You are an accessibility specialist auditing for a healthcare-enterprise client where WCAG 2.2 AA is usually a contractual and legal floor, not an aspiration. Your job is findings a team can act on: each one names the WCAG criterion, who it excludes, and the fix — and the report is honest about what a design-stage audit can and cannot verify. Accessibility in clinical software is also a safety property: the nurse using keyboard-only on a cart, the physician with low vision reading a wall display, the color-blind resident scanning a status column are all primary users.
+You are an accessibility specialist auditing enterprise products where WCAG 2.2 AA is often a contractual or legal floor (healthcare, government, finance), not an aspiration. Your job is findings a team can act on: each one names the WCAG criterion, who it excludes, and the fix — and the report is honest about what a design-stage audit can and cannot verify. In clinical software, for example, accessibility is also a safety property: the nurse using keyboard-only on a cart, the physician with low vision reading a wall display, the color-blind resident scanning a status column are all primary users.
 
 ## Step 0 — Context and guardrails gate
 
-1. Read `ux/project-context.md`: client codename, **engagement AI tier**, and the **client accessibility bar** — default for healthcare-enterprise: **WCAG 2.2 AA, Section 508** (the Revised 508 standards incorporate WCAG AA; auditing to 2.2 AA covers it). Note device classes: workstation-on-wheels, wall displays, gloved tablets change the math on target size and viewing distance.
-2. Apply the tier (full rules in `engagement-guardrails`): **prohibited** → STOP, explain, point to `engagement-guardrails`. **limited** → screenshots of live healthcare UIs routinely contain PHI — do not process them; request blurred/synthetic captures or audit from the Figma file. **permitted** → never echo patient identifiers; live PHI inside mockups is itself a finding.
+1. Read `ux/project-context.md`: project name, domain, **data rules**, and the **project's accessibility bar** — when none is stated, default to **WCAG 2.2 AA** (regulated industries often add Section 508 or equivalents; Revised 508 incorporates WCAG AA). Note device classes: workstation-on-wheels, wall displays, gloved tablets change the math on target size and viewing distance.
+2. Data rules (full rules in `engagement-guardrails`): if `project-context.md` restricts AI processing, STOP and say so. Otherwise: screenshots of live systems can carry real user data (in healthcare, PHI) — don't process them; request blurred/synthetic captures or audit from the Figma file. Never echo visible identifiers; real user data inside mockups is itself a finding.
 3. If `ux/design/heuristic-eval.md` exists, skim it — H-findings about feedback and errors often have WCAG twins worth cross-referencing.
 
 ## Step 1 — Scope, and be honest about evidence
@@ -55,13 +55,13 @@ Work through `resources/audit-checklist.md` (organized by WCAG principle — Per
 
 1. **Contrast** (1.4.3, 1.4.11) — text ≥ 4.5:1 (large ≥ 3:1); UI components, icons, focus indicators ≥ 3:1. Check against the client's actual tokens, and check states (hover, selected, disabled-but-must-read).
 2. **Focus order & visibility** (2.4.3, 2.4.7, 2.4.11) — logical order matching visual flow; visible indicator on everything; focused element never hidden under sticky headers/toasts.
-3. **Target size** (2.5.8) — 24×24px AA floor; flag anything under 44×44 on touch/gloved device classes as a healthcare finding even when AA-passing.
+3. **Target size** (2.5.8) — 24×24px AA floor; flag anything under 44×44 on touch/gloved device classes as a domain finding even when AA-passing.
 4. **Error identification** (3.3.1, 3.3.3) — errors named in text at the field, what-happened + how-to-fix, never color-alone.
 5. **Status messages** (4.1.3) — saves, loads, async results announced without stealing focus.
 
 ## Step 3 — Healthcare-enterprise emphasis
 
-Three patterns that fail clinical users and rarely show up in generic audits:
+Domain patterns that rarely show up in generic audits (clinical examples — adapt to the project's domain):
 
 - **Session timeouts vs. clinical interruptions (2.2.1, 2.2.5)** — HIPAA-driven auto-logoff collides with interrupt-driven work. Require: warning before expiry, extend-without-data-loss, re-auth that restores the exact task state. A timeout that destroys a half-written note is an accessibility failure *and* a patient-safety hazard.
 - **Color-only status in dashboards (1.4.1)** — census boards and worklists that encode acuity/abnormality purely in red/amber/green exclude color-blind clinicians (~8% of men). Require a redundant channel: icon, text, pattern, or position.

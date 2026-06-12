@@ -5,7 +5,7 @@ bundle: research
 stage: validate
 description: |
   Produce a usability test plan that maps tasks to design risks: per-task success metrics,
-  think-aloud script, recruiting, and logistics that survive a clinical environment.
+  think-aloud script, recruiting, and logistics that survive the field environment (clinical playbook shipped).
   Use when asked to "plan a usability test", "test this prototype", "write the test plan",
   or "how do we validate this design".
   Proactively invoke when a prototype or ux/design/brief.md exists and sessions are being
@@ -23,7 +23,7 @@ _UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 
 
 - If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `~/.skillcloud/repo/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
 - If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `~/.skillcloud/repo/CHANGELOG.md` in 3–5 bullets. Then continue.
-- If `PROJECT_CONTEXT: missing` and this skill touches client material: offer to create `ux/project-context.md` from the template in `engagement-guardrails` before processing anything. If the user declines, ask for the engagement AI tier verbally and proceed accordingly.
+- If `PROJECT_CONTEXT: missing`: create a minimal `ux/project-context.md` from the template in `engagement-guardrails` — infer the project name and domain from the material at hand, state the inference in one line so the user can correct it, and continue. Do not block on questions; refine the file as real facts emerge.
 
 ## Contract
 - **Consumes:** `ux/design/brief.md` or a prototype description from the user (required — one of the two), `ux/personas/*.md` (recommended — tasks and recruiting anchor on them), `ux/project-context.md` (always)
@@ -36,11 +36,8 @@ You are a senior UX researcher planning an evaluative study whose sessions will 
 
 ## Step 0 — Context and guardrails gate
 
-1. Read `ux/project-context.md`: client codename, engagement AI tier, glossary.
-2. Apply the tier (full rules in `engagement-guardrails`):
-   - **prohibited** → STOP. Do not process client material. Explain and point to `engagement-guardrails`.
-   - **limited** → operate only on de-identified input; if the brief or prototype description contains live PII/PHI, de-identify on intake and never echo the raw identifiers back.
-   - **permitted** → still de-identify people data by default (Safe Harbor habits).
+1. Read `ux/project-context.md`: project name, domain, data rules, glossary.
+2. Data rules (full rules in `engagement-guardrails`): if `project-context.md` explicitly restricts AI processing of this project's material, STOP — say so and point to `engagement-guardrails`. Otherwise proceed, de-identifying people data on intake as a standing habit: people → participant codes, orgs/systems → glossary codenames, identifiers stripped (the identifier sweep, with industry-specific categories like PHI in healthcare, lives in `engagement-guardrails`).
 3. Read `ux/design/brief.md` (its open questions and success criteria are the risk list's first draft) and the personas. With neither brief nor prototype description, ask one sharp question: **"What design are we testing, and what decision do the results feed?"**
 
 ## Step 1 — Name the risks
@@ -63,7 +60,7 @@ Per task, per `resources/test-plan-template.md`:
 - **Per study:** SUS or UMUX-Lite at session end; qualitative severity classification for findings (blocker / major / minor / cosmetic).
 - **Write pass thresholds now** ("≥4 of 5 complete Task 2 unassisted; median SEQ ≥5") — thresholds set after seeing results are theater. Tie each threshold back to its risk so "what did we decide?" has an answer.
 
-## Step 4 — Participants and clinical logistics
+## Step 4 — Participants and field logistics (clinical examples — adapt to the project's domain)
 
 - Recruit against the persona's behavioral criteria (roles, frequency, tool fluency — not demographics); 3–5 per persona per round; rounds beat headcount. Screener stays PHI-free by construction.
 - **Clinical-environment constraints, in the plan not in your head:**
@@ -77,7 +74,7 @@ Per task, per `resources/test-plan-template.md`:
 The plan embeds the script the moderator reads:
 
 - **Intro:** testing the design, not them; they can't fail; no right answers; we didn't build it (or disclose if we did — then over-invite criticism).
-- **Consent:** what's recorded (screen/audio/video/notes) and **how it's processed — AI processing of recordings or transcripts follows the engagement AI tier in `ux/project-context.md`, and the spoken consent must match it** (rules in `engagement-guardrails`). Notes-only fallback stated. Participation voluntary, stop anytime, no job consequences.
+- **Consent:** what's recorded (screen/audio/video/notes) and **how it's processed — AI processing of recordings or transcripts follows the project's data rules in `ux/project-context.md`, and the spoken consent must match it** (rules in `engagement-guardrails`). Notes-only fallback stated. Participation voluntary, stop anytime, no job consequences.
 - **Think-aloud calibration:** one 30-second practice ("think aloud while checking today's date on this device").
 - **Moderation rules, written down:** answer questions with questions ("what would you expect?"); no helping until the assist protocol triggers (two failed approaches or participant asks to stop); neutral acknowledgments only — "thanks, that's useful" after success *and* failure; probe at task end, not mid-task ("what was happening when you paused at the list?").
 - **Debrief:** SUS/UMUX-Lite, "what would you change first?", thanks, honorarium logistics (clinician incentive rules per the research plan / client compliance).
@@ -96,7 +93,7 @@ Write `ux/validation/usability-test-plan.md` from `resources/test-plan-template.
 - Every task names its risk; every risk has a task or an explicit out-of-scope line.
 - Success thresholds are written, observable, and dated before fieldwork.
 - All task data and prototype content verifiably synthetic; training environment named when testing in-system.
-- Consent script matches the engagement AI tier word-for-word with what happens to recordings.
+- Consent script matches, word-for-word, what happens to recordings under the project's data rules.
 - The interruption protocol and 25–30 minute reality appear in the logistics, not as session-day improvisation.
 
 ## Handoff

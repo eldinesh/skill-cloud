@@ -48,7 +48,7 @@ updated: <yyyy-mm-dd>
 | Synthesis | | | /interview-synthesis → /affinity-mapping |
 | Readout | | | before <milestone> |
 
-- **Consent & recording:** <what is recorded; how processed>. AI processing follows the engagement AI tier in `ux/project-context.md`; consent language matches it (rules in `engagement-guardrails`). Notes-only fallback where recording is refused or site-prohibited.
+- **Consent & recording:** <what is recorded; how processed>. AI processing follows the project's data rules in `ux/project-context.md`; consent language matches it (rules in `engagement-guardrails`). Notes-only fallback where recording is refused or site-prohibited.
 - **Incentives:** <amount/form>; physician honoraria flagged to client compliance (Open Payments).
 - **IRB vs QI:** classified as <QI | human-subjects research> by <client sponsor name/role>, on <month/year>.
 - **Data handling:** raw notes/recordings per engagement data terms; everything entering `ux/` is de-identified on intake.

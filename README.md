@@ -21,15 +21,15 @@ Migrating from personal skill packs: [docs/CLEANUP.md](docs/CLEANUP.md).
 
 | Bundle | Skills |
 |---|---|
-| **core** (everyone) | `skillcloud` (status/update/doctor), `company-handbook` (HR & policy questions), `engagement-guardrails` (client AI tiers + healthcare data hygiene), `ux-pipeline` (the orchestrator) |
+| **core** (everyone) | `skillcloud` (status/update/doctor), `company-handbook` (HR & policy questions), `engagement-guardrails` (data rules + de-identification habits), `ux-pipeline` (the orchestrator), `topic-deep-dive` (plain-language explanations of unfamiliar topics) |
 | **research** | research-plan, interview-guide, interview-synthesis, affinity-mapping, cross-study-synthesis, jobs-to-be-done, persona, journey-map, usability-test-plan, insight-report |
 | **design** | design-brief, design-critique, heuristic-evaluation, accessibility-audit, component-spec, ux-writing, design-rationale, handoff-spec, design-qa-checklist, figma-hygiene |
 
 Every skill reads the project's `ux/project-context.md`, consumes the previous step's artifact, produces the next step's input, and names the next step. `/ux-pipeline` shows where a project stands and runs steps with approval gates. The full map and authoring standard: [docs/PIPELINE.md](docs/PIPELINE.md).
 
-## Working with client material
+## Working with project material
 
-We work embedded in client organizations — many in healthcare. Every skill that touches client material enforces the engagement's AI tier (prohibited / limited / permitted) and de-identifies people data on intake. Read `engagement-guardrails` once; it's short and it's the rule.
+A project is a project — internal, client, whatever. Every skill reads the project's `ux/project-context.md` (domain + data rules) and de-identifies people data on intake as a standing habit. Restrictions apply only when a contract imposes them — then skills refuse and say why. Read `engagement-guardrails` once; it's short and it's the rule.
 
 ## Maintaining SkillCloud
 

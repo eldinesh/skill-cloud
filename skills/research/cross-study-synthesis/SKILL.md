@@ -23,7 +23,7 @@ _UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 
 
 - If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `~/.skillcloud/repo/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
 - If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `~/.skillcloud/repo/CHANGELOG.md` in 3–5 bullets. Then continue.
-- If `PROJECT_CONTEXT: missing` and this skill touches client material: offer to create `ux/project-context.md` from the template in `engagement-guardrails` before processing anything. If the user declines, ask for the engagement AI tier verbally and proceed accordingly.
+- If `PROJECT_CONTEXT: missing`: create a minimal `ux/project-context.md` from the template in `engagement-guardrails` — infer the project name and domain from the material at hand, state the inference in one line so the user can correct it, and continue. Do not block on questions; refine the file as real facts emerge.
 
 ## Contract
 - **Consumes:** everything in `ux/synthesis/` (interview-synthesis, affinity-map, jobs-to-be-done from each study; required), previous `ux/synthesis/cross-study.md` and `ux/insight-report.md` if present, `ux/project-context.md` (always)
@@ -36,11 +36,8 @@ You are the senior researcher who owns the engagement's institutional memory. Si
 
 ## Step 0 — Context and guardrails gate
 
-1. Read `ux/project-context.md`: client codename, engagement AI tier, glossary.
-2. Apply the tier (full rules in `engagement-guardrails`):
-   - **prohibited** → STOP. Do not process client material. Explain and point to `engagement-guardrails`.
-   - **limited** → operate only on de-identified input; if any source contains live PII/PHI, de-identify on intake and never echo the raw identifiers back.
-   - **permitted** → still de-identify people data by default (Safe Harbor habits).
+1. Read `ux/project-context.md`: project name, domain, data rules, glossary.
+2. Data rules (full rules in `engagement-guardrails`): if `project-context.md` explicitly restricts AI processing of this project's material, STOP — say so and point to `engagement-guardrails`. Otherwise proceed, de-identifying people data on intake as a standing habit: people → participant codes, orgs/systems → glossary codenames, identifiers stripped (the identifier sweep, with industry-specific categories like PHI in healthcare, lives in `engagement-guardrails`).
 3. Inventory the corpus: every file in `ux/synthesis/`, plus prior `cross-study.md` and any `ux/insight-report.md`. Build a source table — study label (S1, S2…), method, participant count, fieldwork month/year — from each artifact's header and body. If only one study exists, say so and recommend waiting: a registry with one study is just the synthesis renamed. Offer to bootstrap it anyway if a second study is imminent.
 
 ## Step 1 — Registry rules (read before touching anything)

@@ -24,7 +24,7 @@ _UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 
 
 - If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `~/.skillcloud/repo/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
 - If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `~/.skillcloud/repo/CHANGELOG.md` in 3–5 bullets. Then continue.
-- If `PROJECT_CONTEXT: missing` and this skill touches client material: offer to create `ux/project-context.md` from the template in `engagement-guardrails` before processing anything. If the user declines, ask for the engagement AI tier verbally and proceed accordingly.
+- If `PROJECT_CONTEXT: missing`: create a minimal `ux/project-context.md` from the template in `engagement-guardrails` — infer the project name and domain from the material at hand, state the inference in one line so the user can correct it, and continue. Do not block on questions; refine the file as real facts emerge.
 
 ## Contract
 - **Consumes:** the final designs (Figma), `ux/design/components/*.md` (optional — slot in by reference), `ux/design/rationale.md` (optional — cite DEC entries instead of re-arguing), `ux/design/accessibility-audit.md` (optional — build-stage annotations land here), `ux/design/copy/*.md` (optional), `ux/project-context.md` (always)
@@ -37,8 +37,8 @@ You are a designer writing the document engineering builds from — the goal is 
 
 ## Step 0 — Context and guardrails gate
 
-1. Read `ux/project-context.md`: client codename, **engagement AI tier**, client design system + token pipeline, eng conventions (ticket tracker, Storybook?), accessibility bar.
-2. Apply the tier (full rules in `engagement-guardrails`): **prohibited** → STOP, explain, point to `engagement-guardrails`. **limited** → all example data in handoff frames and screenshots must be synthetic; if final designs still carry pasted-in live data, that's a pre-handoff defect — flag it, don't propagate it. **permitted** → same standard; handoff documents travel far inside client orgs.
+1. Read `ux/project-context.md`: project name, domain, **data rules**, client design system + token pipeline, eng conventions (ticket tracker, Storybook?), accessibility bar.
+2. Data rules (full rules in `engagement-guardrails`): if `project-context.md` restricts AI processing, STOP and say so. Otherwise: all example data in handoff frames and screenshots must be synthetic; if final designs still carry pasted-in live data, that's a pre-handoff defect — flag it, don't propagate it. Handoff documents travel far — hold the standard everywhere.
 3. Read components, rationale, a11y audit, and copy artifacts if present — the handoff assembles them; it doesn't rewrite them.
 
 ## Step 1 — Readiness gate (don't hand off design debt)
@@ -86,7 +86,7 @@ Write `ux/delivery/handoff-<scope>.md` from `resources/handoff-template.md` — 
 ## Quality bar
 
 - Every frame link points at a named, stable frame on the approved page or pinned branch.
-- State matrix complete — no blank cells, no "TBD"; offline and timeout behavior explicit for clinical flows.
+- State matrix complete — no blank cells, no "TBD"; offline and timeout behavior explicit for interruption-prone (e.g. clinical) flows.
 - A11y annotations testable as acceptance criteria.
 - Decisions cited as `DEC-NN`, not re-argued; components referenced, not re-specified.
 - The not-specified list exists — engineering knows exactly where their judgment is invited.

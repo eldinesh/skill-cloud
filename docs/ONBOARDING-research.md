@@ -36,11 +36,11 @@ Every artifact lands at a standard path in the project's `ux/` folder: `ux/resea
 
 ## Guardrails, in five lines
 
-1. Every engagement has an AI tier — **prohibited / limited / permitted** — recorded in `ux/project-context.md`.
-2. Skills check the tier before touching any client material. On a prohibited engagement they refuse. That's correct behavior, not a bug.
-3. **Limited** is the healthcare default: de-identified material only, never live PHI/PII.
-4. De-identification is not a step you run — it's automatic on intake. Names become P-numbers, identifiers get stripped, and the raw versions are never echoed back.
-5. No tier on file? Skills treat the engagement as limited and offer to set up `project-context.md`. Read the `engagement-guardrails` skill once; it's short and it's the rule.
+1. A project is a project — internal or client, same treatment. Skills never ask you to classify it.
+2. Each project's `ux/project-context.md` carries its **domain** and **data rules**; skills read it first. No file? Skills create it from the material and keep moving — you correct it later.
+3. The default is **standard**: work normally. **Restricted** exists only when a contract bars AI processing — then skills refuse and say why.
+4. De-identification is not a step you run — it's automatic on intake, every domain. Names become P-numbers, identifiers get stripped (the sweep adapts to the industry), raw versions are never echoed back.
+5. Credentials, secrets, contracts, live production datasets: never in any AI tool, no exceptions. Read `engagement-guardrails` once; it's short and it's the rule.
 
 ## Cowork
 
@@ -52,5 +52,6 @@ Updates announce themselves. When a new version ships, the next skill you use of
 
 ## Help and requests
 
-- Stuck, unsure about a tier call, or a skill behaves oddly? Ask the **research champion** — that's their job.
+- Dropped into a domain you don't know? `/topic-deep-dive` explains any technical or domain topic in plain language first, deeper only when you ask — and saves it to the project's domain primer for the next person.
+- Stuck, unsure about a data-rules call, or a skill behaves oddly? Ask the **research champion** — that's their job.
 - Want a skill that doesn't exist, or want to sharpen one that does? Open an issue or PR in the SkillCloud repo — see [CONTRIBUTING.md](CONTRIBUTING.md). Requests grounded in a real project are exactly what shapes the next release.

@@ -24,7 +24,7 @@ _UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 
 
 - If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `~/.skillcloud/repo/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
 - If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `~/.skillcloud/repo/CHANGELOG.md` in 3–5 bullets. Then continue.
-- If `PROJECT_CONTEXT: missing` and this skill touches client material: offer to create `ux/project-context.md` from the template in `engagement-guardrails` before processing anything. If the user declines, ask for the engagement AI tier verbally and proceed accordingly.
+- If `PROJECT_CONTEXT: missing`: create a minimal `ux/project-context.md` from the template in `engagement-guardrails` — infer the project name and domain from the material at hand, state the inference in one line so the user can correct it, and continue. Do not block on questions; refine the file as real facts emerge.
 
 ## Contract
 - **Consumes:** the Figma file under discussion (link or description of its state), the client design system and conventions from `ux/project-context.md` (always)
@@ -37,8 +37,8 @@ You are the designer whose files the client inherits. Embedded work has a brutal
 
 ## Step 0 — Context and guardrails gate
 
-1. Read `ux/project-context.md`: client codename, **engagement AI tier**, the client's design library and any existing file conventions (theirs win — extend, don't replace), team plan capabilities (branching available?).
-2. Apply the tier (full rules in `engagement-guardrails`): file *structure* is low-risk, but file *content* isn't — frames must carry **synthetic data only**; pasted-in screenshots of live systems carry PHI into a file the whole client org can open. If you find live data while organizing, flag it for replacement as a finding, and don't echo the identifiers. **prohibited**-tier: advise on conventions only; don't process file contents.
+1. Read `ux/project-context.md`: project name, domain, **data rules**, the client's design library and any existing file conventions (theirs win — extend, don't replace), team plan capabilities (branching available?).
+2. Data rules (full rules in `engagement-guardrails`): file *structure* is low-risk, but file *content* isn't — frames must carry **synthetic data only**; pasted-in screenshots of live systems carry real user data (in healthcare, PHI) into a file the whole org can open. If you find live data while organizing, flag it for replacement as a finding, and don't echo the identifiers. If `project-context.md` restricts AI processing: advise on conventions only; don't process file contents.
 3. Ask which mode you're in: **set up** a new file, **clean up** an existing one, or **write down** team conventions (`ux/design/figma-conventions.md`).
 
 ## Step 1 — Diagnose (clean-up mode)

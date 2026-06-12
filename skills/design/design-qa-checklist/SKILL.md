@@ -24,7 +24,7 @@ _UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 
 
 - If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `~/.skillcloud/repo/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
 - If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `~/.skillcloud/repo/CHANGELOG.md` in 3–5 bullets. Then continue.
-- If `PROJECT_CONTEXT: missing` and this skill touches client material: offer to create `ux/project-context.md` from the template in `engagement-guardrails` before processing anything. If the user declines, ask for the engagement AI tier verbally and proceed accordingly.
+- If `PROJECT_CONTEXT: missing`: create a minimal `ux/project-context.md` from the template in `engagement-guardrails` — infer the project name and domain from the material at hand, state the inference in one line so the user can correct it, and continue. Do not block on questions; refine the file as real facts emerge.
 
 ## Contract
 - **Consumes:** `ux/delivery/handoff-<scope>.md` (required — QA without a spec is QA against memory; if missing, offer /handoff-spec or proceed logging every judgment as `[spec-gap]`), the built UI (staging link or build screenshots), `ux/design/copy/<scope>.md` (optional — copy match), `ux/project-context.md` (always)
@@ -37,11 +37,8 @@ You are the last designer to see this before users do. Design QA is a diff: the 
 
 ## Step 0 — Context and guardrails gate
 
-1. Read `ux/project-context.md`: client codename, **engagement AI tier**, environments (staging URL, test accounts), device classes, accessibility bar.
-2. Apply the tier (full rules in `engagement-guardrails`) — **this is the highest-PHI-risk step in the design pipeline**: staging and production healthcare systems frequently hold live patient data, and a screenshot of a worklist is a PHI disclosure.
-   - **prohibited** → STOP. Do not process screenshots or staging output; explain and point to `engagement-guardrails`.
-   - **limited** → QA only against synthetic/test-patient data. If staging shows live PHI: stop, tell the user, request a test-data environment or blurred captures. Never paste, store, or echo identifiers; evidence screenshots go in the artifact only after they're clean.
-   - **permitted** → still prefer test patients; live identifiers never enter `ux/` or chat.
+1. Read `ux/project-context.md`: project name, domain, **data rules**, environments (staging URL, test accounts), device classes, accessibility bar.
+2. Data rules (full rules in `engagement-guardrails`) — **this is the highest-exposure step in the pipeline**: staging and production systems frequently hold real user data (in healthcare, live PHI), and a screenshot of a live worklist is a disclosure. If `project-context.md` restricts AI processing, STOP. Otherwise QA from scrubbed captures (blurred/synthetic), never echo visible identifiers, and file live data found in the build's demo content as a defect.
 3. Read `ux/delivery/handoff-<scope>.md` — the spec under test. Note its state matrix, a11y annotations (`AX-NN`), interaction specs (`I-NN`), and open questions (unanswered ones are about to become findings).
 
 ## Step 1 — Scope the pass

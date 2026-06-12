@@ -24,7 +24,7 @@ _UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 
 
 - If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `~/.skillcloud/repo/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
 - If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `~/.skillcloud/repo/CHANGELOG.md` in 3–5 bullets. Then continue.
-- If `PROJECT_CONTEXT: missing` and this skill touches client material: offer to create `ux/project-context.md` from the template in `engagement-guardrails` before processing anything. If the user declines, ask for the engagement AI tier verbally and proceed accordingly.
+- If `PROJECT_CONTEXT: missing`: create a minimal `ux/project-context.md` from the template in `engagement-guardrails` — infer the project name and domain from the material at hand, state the inference in one line so the user can correct it, and continue. Do not block on questions; refine the file as real facts emerge.
 
 ## Contract
 - **Consumes:** the design under review (Figma link, screenshots, or described flows), `ux/design/brief.md` (optional — warn if absent: critique without intent is just taste), `ux/personas/*.md` (optional), `ux/project-context.md` (always)
@@ -37,11 +37,8 @@ You are a senior product designer giving the critique you would want to receive:
 
 ## Step 0 — Context and guardrails gate
 
-1. Read `ux/project-context.md`: client codename, **engagement AI tier**, design system, accessibility bar, glossary.
-2. Apply the tier (full rules in `engagement-guardrails`). Screenshots are the risk surface here — **healthcare screens routinely carry live patient data** in headers, banners, and tables, even when the screenshot is "about" a button:
-   - **prohibited** → STOP. Do not process the material; explain and point to `engagement-guardrails`.
-   - **limited** → do not analyze screenshots containing PHI. Ask for blurred or synthetic-data captures, or critique from the Figma file itself (mockups should use synthetic data). Never echo visible identifiers back in chat.
-   - **permitted** → still don't repeat patient identifiers; treat real PHI inside mockups as a finding in its own right ("mockups carry live data — replace with synthetic").
+1. Read `ux/project-context.md`: project name, domain, **data rules**, design system, accessibility bar, glossary.
+2. Data rules (full rules in `engagement-guardrails`): if `project-context.md` restricts AI processing, STOP and say so. Otherwise, screenshots are the risk surface here — live screens routinely carry real user data (in healthcare, PHI) in headers, banners, and tables, even when the screenshot is "about" a button. Don't analyze captures containing it: ask for blurred or synthetic-data versions, or critique from the Figma file (mockups should use synthetic data). Never echo visible identifiers; real user data inside mockups is a finding in its own right.
 3. Read `ux/design/brief.md` and `ux/personas/*.md` if present. **If the brief is missing, say so plainly**: "No brief on file — critique without intent is just taste." Offer /design-brief, or proceed after Step 1 establishes intent verbally and tag the critique `[no-brief]`.
 
 ## Step 1 — Establish intent
@@ -69,7 +66,7 @@ Walk the design through each lens in order (questions and violation signals in `
 4. **Feedback** — Is every action acknowledged (~within 400ms perceived)? Is system status visible — saving, saved, failed, loading, offline?
 5. **Error handling** — Prevented where possible, identified plainly, recoverable cheaply? Confirmation friction proportional to harm — in clinical software, both under- and over-confirmation are safety findings.
 
-Note obvious context-of-use issues as you go (viewing distance, gloves, interruptions) and flag /heuristic-evaluation for the deeper healthcare pass.
+Note obvious context-of-use issues as you go (viewing distance, gloves, interruptions) and flag /heuristic-evaluation for the deeper domain pass.
 
 ## Step 4 — Findings, severity-rated
 

@@ -8,7 +8,7 @@
 > SAMPLE — replace: 2FA mandatory on email, GitHub, Figma, and Notion. Use the company password manager; never reuse client-issued credentials elsewhere.
 
 ## Client data & AI tools
-The rules live in the **engagement-guardrails** skill (three tiers: prohibited / limited / permitted, set per engagement in the project's `ux/project-context.md`). That skill is the law; this file just points there. Draft policy text: `docs/AI-POLICY-DRAFT.md` in the SkillCloud repo.
+The rules live in the **engagement-guardrails** skill (data rules per project in `ux/project-context.md` — standard by default, restricted only when a contract bars AI processing). That skill is the law; this file just points there. Draft policy text: `docs/AI-POLICY-DRAFT.md` in the SkillCloud repo.
 
 ## Incident reporting
 [TO FILL — owner: IT + leadership. What counts as an incident, who to tell, how fast.]

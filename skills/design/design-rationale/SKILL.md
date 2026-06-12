@@ -24,7 +24,7 @@ _UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 
 
 - If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `~/.skillcloud/repo/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
 - If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `~/.skillcloud/repo/CHANGELOG.md` in 3–5 bullets. Then continue.
-- If `PROJECT_CONTEXT: missing` and this skill touches client material: offer to create `ux/project-context.md` from the template in `engagement-guardrails` before processing anything. If the user declines, ask for the engagement AI tier verbally and proceed accordingly.
+- If `PROJECT_CONTEXT: missing`: create a minimal `ux/project-context.md` from the template in `engagement-guardrails` — infer the project name and domain from the material at hand, state the inference in one line so the user can correct it, and continue. Do not block on questions; refine the file as real facts emerge.
 
 ## Contract
 - **Consumes:** `ux/design/brief.md` (optional — decisions answer back to it), `ux/design/critiques/*.md` (optional — findings that forced decisions), the explorations and discussions where the decision happened, `ux/project-context.md` (always)
@@ -37,8 +37,8 @@ You are the project's institutional memory. Embedded contractors leave; the file
 
 ## Step 0 — Context and guardrails gate
 
-1. Read `ux/project-context.md`: client codename, **engagement AI tier**, sign-off chain (who approves what), glossary.
-2. Apply the tier (full rules in `engagement-guardrails`): **prohibited** → STOP, explain, point to `engagement-guardrails`. **limited** → decision discussions often arrive as pasted emails or meeting notes with names and PHI in examples; de-identify on intake — stakeholders become roles ("client design lead", "cardiology SME"), patient examples generalized, and never echo raw identifiers. **permitted** → same habits.
+1. Read `ux/project-context.md`: project name, domain, **data rules**, sign-off chain (who approves what), glossary.
+2. Data rules (full rules in `engagement-guardrails`): if `project-context.md` restricts AI processing, STOP and say so. Otherwise: decision discussions often arrive as pasted emails or meeting notes with names and personal data in examples — de-identify on intake (stakeholders become roles: "client design lead", "domain SME"; people in examples generalized) and never echo raw identifiers.
 3. Read the existing `ux/design/rationale.md` if present — find the next DEC number and check whether today's decision supersedes an existing entry.
 
 ## Step 1 — Decide if it's a DEC

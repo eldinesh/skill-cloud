@@ -1,15 +1,16 @@
 ---
 name: engagement-guardrails
-version: 1.0.0
+version: 1.1.0
 bundle: core
 description: |
-  The rules for client material in AI tools: the three engagement AI tiers (prohibited /
-  limited / permitted), healthcare PHI de-identification habits, and cross-client isolation.
+  The data rules for project material in AI tools — the same for every project, no
+  client/internal distinction. De-identification habits by industry (healthcare set shipped),
+  restriction handling when a contract bars AI processing, and cross-project isolation.
   Also creates the project's ux/project-context.md keystone file.
-  Use when asked "can I use AI for this client", "what's the AI tier here", "set up project
-  context", "is this allowed under the engagement", or "new client project setup".
-  Proactively invoke when someone starts processing client material in a project that has
-  no ux/project-context.md, or asks whether client data may be processed. (skillcloud)
+  Use when asked "can I use AI on this material", "what are the data rules here",
+  "set up project context", or "new project setup".
+  Proactively invoke when someone starts processing project material in a project that has
+  no ux/project-context.md. (skillcloud)
 ---
 
 ## Preamble (run first)
@@ -26,60 +27,64 @@ _UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 
 
 # Engagement Guardrails
 
-We work embedded inside client organizations, often in healthcare. What we may do with client material in AI tools is set **per engagement**, not per person, and it is recorded in one place: the project's `ux/project-context.md`. Every SkillCloud skill reads that file before touching client material. This skill defines the tiers, sets up the file, and answers "is this allowed?"
+**A project is a project.** Internal product, client engagement, side initiative — same treatment, same pipeline, same habits. There is no internal/external classification, and nothing ever asks the user to make one. The only thing that varies is recorded in one place: the project's `ux/project-context.md` — its **domain** (which adapts examples and identifier sweeps) and its **data rules** (which are "standard" unless a contract says otherwise).
 
-## The three tiers
+## The data rules
 
-**prohibited** — the engagement bars AI processing of client material.
-- Do: use SkillCloud for general craft (templates, method guidance, company handbook), on fully synthetic stand-ins, or on your own non-client notes.
-- Don't: paste, upload, screenshot, or describe-in-detail any client material into any AI tool. SkillCloud pipeline skills will refuse and point here.
+**standard** — the default for every project, no questions asked.
+- Work normally. De-identify people data on intake as a standing habit: it costs nothing and ages well.
+- Never paste credentials, secrets, contracts, or live production datasets into any AI tool. That's universal, not a project setting.
 
-**limited** — AI may process **de-identified** client material only. *This is the default for healthcare engagements unless the contract says otherwise, and the default whenever you're unsure.*
-- Do: work with transcripts, notes, and screens **after** de-identification on intake (below). Keep the `ux/` folder de-identified end to end.
-- Don't: paste live PHI/PII, real names, MRNs, schedules, or identifiable screenshots — even "just to clean them up". De-identification happens before AI processing, not by it, unless the engagement manager has explicitly approved intake-cleaning in writing.
+**restricted** — only when a contract or NDA explicitly bars AI processing of the project's material.
+- Recorded in `project-context.md` by whoever knows the contract (project lead), with the source ("MSA §7"). Skills then refuse to process project material and say why.
+- General craft, templates, the handbook, and fully synthetic stand-ins remain fine.
 
-**permitted** — the client has approved AI tooling in writing.
-- Do: work normally. Still de-identify people data by default — it costs nothing and ages well.
-- Don't: treat "permitted" as covering credentials, contracts, or patient records. It never does.
-
-**Who sets the tier:** the engagement manager, from the contract/NDA. The tier and its source ("per MSA §7", "per email from <role>, May 2026") are recorded in `project-context.md`. A stricter client NDA always wins. Unsure → treat as **limited** and ask.
+That's the whole model. No tiers to choose, nothing to interrogate. If no restriction is recorded, none applies.
 
 ## Setting up a project (creates the keystone)
 
-When `ux/project-context.md` is missing, offer to create it. Interview the user briefly — one question at a time, not a form:
+When `ux/project-context.md` is missing, **create it and keep moving** — don't run a questionnaire:
 
-1. Client codename (on limited/prohibited engagements the real name stays out of artifacts — pick a codename and use it everywhere)
-2. Domain and product in one line
-3. **Engagement AI tier + its source** (who confirmed it, where it's written)
-4. Brand/design system (name, where tokens live)
-5. Known constraints (a11y bar, compliance regime, tech stack realities)
-6. Glossary seeds: codenames for sites, systems, and products that will recur
-7. Stakeholders by role only
+1. Infer the project name and domain from the material at hand (a discovery transcript about warehouse cabinets → "Stock Area Administration, IoT/logistics"). State the inference in one line so the user can correct it.
+2. Write the file from `resources/project-context-template.md` with defaults: `data rules: standard`, glossary seeded from whatever systems/orgs the material mentions.
+3. Tell the user where it lives and that every SkillCloud skill reads it first — they (or the project lead) edit it when reality differs: a stricter contract, a brand library, sanctioned terminology.
 
-Write the file from `resources/project-context-template.md`, then run `mkdir -p ux` as needed. Tell the user: every SkillCloud skill now reads this first.
+Only ask a question when the material itself signals a restriction might exist (an NDA pasted into the transcript, "don't put this in AI" in the notes) — then ask that one question, not a form.
 
-## De-identification habits (all tiers)
+## Industry adaptation
 
-People data gets de-identified on intake, always:
+The domain in `project-context.md` drives what "sensitive" means and which playbooks apply. Healthcare ships as the worked example throughout SkillCloud — adapt, don't assume:
+
+| Domain | Extra identifier categories to strip | Shipped playbooks that apply |
+|---|---|---|
+| healthcare | PHI: MRNs, patient details inside stories, the HIPAA Safe Harbor set (full list in `interview-synthesis/resources/deidentification-checklist.md`) | clinical recruiting, consent, interruption heuristics, registers |
+| finance / fintech | account and card numbers, transaction details, KYC data, balances tied to people | adapt the healthcare playbooks: same interruption/trust patterns, different identifiers |
+| general / B2B SaaS | the universal sweep below — names, contacts, IDs | base playbooks as written |
+
+Domain not in the table or unknown → infer from the material, state the inference, and apply the universal sweep plus common sense about what's sensitive in that industry.
+
+## De-identification habits (every project)
+
+People data is de-identified on intake, always:
 - People → stable participant codes (`P01`, `P02`, …) with roles-only descriptors.
-- Client orgs, sites, systems → glossary codenames.
-- Strip or generalize the HIPAA Safe Harbor categories: names; geography below state; dates beyond month/year; phone/fax/email; SSN/MRN/account/license/device IDs; URLs/IPs; biometrics; photos; any unique identifier — including details about patients mentioned *inside* stories.
-- Never echo raw identifiers back in chat; never write the code↔person mapping down in `ux/`.
-- The working checklist for transcripts lives in `interview-synthesis/resources/deidentification-checklist.md`.
+- Orgs, sites, systems → glossary codenames from `project-context.md` (invent and record one if missing).
+- Strip or generalize: names, contact details, exact dates beyond month/year, geography below region, account/ID numbers, URLs/IPs tied to people, plus the domain's extra categories above.
+- Never echo raw identifiers back in chat; never write the code↔person mapping into `ux/`.
+- The working checklist for transcripts: `interview-synthesis/resources/deidentification-checklist.md`.
 
-**Screenshots and recordings:** healthcare UIs routinely display live patient data — and *staging environments usually hold real data too*. Blur, crop, or rebuild with synthetic data before any AI processing or artifact embedding. A "quick screenshot to ask about spacing" is how PHI leaks.
+**Screenshots and recordings:** live systems — including staging environments — often display real user data (in healthcare, PHI). Blur, crop, or rebuild with synthetic data before AI processing or artifact embedding.
 
-## Cross-client isolation (embedded-contractor rule)
+## Cross-project isolation
 
-- One project folder (and its `ux/`) per engagement. Artifacts, glossaries, and codenames never migrate between clients.
-- Switching clients → switch project folders and start a fresh session. Don't carry Client A's context into Client B's chat.
-- Don't ask Claude to "remember" client specifics across engagements; durable client knowledge lives in that client's `ux/` folder only.
-- Insights from Client A are Client A's property. Generalizable craft lessons are fine; their data, designs, and findings are not.
+- One project folder (and its `ux/`) per project. Artifacts, glossaries, and codenames never migrate between projects.
+- Switching projects → switch folders and start a fresh session. Don't carry Project A's context into Project B's chat.
+- Durable project knowledge lives in that project's `ux/` folder, not in chat memory across projects.
+- Insights belong to their project. Generalizable craft lessons travel; data, designs, and findings don't.
 
 ## If something slips
 
-Pasted PHI or client-identifiable material outside the tier? Stop the session, don't keep working "around" it, and report it the same day to your engagement manager per `company-handbook` → security-and-data. Fast honesty is company policy; quiet cleanup is not.
+Pasted restricted or sensitive material where it shouldn't go? Stop the session, don't keep working "around" it, and report it the same day per `company-handbook` → security-and-data. Fast honesty is company policy; quiet cleanup is not.
 
 ## Handoff
 
-After setup, suggest the natural entry point: `/research-plan` (research starting), `/design-brief` (design starting from existing research), or `/ux-pipeline` to see the whole map.
+After setup, suggest the natural entry point: `/research-plan` (research starting), `/design-brief` (design starting from existing research), `/topic-deep-dive` (unfamiliar domain — get a plain-language grounding first), or `/ux-pipeline` to see the whole map.

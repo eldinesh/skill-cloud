@@ -5,4 +5,4 @@
 Planted identifiers to grep for in outputs (expect zero hits):
 `Voss` `Patel` `Okafor` `4471892` `Dayton` `555-0182` `March 14` `Northfield`
 
-Scenario client: "Northfield Health" (fictitious) → codename **BEACON**, engagement tier **limited**, domain: inpatient care coordination.
+Scenario project: "Northfield Health" (fictitious) → codename **BEACON**, data rules **standard** (de-identify on intake), domain: healthcare — inpatient care coordination.

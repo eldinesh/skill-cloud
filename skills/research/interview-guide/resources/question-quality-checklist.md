@@ -26,7 +26,7 @@ Run every question in the guide through this table before the guide ships. If a 
 ## Healthcare etiquette quick card
 
 - Schedule: never shift change (~7a/7p), rounds, or med passes; reconfirm with the charge nurse/manager the day before; bring the 25–30 min cut.
-- Consent: the recording/AI-processing sentence must match the engagement AI tier in `ux/project-context.md` (rules in `engagement-guardrails`). Notes-only fallback always on offer.
+- Consent: the recording/AI-processing sentence must match the project's data rules in `ux/project-context.md` (rules in `engagement-guardrails`). Notes-only fallback always on offer.
 - PHI redirect up front; if patient details slip out anyway, they don't enter notes — generalize on intake.
 - Interruptions are data first (what pulled them away, how they re-entered), protocol second (offer pause/end).
 - Demos on test or training environments only. Live screen = look away, don't capture.
