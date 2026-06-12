@@ -36,7 +36,7 @@ for skill_md in "$REPO_ROOT"/skills/*/*/SKILL.md; do
   echo "$fm" | grep -q 'Use when' || fail "$rel" "description missing 'Use when' routing grammar"
   echo "$fm" | grep -q '(skillcloud)' || fail "$rel" "description missing (skillcloud) tag"
 
-  if [ "$group" = "research" ] || [ "$group" = "design" ]; then
+  if [ "$group" = "research" ] || [ "$group" = "design" ] || [ "$group" = "ai" ]; then
     grep -q '^## Contract' "$skill_md" || fail "$rel" "missing '## Contract' block"
     grep -q 'Consumes' "$skill_md" || fail "$rel" "contract missing Consumes"
     grep -q 'Produces' "$skill_md" || fail "$rel" "contract missing Produces"

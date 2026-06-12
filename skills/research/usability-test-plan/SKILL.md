@@ -26,6 +26,7 @@ _UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 
 - If `PROJECT_CONTEXT: missing`: create a minimal `ux/project-context.md` from the template in `engagement-guardrails` — infer the project name and domain from the material at hand, state the inference in one line so the user can correct it, and continue. Never ask administrative questions (project type, classification, permissions — defaults exist); but if something material to the work itself is unclear — who the participants are, what decision the output should inform — ask that one sharp question before producing.
 
 ## Contract
+<!-- AI products: ux/sprint/steer-plan.md (from /sense-shape-steer) supplies the pass thresholds and trust metrics tasks should test against. -->
 - **Consumes:** `ux/design/brief.md` or a prototype description from the user (required — one of the two), `ux/personas/*.md` (recommended — tasks and recruiting anchor on them), `ux/project-context.md` (always)
 - **Produces:** `ux/validation/usability-test-plan.md`
 - **Next:** run the sessions, then /interview-synthesis on the session notes — validation findings enter the same evidence pipeline as discovery

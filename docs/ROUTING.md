@@ -10,6 +10,7 @@ When the user's request matches a skill below, invoke it via the Skill tool. Whe
 - New project setup, "can I use AI on this material", data-rules questions → /engagement-guardrails
 - "Where are we", "what's next", run several steps end to end → /ux-pipeline
 - "What is X", explain a technical or domain topic simply, jargon decoding → /topic-deep-dive
+- An AI feature/opportunity whose role, risks, or success criteria aren't defined; "run an AI design sprint", "scope this AI feature", "teach me sense-shape-steer" → /sense-shape-steer
 - Planning a study, "what method should we use" → /research-plan
 - Writing interview questions → /interview-guide
 - A transcript or session notes appear → /interview-synthesis

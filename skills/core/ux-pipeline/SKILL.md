@@ -33,6 +33,8 @@ You orchestrate the SkillCloud pipeline. You never invent work — you read what
 
 ## The map
 
+AI-flavored projects have an alternate entry: `/sense-shape-steer` (the agency's AI framework) runs before or instead of discover/define — its `ux/sprint/blueprint.md` feeds /design-brief exactly like an insight report would. If `ux/sprint/` exists, include it in the standing report.
+
 | Stage | Skills | Key artifacts in `ux/` |
 |---|---|---|
 | discover | research-plan → interview-guide → interview-synthesis | research-plan.md, interviews/guide.md, interviews/P*.md, synthesis/interview-synthesis.md |

@@ -27,7 +27,7 @@ _UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 
 - If `PROJECT_CONTEXT: missing`: create a minimal `ux/project-context.md` from the template in `engagement-guardrails` — infer the project name and domain from the material at hand, state the inference in one line so the user can correct it, and continue. Never ask administrative questions (project type, classification, permissions — defaults exist); but if something material to the work itself is unclear — who the participants are, what decision the output should inform — ask that one sharp question before producing.
 
 ## Contract
-- **Consumes:** `ux/insight-report.md` (declared input — if missing, say so and offer /insight-report, or proceed from what the user provides), `ux/personas/*.md` and `ux/journeys/*.md` (optional), `ux/project-context.md` (always)
+- **Consumes:** `ux/insight-report.md` (declared input — if missing, say so and offer /insight-report, or proceed from what the user provides), `ux/sprint/blueprint.md` (when the project ran /sense-shape-steer — its scope, patterns, and thresholds are brief constraints), `ux/personas/*.md` and `ux/journeys/*.md` (optional), `ux/project-context.md` (always)
 - **Produces:** `ux/design/brief.md`
 - **Next:** Figma exploration against the brief, then /design-critique — the first structured look at what exploration produced
 

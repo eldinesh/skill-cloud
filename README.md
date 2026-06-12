@@ -24,6 +24,7 @@ Migrating from personal skill packs: [docs/CLEANUP.md](docs/CLEANUP.md).
 | **core** (everyone) | `skillcloud` (status/update/doctor), `company-handbook` (HR & policy questions), `engagement-guardrails` (data rules + de-identification habits), `ux-pipeline` (the orchestrator), `topic-deep-dive` (plain-language explanations of unfamiliar topics) |
 | **research** | research-plan, interview-guide, interview-synthesis, affinity-mapping, cross-study-synthesis, jobs-to-be-done, persona, journey-map, usability-test-plan, insight-report |
 | **design** | design-brief, design-critique, heuristic-evaluation, accessibility-audit, component-spec, ux-writing, design-rationale, handoff-spec, design-qa-checklist, figma-hygiene |
+| **ai** (every role) | sense-shape-steer — the Sense-Shape-Steer framework: AI opportunity → patterns & storyboard → metrics & feedback loops → build-ready blueprint. Modes: run / facilitate / learn |
 
 Every skill reads the project's `ux/project-context.md`, consumes the previous step's artifact, produces the next step's input, and names the next step. `/ux-pipeline` shows where a project stands and runs steps with approval gates. The full map and authoring standard: [docs/PIPELINE.md](docs/PIPELINE.md).
 

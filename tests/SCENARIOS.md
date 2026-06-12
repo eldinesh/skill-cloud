@@ -14,6 +14,7 @@ Fixtures live in `tests/fixtures/` (fully synthetic, identifiers planted on purp
 | company-handbook | "what's our PTO policy?" | — | Reads resources/time-off.md; placeholder → says "not populated yet" + names owner; never invents policy |
 | engagement-guardrails | "can I use AI on this material?" | project with/without context | Cites the data rules; creates project-context.md from the material without a questionnaire |
 | ux-pipeline | "where are we on this project?" | bench `ux/` folder | Standing report matches files on disk; suggests the correct next skill; doesn't auto-run it |
+| sense-shape-steer | "scope this AI feature" + a brief | any project | Infers RUN mode; works SENSE worksheets conversationally; gates on checkpoints; writes ux/sprint/opportunity-statement.md; "teach me the framework" → LEARN mode, overview first |
 
 ## Research (fixtures: transcripts 01–03, data rules=standard)
 

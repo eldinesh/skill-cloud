@@ -40,10 +40,10 @@ done
 
 groups_for_role() {
   case "$1" in
-    researcher) echo "core research" ;;
-    designer)   echo "core design" ;;
-    both)       echo "core research design" ;;
-    core)       echo "core" ;;
+    researcher) echo "core ai research" ;;
+    designer)   echo "core ai design" ;;
+    both)       echo "core ai research design" ;;
+    core)       echo "core ai" ;;
     *) echo "" ;;
   esac
 }

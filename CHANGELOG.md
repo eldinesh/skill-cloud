@@ -2,6 +2,14 @@
 
 All notable changes to SkillCloud. Maintainers: bump `VERSION` and add an entry here in the same commit — the self-update prompt reads this file to show "what's new".
 
+## 0.10.0 — 2026-06-12
+
+New: `sense-shape-steer` — the agency's framework for AI product UX, as a skill.
+
+- Full framework encoded from the workbook, sprint deck, and demo: SENSE (five worksheets + AI Opportunity Statement), SHAPE (seven interaction patterns, 4-step pattern selector, storyboard grid, touchpoint swimlanes, trust & transparency checklist, three readiness checkpoints), STEER (four metric worksheets, three tracking levels, four feedback-loop types, six common mistakes), CONCLUDE (prioritize / feasibility / ownership / risks → build-ready blueprint).
+- Three modes: **run** (apply the framework with Claude now — days become gates), **facilitate** (support a real team sprint with the real timeline, prep packs, and board capture), **learn** (layered tutoring).
+- New `ai` skill group, installed for every role. Artifacts land in `ux/sprint/`; the blueprint feeds /design-brief, the STEER plan feeds /usability-test-plan. Routing block updated.
+
 ## 0.9.2 — 2026-06-12
 
 - Questions policy sharpened: skills never ask administrative questions (project type, classification, permissions — defaults exist), but when something material to the work is genuinely unclear — who the participants are, what decision the output should inform — they ask that one sharp question before producing. Outputs always land as drafts with gaps flagged; humans promote them.
