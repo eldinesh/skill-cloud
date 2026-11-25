@@ -68,6 +68,11 @@ t('pseudonymise replaces names from the private map', () => {
   const out = fs.readFileSync(path.join(dir, 'koru/raw/int-03.txt'), 'utf8');
   if (/Maria|Lopez/.test(out)) throw new Error(out);
 });
+t('pseudonymise lists names the map missed', () => {
+  fs.writeFileSync(path.join(dir, 'koru/raw/originals/int-04.txt'), '[00:00:05] Maria Lopez: My lead Sandra checks the big ones.\n');
+  has(koru(['pseudonymise', 'koru/raw/originals/int-04.txt']), 'line 1: Sandra');
+  fs.unlinkSync(path.join(dir, 'koru/raw/int-04.txt'));
+});
 
 console.log('\nFrame');
 t('context card blocks the Brief until questions 1-5 are answered', () => {
@@ -104,11 +109,24 @@ t('synthetic output cannot become a Finding (hook)', () => eq(claudeEdit('FND-00
 t('Claude cannot write an Insight (hook)', () => {
   eq(decision(guard('PreToolUse', { tool_name: 'Write', tool_input: { file_path: path.join(dir, 'koru/cards/INS-001-x.md'), content: '---\nid: INS-001\ntype: INS\ntitle: x\n---\n' } })), 'deny');
 });
+t('Claude cannot create an Insight through the engine either (hook)', () => {
+  eq(decision(guard('PreToolUse', { tool_name: 'Bash', tool_input: { command: 'koru new INS "Adjusters distrust routing"' } })), 'deny');
+});
+t('koru new refuses sign-off fields, synthetic Findings and help flags', () => {
+  has(koru(['new', 'FND', 'x', '--field', 'signed_by=Claude'], true), 'set by koru sign');
+  has(koru(['new', 'FND', 'x', '--field', 'evidence=synthetic'], true), 'Synthetic output cannot become a Finding');
+  has(koru(['new', 'DAT', '--help'], true), 'koru new TYPE');
+  if (fs.readdirSync(path.join(dir, 'koru/cards')).some((f) => f.startsWith('DAT-002'))) throw new Error('--help made a card');
+});
 t('Claude cannot set confidence or sign (hook)', () => {
   eq(claudeEdit('FND-001', 'status: draft', 'status: final'), 'deny');
   eq(claudeEdit('FND-001', 'signed_by:', 'signed_by: Claude'), 'deny');
   eq(decision(guard('PreToolUse', { tool_name: 'Bash', tool_input: { command: 'koru sign FND-001 --name X --role "research owner"' } })), 'deny');
   eq(decision(guard('PreToolUse', { tool_name: 'Bash', tool_input: { command: 'sed -i s/draft/final/ koru/cards/FND-001.md' } })), 'deny');
+  const sh = (command) => decision(guard('PreToolUse', { tool_name: 'Bash', tool_input: { command } }));
+  eq(sh('echo "status: final" >> koru/cards/FND-001.md'), 'deny');
+  eq(sh('find koru -type f | head; cat koru/engagement.md 2>&1; koru list >/dev/null'), 'allow');
+  eq(sh('grep -l final koru/cards/*.md > /tmp/out.txt'), 'allow');
 });
 t('signing needs the right role and final sources', () => {
   has(koru(['sign', 'FND-001', '--name', 'Rae', '--role', 'designer'], true), 'signed by the research owner');
@@ -124,6 +142,7 @@ t('people write Insights; the gate needs every Insight final', () => {
   koru(['new', 'INS', 'Adjusters do not trust automatic assignment', '--link', 'supports FND-001: re-checking by hand', '--field', 'author=Rae']);
   fill('INS-001', { What: 'Adjusters treat auto-assignment as a suggestion to verify.', Why: 'Because one bad assignment costs them a day of rework.', 'So what': 'Assignment must show its reasons and be easy to correct.' }, { confidence: 'medium', last_validated: '2026-11-25', review_by: '2027-05-25' });
   has(koru(['check', 'INS-001']), 'No contradicting evidence');
+  has(koru(['check', 'INS-001']), 'Signals: 1 participant(s)');
   koru(['sign', 'INS-001', '--name', 'Sam', '--role', 'research owner']);
 });
 t('solo mode: nobody signs their own high-confidence Insight', () => {
@@ -144,8 +163,11 @@ t('Problem, HMW and Brief chain', () => {
   koru(['new', 'HMW', 'How might we let adjusters trust and correct assignment in one step', '--link', 'reframes PRB-001: trust gap']);
   koru(['new', 'BRF', 'Trusted claim assignment']);
   fill('BRF-001', { Problem: 'PRB-001', Outcome: 'Right first time assignment', Scope: 'Assignment review flow' });
-  for (const id of ['JOB-001', 'PRB-001']) koru(['sign', id, '--name', id === 'JOB-001' ? 'Sam' : 'Dee', '--role', id === 'JOB-001' ? 'research owner' : 'engagement lead']);
+  has(koru(['sign', 'PRB-001', '--name', 'Dee', '--role', 'engagement lead'], true), 'Sign these first, in this order');
+  koru(['sign', 'JOB-001', '--name', 'Sam', '--role', 'research owner']);
+  koru(['sign', 'PRB-001', '--name', 'Dee', '--role', 'engagement lead']);
   koru(['sign', 'HMW-001', '--name', 'Lee', '--role', 'design lead']);
+  has(koru(['sign', 'BRF-001', '--cosign', '--name', 'Pat'], true), 'not final yet');
   koru(['sign', 'BRF-001', '--name', 'Dee', '--role', 'engagement lead']);
   koru(['sign', 'BRF-001', '--cosign', '--name', 'Pat']);
 });
@@ -162,6 +184,12 @@ t('the gate needs a checker review newer than the last change', () => {
   has(koru(['gate', 'frame'], true), '✗ Every checker finding has a disposition');
   let s = read('REV-001').replace('searched — open', 'searched — fixed').replace('general — open', 'general — accepted risk');
   put('REV-001', s);
+  // An edit after the review, by anyone, needs a new review unless a "fixed" finding names the card.
+  const ctxFile = path.join(dir, 'koru/cards', fs.readdirSync(path.join(dir, 'koru/cards')).find((f) => f.startsWith('CTX-001')));
+  const ctxText = fs.readFileSync(ctxFile, 'utf8');
+  fs.writeFileSync(ctxFile, ctxText + '\nA late note.\n');
+  has(koru(['gate', 'frame'], true), 'changed: CTX-001');
+  fs.writeFileSync(ctxFile, ctxText);
 });
 t('Claude cannot pass a gate; a signer can', () => {
   eq(decision(guard('PreToolUse', { tool_name: 'Bash', tool_input: { command: 'koru gate frame --pass --name Dee --role "engagement lead"' } })), 'deny');
