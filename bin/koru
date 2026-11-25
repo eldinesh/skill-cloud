@@ -1,0 +1,14 @@
+#!/bin/sh
+# koru: the Koru project graph CLI. Needs Node 18 or newer.
+SELF="$0"
+while [ -h "$SELF" ]; do
+  DIR=$(cd "$(dirname "$SELF")" && pwd)
+  SELF=$(readlink "$SELF")
+  case "$SELF" in /*) ;; *) SELF="$DIR/$SELF" ;; esac
+done
+DIR=$(cd "$(dirname "$SELF")" && pwd)
+if ! command -v node >/dev/null 2>&1; then
+  echo "koru needs Node.js 18 or newer: https://nodejs.org" >&2
+  exit 1
+fi
+exec node "$DIR/../lib/koru.js" "$@"

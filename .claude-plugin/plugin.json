@@ -1,0 +1,27 @@
+{
+  "name": "koru",
+  "version": "3.0.0-alpha.1",
+  "description": "Koru 3.0: one evidence chain from kick-off call to shipped ticket. Stage skills for Frame, Explore, Harden and Ship on top of the SkillCloud research and design skills, four independent checkers, hooks that enforce the never-break rules, and a project graph with a plain visual board.",
+  "author": {
+    "name": "Koru Design Ops"
+  },
+  "homepage": "https://github.com/eldinesh/skill-cloud/tree/koru-3.0",
+  "repository": "https://github.com/eldinesh/skill-cloud",
+  "license": "UNLICENSED",
+  "keywords": [
+    "ux",
+    "research",
+    "design",
+    "design-ops",
+    "playbook"
+  ],
+  "skills": [
+    "./skills/koru/",
+    "./skills/core/",
+    "./skills/research/",
+    "./skills/design/",
+    "./skills/ai/"
+  ],
+  "hooks": "./hooks/hooks.json",
+  "outputStyles": "./output-styles/"
+}

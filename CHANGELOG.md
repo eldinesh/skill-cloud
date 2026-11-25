@@ -2,6 +2,20 @@
 
 All notable changes to SkillCloud. Maintainers: bump `VERSION` and add an entry here in the same commit — the self-update prompt reads this file to show "what's new".
 
+## Unreleased — Koru 3.0 plugin (alpha, branch koru-3.0)
+
+SkillCloud becomes the Koru 3.0 plugin. Spec: Koru delivery system design spec v2. Guide: docs/KORU-3.md.
+
+- **Plugin:** `.claude-plugin/` manifest and private marketplace; every existing skill loads inside it.
+- **Engine (`koru`):** project graph of cards with fixed shapes per type, typed links pinned by version, sign-off by role, revise and supersede, stale and writeback flags with impact preview, thresholds before results, deterministic gates, health numbers.
+- **Hooks:** human-only sign-off, confidence and Insights; consent and contract before AI sees research; originals and the name map never readable; exact quotes; synthetic output never evidence; client limits on Figma and Jira; Definition of Ready before Jira tickets; provenance stamps and automatic versions; session-start recap.
+- **Commands:** `/koru:start`, `where`, `join`, `note`, `decide`, `gate`, `share`, `ship`, `board`.
+- **Skills:** `koru-frame`, `koru-explore`, `koru-harden`, `koru-ship`, `koru-cards`, `koru-deliverables`.
+- **Checkers:** research, direction, harden and spec agents: fresh context, read-only, list and never fix.
+- **Board and outputs:** board, decision log, trace, client page with AI-use note, finals-only Claude project knowledge.
+- **Deliverables:** HTML, Figma, front-end code or any mix; password-protected share pages and publishing to Koru's hosted service.
+- **Tests:** `tests/koru/test.js` (45 checks with planted defects), run by `tools/validate.sh` with `claude plugin validate`.
+
 ## 0.10.0 — 2026-06-12
 
 New: `sense-shape-steer` — the agency's framework for AI product UX, as a skill.

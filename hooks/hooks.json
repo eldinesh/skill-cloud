@@ -1,0 +1,16 @@
+{
+  "description": "Koru Tier 1 rules: human sign-off, consent before AI sees research, exact quotes, provenance, supersede-never-edit, client limits on Figma and Jira, Definition of Ready before tickets, thresholds before results.",
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [ { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/lib/guard.js\" SessionStart", "timeout": 20 } ] }
+    ],
+    "PreToolUse": [
+      { "matcher": "Write|Edit|MultiEdit|NotebookEdit|Read|NotebookRead|Grep|Glob|Bash|mcp__.*",
+        "hooks": [ { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/lib/guard.js\" PreToolUse", "timeout": 20 } ] }
+    ],
+    "PostToolUse": [
+      { "matcher": "Write|Edit|MultiEdit",
+        "hooks": [ { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/lib/guard.js\" PostToolUse", "timeout": 20 } ] }
+    ]
+  }
+}

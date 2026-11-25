@@ -2,7 +2,19 @@
 
 Internal skill system for UX work. One repo, versioned, curated — research and design skills wired as a pipeline, where each step's output feeds the next step's input. Private; not for distribution.
 
-## Install
+## Koru 3.0 plugin (this branch)
+
+SkillCloud is becoming **Koru 3.0**: one Claude Code plugin that runs the Koru playbook (Frame, Explore, Harden, Ship) on a project graph of evidence cards, with hooks that enforce the never-break rules, four independent checkers and a plain visual board. All the skills below ship inside it. Guide: [docs/KORU-3.md](docs/KORU-3.md).
+
+```bash
+git clone -b koru-3.0 git@github.com:eldinesh/skill-cloud.git ~/koru-plugin
+claude plugin marketplace add ~/koru-plugin
+claude plugin install koru@koru
+```
+
+Then, in a project folder: `/koru:start`.
+
+## Install (skills only, without the Koru plugin)
 
 ```bash
 git clone --single-branch --depth 1 git@github.com:eldinesh/skill-cloud.git ~/.claude/skills/skill-cloud

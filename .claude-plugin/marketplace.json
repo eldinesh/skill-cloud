@@ -1,0 +1,12 @@
+{
+  "name": "koru",
+  "owner": { "name": "Koru Design Ops" },
+  "metadata": { "description": "Koru's private plugin marketplace." },
+  "plugins": [
+    {
+      "name": "koru",
+      "source": "./",
+      "description": "Koru 3.0 delivery system: evidence chain, stage skills, checkers, hooks and board."
+    }
+  ]
+}

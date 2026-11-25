@@ -36,7 +36,7 @@ for skill_md in "$REPO_ROOT"/skills/*/*/SKILL.md; do
   echo "$fm" | grep -q 'Use when' || fail "$rel" "description missing 'Use when' routing grammar"
   echo "$fm" | grep -q '(skillcloud)' || fail "$rel" "description missing (skillcloud) tag"
 
-  if [ "$group" = "research" ] || [ "$group" = "design" ] || [ "$group" = "ai" ]; then
+  if [ "$group" = "research" ] || [ "$group" = "design" ] || [ "$group" = "ai" ] || [ "$group" = "koru" ]; then
     grep -q '^## Contract' "$skill_md" || fail "$rel" "missing '## Contract' block"
     grep -q 'Consumes' "$skill_md" || fail "$rel" "contract missing Consumes"
     grep -q 'Produces' "$skill_md" || fail "$rel" "contract missing Produces"
@@ -53,6 +53,25 @@ for skill_md in "$REPO_ROOT"/skills/*/*/SKILL.md; do
     fail "$rel" "MRN-like identifier found in skill folder"
   fi
 done
+
+# Koru plugin: manifest is valid JSON, every agent and command has frontmatter, and the engine tests pass.
+if [ -f "$REPO_ROOT/.claude-plugin/plugin.json" ]; then
+  for j in "$REPO_ROOT/.claude-plugin/plugin.json" "$REPO_ROOT/.claude-plugin/marketplace.json" "$REPO_ROOT/hooks/hooks.json"; do
+    node -e "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'))" "$j" 2>/dev/null || fail "${j#$REPO_ROOT/}" "not valid JSON"
+  done
+  for f in "$REPO_ROOT"/agents/*.md "$REPO_ROOT"/commands/*.md "$REPO_ROOT"/output-styles/*.md; do
+    [ -f "$f" ] || continue
+    head -1 "$f" | grep -q '^---$' || fail "${f#$REPO_ROOT/}" "missing frontmatter"
+    awk '/^---$/{n++; next} n==1' "$f" | grep -qE '^description:' || fail "${f#$REPO_ROOT/}" "frontmatter missing description:"
+  done
+  if command -v claude >/dev/null 2>&1; then
+    claude plugin validate "$REPO_ROOT" >/tmp/koru-validate.log 2>&1 || { cat /tmp/koru-validate.log; fail "plugin" "claude plugin validate failed"; }
+  fi
+  if command -v node >/dev/null 2>&1; then
+    node "$REPO_ROOT/tests/koru/test.js" >/tmp/koru-test.log 2>&1 || { tail -40 /tmp/koru-test.log; fail "tests/koru" "engine tests failed"; }
+    echo "koru: $(tail -1 /tmp/koru-test.log)"
+  fi
+fi
 
 echo ""
 if [ "$FAIL" -gt 0 ]; then
