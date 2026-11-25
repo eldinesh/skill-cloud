@@ -193,6 +193,9 @@ t('the gate needs a checker review newer than the last change', () => {
 });
 t('Claude cannot pass a gate; a signer can', () => {
   eq(decision(guard('PreToolUse', { tool_name: 'Bash', tool_input: { command: 'koru gate frame --pass --name Dee --role "engagement lead"' } })), 'deny');
+  has(koru(['gate', 'frame'], true), '✗ Review signed by engagement lead, research owner');
+  koru(['sign', 'REV-001', '--name', 'Dee', '--role', 'engagement lead']);
+  koru(['sign', 'REV-001', '--name', 'Sam', '--role', 'research owner']);
   has(koru(['gate', 'frame']), 'Ready to pass');
   has(koru(['gate', 'frame', '--pass', '--name', 'Dee', '--role', 'engagement lead']), 'Frame gate passed');
 });
@@ -218,6 +221,7 @@ t('a Decision has one Approver and factors before options', () => {
   koru(['sign', 'DEC-001', '--name', 'Dee']);
   fs.writeFileSync(path.join(dir, 'f2.md'), '1. [DIR-001] Prototype lacks the wrong-suggestion case — fixed\n');
   koru(['review', 'explore', '--checker', 'direction-checker', '--file', 'f2.md']);
+  koru(['sign', 'REV-002', '--name', 'Lee', '--role', 'design lead']);
   has(koru(['gate', 'explore']), 'Ready to pass');
   koru(['gate', 'explore', '--pass', '--name', 'Lee', '--role', 'design lead']);
 });
@@ -237,10 +241,10 @@ t('unclassified elements and blank state cells block the gate', () => {
   koru(['new', 'MET', 'Reassignment rate', '--field', 'level=core', '--field', 'threshold=under 5% of claims reassigned']);
   fill('MET-001', { 'Feedback loop': 'Weekly reassignment log review.' });
   koru(['sign', 'MET-001', '--name', 'Dee', '--role', 'engagement lead']);
-  koru(['sign', 'SCR-001', '--name', 'Lee', '--role', 'design lead']);
+  koru(['sign', 'SCR-001', 'STA-001', 'STA-002', '--name', 'Lee', '--role', 'design lead']);
   fs.writeFileSync(path.join(dir, 'f3.md'), '1. [STA-002] n/a reason is thin — accepted risk\n');
   koru(['review', 'harden', '--checker', 'harden-checker', '--file', 'f3.md']);
-  has(koru(['gate', 'harden']), 'Ready to pass');
+  has(koru(['gate', 'harden'], true), '✗ Review signed by engineer, rulebook owner, design lead');
 });
 t('the Harden review needs all three signers', () => {
   has(koru(['sign', 'REV-003', '--name', 'Eng', '--role', 'engineer']), 'Still needed');
@@ -274,7 +278,7 @@ t('the Ship gate needs a handoff with rabbit holes and no-gos', () => {
   has(koru(['gate', 'ship'], true), '✗ Handoff note complete');
   fill('HND-001', { In: 'Assignment review', 'Not in': 'Bulk reassignment', Decisions: 'DEC-001', 'Who to ask': 'Lee', 'Rabbit holes': 'Reason text length', 'No-gos': 'No auto-accept' });
   koru(['review', 'ship', '--checker', 'spec-checker', '--file', 'f4.md']);
-  let s = read('REV-005').replace('named — fixed', 'named — fixed'); put('REV-005', s);
+  koru(['sign', 'REV-005', '--name', 'Eng', '--role', 'engineer']);
   has(koru(['gate', 'ship']), 'Ready to pass');
 });
 
