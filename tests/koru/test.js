@@ -252,6 +252,13 @@ t("extending a client system catches its own contrast failures and fills gaps as
   if (!lint.some((x) => x.rule === 'contrast')) throw new Error('the lint did not refuse white on brand-500');
 });
 
+t('a draft made by mistake can be discarded once, and its id is never reused', () => {
+  koru(['new', 'ASM', 'Stray card']);
+  const id = fs.readdirSync(path.join(dir, 'koru/cards')).filter((f) => f.startsWith('ASM-')).sort().pop().slice(0, 7);
+  has(koru(['discard', id, '--reason', 'made by mistake']), 'discarded');
+  has(koru(['new', 'ASM', 'Next card']), String(Number(id.slice(4)) + 1).padStart(3, '0'));
+});
+
 console.log('\nExplore');
 t('thresholds must be saved before results', () => {
   koru(['new', 'DIR', 'Explainable queue', '--link', 'serves HMW-001: trust', '--field', 'seed_author=Lee']);
