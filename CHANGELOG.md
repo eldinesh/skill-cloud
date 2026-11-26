@@ -2,6 +2,12 @@
 
 All notable changes to SkillCloud. Maintainers: bump `VERSION` and add an entry here in the same commit — the self-update prompt reads this file to show "what's new".
 
+## 0.12.2 — 2026-11-26
+
+- **Partial yes:** approve some tickets and decline others. Before acting, `/design-lead` shows what a declined ticket strands (tickets and gates that need its output) and offers: drop those too, supply the input yourself, run on raw material at low confidence, or keep it. Dropped tickets stay on the board with the reason.
+- `skillcloud-board stranded`: tickets whose blocker was dropped. They show under Waits on you, and are never dispatched.
+- Board page: empty fields no longer show as `""` chips, and there is a Dropped column.
+
 ## 0.12.1 — 2026-11-26
 
 - The sidequest check reads the installed version. An old 3.x copy left in the plugin cache no longer triggers a false "agents may be refused" warning.

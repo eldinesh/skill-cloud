@@ -128,6 +128,25 @@ Yes to run it? (or correct it in one line)
 
 Nothing starts, counts or lists as open work until the person says yes. Then set the tickets to `ready` and log `D-nnn plan approved` in the decisions log. A correction is folded in and played back again. The plan is the only thing you ask a yes for. *How* each job is done is never a question.
 
+**Partial yes.** People may approve some tickets and decline others ("yes, but drop J-002", "only J-001 and J-004"). Before acting on it:
+
+1. **Work out the knock-on.** For each declined ticket, find every ticket that needs it, directly or down the chain (`blockedBy`), and every gate whose required artifacts it would have produced.
+2. **If nothing needs it**, set it `dropped`, log the reason, and run the rest.
+3. **If something needs it**, don't silently run around the hole. Play back the knock-on in one block, with the options:
+   ```
+   Dropping J-002 (synthesis) strands J-003, J-004, J-005 and the research-pack gate: they build on its output.
+   A. Drop those too. Frame stops at intake.
+   B. Keep them, and you supply the input: a synthesis or notes you already have go into ux/synthesis/, and they're
+      treated as unsigned until signed (built_on_unsigned).
+   C. Keep them on the raw material instead. Every claim drops to low confidence, recorded as an override.
+   D. Keep J-002 after all.
+   Recommended: B if you have the input, otherwise D. A Frame without synthesis can't produce an honest pack.
+   ```
+4. Apply the chosen option. Dropped tickets stay on the board as `dropped` with the reason, never deleted. Options B and C are logged as `override-unsigned-input` in the decisions log, and the affected tickets' `What` says what they're built on.
+5. `skillcloud-board stranded` lists any ticket whose blocker was dropped. It shows under **Waits on you** until someone decides. Never dispatch a stranded ticket.
+
+The same applies later: a ticket a person drops mid-stage ("stop J-004, we don't need the scan") gets the same knock-on check before anything else moves.
+
 **FRAME**
 1. Raw material in → `sc-synthesiser`: clean intake into `ux/intake/clean/` (de-identified, speaker-labelled markdown). If a requirement call is coming or just happened → `sc-researcher`: /requirement-call (prep or recap).
 2. Fresh research needed → `sc-researcher`: /research-plan + /interview-guide → checker H0 → **research owner signs before fieldwork** → people run sessions → transcripts in.

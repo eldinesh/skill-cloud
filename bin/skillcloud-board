@@ -4,6 +4,7 @@
 #   skillcloud-board summary     counts, what waits on people, the frontier
 #   skillcloud-board frontier    ready + afk tickets whose blockers are done and whose resources are free
 #   skillcloud-board waiting     hitl / needs-you tickets with their question
+#   skillcloud-board stranded    tickets that can't start because a blocker was dropped
 #   skillcloud-board list [status]
 #   skillcloud-board html [out]  render a self-contained board page (default ux/team/board.html)
 #
@@ -16,7 +17,7 @@ BOARD="$ROOT/ux/team/board"
 
 field() { # field <file> <key> -> raw value (frontmatter only)
   awk -v k="$2" 'NR==1&&$0=="---"{f=1;next} f&&$0=="---"{exit}
-    f{ if (index($0, k":")==1) { v=substr($0, length(k)+2); sub(/^[ \t]+/,"",v); sub(/[ \t]+#.*$/,"",v); print v; exit } }' "$1"
+    f{ if (index($0, k":")==1) { v=substr($0, length(k)+2); sub(/^[ \t]+/,"",v); sub(/[ \t]+#.*$/,"",v); if (v=="\"\"" || v=="[]") v=""; print v; exit } }' "$1"
 }
 list_items() { # "[a, b]" -> one per line
   echo "$1" | sed 's/^\[//; s/\]$//' | tr ',' '\n' | sed 's/^[ \t]*//; s/[ \t]*$//; s/^"//; s/"$//' | grep -v '^$' || true
@@ -58,6 +59,28 @@ cmd_list() {
     [ -n "$want" ] && [ "$st" != "$want" ] && continue
     printf "%-12s %-10s %-6s %-9s %-22s %s\n" "$(field "$f" id)" "$st" "$(field "$f" mode)" "$(field "$f" stage)" "$(field "$f" role)" "$(field "$f" title)"
   done
+}
+
+blocked_by_dropped() { # prints the dropped blockers of a ticket, if any
+  local f="$1" b
+  for b in $(list_items "$(field "$f" blockedBy)"); do
+    [ "$(status_of "$b")" = "dropped" ] && printf "%s " "$b"
+  done
+}
+
+cmd_stranded() { # tickets that can never start because a blocker was dropped
+  need_board
+  local n=0 d st
+  for f in $(tickets); do
+    st=$(field "$f" status)
+    case "$st" in done|dropped) continue ;; esac
+    d=$(blocked_by_dropped "$f")
+    [ -z "$d" ] && continue
+    printf "%-10s %-22s needs dropped: %s\n" "$(field "$f" id)" "$(field "$f" role)" "$d"
+    n=$((n + 1))
+  done
+  [ "$n" -eq 0 ] && echo "(nothing stranded)"
+  return 0
 }
 
 cmd_frontier() {
@@ -104,6 +127,7 @@ cmd_summary() {
   done
   echo "WAITS ON PEOPLE"; cmd_waiting | sed 's/^/  /'
   echo "FRONTIER"; cmd_frontier | sed 's/^/  /'
+  echo "STRANDED (a blocker was dropped: decide before they can run)"; cmd_stranded | sed 's/^/  /'
   echo "DOING"; local d=0
   for f in $(tickets); do
     if [ "$(field "$f" status)" = "doing" ]; then
@@ -180,7 +204,8 @@ CSS
     for f in $(tickets); do
       st=$(field "$f" status); md=$(field "$f" mode); blk=""
       for b in $(list_items "$(field "$f" blockedBy)"); do [ "$(status_of "$b")" = "done" ] || blk=1; done
-      if { [ "$md" = "hitl" ] && [ "$st" = "ready" ] && [ -z "$blk" ]; } || [ "$st" = "needs-you" ]; then card "$f"; n=$((n+1)); fi
+      strand=""; case "$st" in done|dropped) ;; *) strand=$(blocked_by_dropped "$f") ;; esac
+      if { [ "$md" = "hitl" ] && [ "$st" = "ready" ] && [ -z "$blk" ]; } || [ "$st" = "needs-you" ] || [ -n "$strand" ]; then card "$f"; n=$((n+1)); fi
     done
     [ "$n" -eq 0 ] && printf '<p class="empty">Nothing waits on you.</p>\n'
     printf '</section>\n'
@@ -201,6 +226,7 @@ CSS
     col "Being checked" review
     col "Proposed" proposed
     col "Done" done
+    col "Dropped" dropped
     printf '</main><footer>Tickets are plain files: edit them by hand and the board follows. Gates and fieldwork are people'"'"'s work and are never dispatched.</footer>\n'
     cat <<'JS'
 <script>
@@ -215,6 +241,7 @@ case "${1:-summary}" in
   summary) cmd_summary ;;
   frontier) cmd_frontier ;;
   waiting) cmd_waiting ;;
+  stranded) cmd_stranded ;;
   list) shift; cmd_list "${1:-}" ;;
   html) shift; cmd_html "${1:-}" ;;
   -h|--help) sed -n '2,11p' "$0" ;;
