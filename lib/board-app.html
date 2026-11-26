@@ -47,6 +47,8 @@ input.edit{width:100%;height:36px;border:1px solid var(--line);border-radius:6px
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:10px 16px;border-radius:8px;z-index:30;font-size:13px}
 .how ol{padding-left:20px}.how li{margin:0 0 10px}.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0 16px}.flow span{background:var(--sunk);border-radius:6px;padding:4px 8px;font-size:12px}.flow b{color:var(--muted);font-weight:400}
 .empty{padding:24px;text-align:center;color:var(--muted)}
+table.steps td{vertical-align:top}.y{color:var(--ok)}.r{color:var(--accent);font-weight:700}.p{color:var(--warn);font-weight:700}.m{color:var(--muted)}.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.panel>h3{margin:0 0 8px;display:flex;justify-content:space-between;align-items:baseline;gap:12px;color:var(--ink)}
 @media (max-width:900px){.layout{grid-template-columns:1fr}nav.side{display:flex;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:8px}nav.side button{width:auto;white-space:nowrap}.cols{grid-template-columns:1fr}.search{min-width:0;width:100%}main{padding:16px}}
 </style>
 </head>
@@ -67,7 +69,7 @@ const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&':
 const byId = Object.fromEntries(DATA.cards.map((c) => [c.id, c]));
 const STATUS = { draft: 'Draft', review: 'In review', final: 'Signed', superseded: 'Superseded' };
 const CHAIN = ['CTX', 'DAT', 'FND', 'INS', 'JOB', 'PRB', 'HMW', 'OPP', 'BRF', 'DIR', 'SCR', 'STA', 'TKT', 'MET'];
-const VIEWS = [['overview', 'Overview'], ['cards', 'Cards'], ['chain', 'Evidence chain'], ['decisions', 'Decisions'], ['inbox', 'Inbox'], ['design', 'Design system'], ['quality', 'Quality'], ['how', 'How this board works']];
+const VIEWS = [['overview', 'Overview'], ['workflow', 'Workflow'], ['agents', 'Agents and AI accuracy'], ['cards', 'Cards'], ['chain', 'Evidence chain'], ['decisions', 'Decisions'], ['inbox', 'Inbox'], ['design', 'Design system'], ['quality', 'Quality'], ['how', 'How this board works']];
 let live = false;
 let view = 'overview';
 const filt = { type: new Set(), status: new Set(), flag: new Set() };
@@ -110,7 +112,29 @@ function matches(c) {
   return true;
 }
 
+const STEPMARK = (x) => x.done ? ['y', '✓', 'Done'] : x.optional ? ['m', '–', 'Skipped at this rigour'] : x.ready ? (x.who === 'person' ? ['p', '◆', 'Waiting on a person'] : ['r', '▶', 'Ready for an agent']) : ['m', '○', 'Waits on an earlier step'];
 const views = {
+  workflow() {
+    const R = DATA.rigour || {};
+    const stage = (p) => `<section class="panel"><h3><span>${esc((DATA.gates.find((g) => g.stage === p.stage) || {}).label || p.stage)}${p.stage === DATA.stage ? ' · now' : ''}</span><span class="small muted">${p.steps.filter((x) => x.done).length} of ${p.steps.length} steps</span></h3>
+      <table class="steps"><tr><th></th><th>Step</th><th>Who</th><th>Skills</th><th>Where it stands</th></tr>${p.steps.map((x) => { const [cls, ic, lab] = STEPMARK(x); return `<tr><td><span class="${cls}" title="${lab}" aria-label="${lab}">${ic}</span></td><td><b>${esc(x.id)}</b> ${esc(x.title)}</td><td>${x.who === 'person' ? `<span class="tag review">a person${x.role ? '' : ''}</span>` : `<span class="tag ${x.checker ? 'warn' : 'ai'}">${esc(x.agent || '')}</span>`}</td><td class="small">${esc((x.skills || []).join(', '))}</td><td class="small">${esc(x.progress)}${x.packages ? ` · ${x.packages} package(s) in parallel` : ''}${x.ready && x.who === 'person' && x.ask ? `<br><code>${esc(x.ask)}</code>` : ''}</td></tr>`; }).join('')}</table></section>`;
+    return `<h2>Workflow</h2><p class="muted">The playbook as the planner computes it from the cards. <code>/koru:run</code> hands every ▶ step to its agent with a work order; ◆ steps wait for a person. Nothing here is typed by hand.</p>
+      <div class="panel"><b>Rigour: ${esc(R.label || '')}</b>${R.appetite ? ` · appetite ${esc(R.appetite)}` : ''} · severity floor ${esc(R.floor || '')}<p class="small muted">${esc(R.note || '')}</p></div>
+      <p class="small"><span class="y">✓</span> done · <span class="r">▶</span> ready for an agent · <span class="p">◆</span> waiting on a person · <span class="m">○</span> waits on an earlier step · <span class="m">–</span> skipped at this rigour</p>
+      ${(DATA.plan || []).map(stage).join('')}`;
+  },
+  agents() {
+    const s = DATA.stats || { byBucket: {}, disp: {}, rules: [], caught: [] };
+    const pct = (n, d) => d ? Math.round(100 * n / d) + '%' : '—';
+    const tile = (label, value, note) => `<div class="panel"><div class="small muted">${esc(label)}</div><b>${esc(value)}</b>${note ? `<div class="small muted">${esc(note)}</div>` : ''}</div>`;
+    const agents = (DATA.agents || []).map((a) => `<section class="panel"><h3><span>${esc(a.label)}</span><span class="small muted">${a.checker ? 'checker · writes nothing' : `${a.cards.length} card(s)`}</span></h3><p class="small">${esc(a.does)}</p><p class="small"><b>Skills:</b> ${esc(a.skills.join(', '))}</p>${a.writes.length ? `<p class="small"><b>May write:</b> ${esc(a.writes.join(', '))}</p>` : ''}${a.cards.length ? `<p class="small">${a.cards.slice(0, 40).map((id) => byId[id] ? `<button class="linkbtn" data-open="${id}">${id}</button>` : id).join(' ')}${a.cards.length > 40 ? ' …' : ''}</p>` : ''}</section>`).join('');
+    return `<h2>Agents and AI accuracy</h2><p class="muted">Who did the work, and how often people had to correct it. The numbers come from what people did: what they changed before signing, what they discarded, which checker findings they rejected, and the mistakes they recorded with <code>koru caught</code>.</p>
+      <div class="grid4">${tile('AI drafts signed unchanged', pct(s.byBucket.unchanged || 0, s.drafts), `${s.byBucket.unchanged || 0} of ${s.drafts || 0}`)}${tile('Lightly edited before signing', s.byBucket.light || 0, 'under 20% changed')}${tile('Heavily edited before signing', s.byBucket.heavy || 0, 'over 20% changed')}${tile('AI drafts discarded', s.discarded || 0, '')}</div>
+      <div class="grid4">${tile('Checker findings', s.findings || 0, '')}${tile('Fixed', s.disp.fixed || 0, '')}${tile('Rejected: the checker was wrong', s.disp.rejected || 0, '')}${tile('Mistakes people caught', (s.caught || []).length, 'koru caught')}</div>
+      ${(s.rules || []).filter((r) => r.n).length ? `<h3>Checker rules</h3><table><tr><th>Rule</th><th>Checker</th><th>Findings</th><th>Rejected</th></tr>${s.rules.filter((r) => r.n).slice(0, 20).map((r) => `<tr><td>${esc(r.rule)}</td><td class="small">${esc(r.checker || '')}</td><td>${r.n}</td><td><span class="tag ${r.rate >= 0.5 && r.n >= 3 ? 'block' : ''}">${pct(r.rejected, r.n)}</span></td></tr>`).join('')}</table><p class="small muted">A rule people reject half the time or more gets rewritten.</p>` : ''}
+      ${(s.caught || []).length ? `<h3>Mistakes people caught</h3><ul>${s.caught.map((c) => `<li><button class="linkbtn" data-open="${c.id}">${c.id}</button> (${esc(c.agent)}): ${esc(c.what)}</li>`).join('')}</ul>` : ''}
+      <h3>The team</h3><div class="grid2">${agents}</div>${DATA.mainCards ? `<p class="small muted">${DATA.mainCards} card(s) were written in the main session rather than by an agent.</p>` : ''}`;
+  },
   overview() {
     const g = DATA.gates.map((x) => {
       const done = x.rows.filter((r) => r.ok).length;
@@ -202,7 +226,7 @@ function openCard(id) {
   const tabs = {
     content: () => editing ? `<label class="small muted" for="et">Title</label><input class="edit" id="et" value="${esc(c.title)}"><label class="small muted" for="eb">Text (Markdown)</label><textarea class="edit" id="eb">${esc(c.body)}</textarea><p class="small muted">Saved through the same checks as Claude's edits. Status, signatures and versions cannot be changed here.</p>` : `<div class="md">${md(c.body) || '<p class="muted">No text yet.</p>'}</div>`,
     links: () => `<h3>Rests on</h3><ul class="rows">${up || '<li class="muted">Nothing: this card is labelled an assumption.</li>'}</ul><h3>Cited by</h3><ul class="rows">${down || '<li class="muted">No card cites this yet.</li>'}</ul>`,
-    history: () => `<h3>How this card got here</h3><table><tr><th>When (UTC)</th><th>What happened</th></tr>${ev || '<tr><td colspan="2" class="muted">No events logged.</td></tr>'}</table><h3>Saved versions</h3><table><tr><th>When</th><th>Version</th><th>Saved by</th></tr>${hist || '<tr><td colspan="3" class="muted">No earlier versions.</td></tr>'}</table><p class="small muted">File: ${esc(c.file)}</p>`,
+    history: () => `<h3>How this card got here</h3><table><tr><th>When (UTC)</th><th>What happened</th></tr>${ev || '<tr><td colspan="2" class="muted">No events logged.</td></tr>'}</table><h3>Saved versions</h3><table><tr><th>When</th><th>Version</th><th>Saved by</th></tr>${hist || '<tr><td colspan="3" class="muted">No earlier versions.</td></tr>'}</table><h3>AI work on this card</h3><table><tr><th>When (UTC)</th><th>Who</th><th>Tool</th></tr>${(c.prov || []).map((e) => `<tr><td class="small">${esc(e.at)}</td><td>${e.agent === 'main' ? 'Claude (main session)' : `${esc(e.agent)} agent`}</td><td class="small">${esc(e.tool || '')}</td></tr>`).join('') || '<tr><td colspan="3" class="muted">No AI edits logged. A person wrote this card.</td></tr>'}</table><p class="small muted">File: ${esc(c.file)}</p>`,
     checks: () => `<ul class="rows">${c.problems.map((p) => `<li><span class="tag ${p.level}">${p.level === 'block' ? 'must fix' : 'check'}</span> ${esc(p.msg)}</li>`).join('') || '<li class="muted">No problems. This card can be signed.</li>'}</ul>`,
     fields: () => `<dl class="kv">${Object.entries(c.meta).map(([k, v]) => `<dt>${esc(k.replace(/_/g, ' '))}</dt><dd>${esc(Array.isArray(v) ? v.join(', ') : v)}</dd>`).join('')}</dl>`,
   };

@@ -2,7 +2,30 @@
 
 This branch turns SkillCloud into the Koru 3.0 delivery plugin for Claude Code (terminal and desktop app). The design source is **Koru delivery system: design spec v2**. The playbook submission links here.
 
-One chain of evidence, from kick-off call to shipped ticket. People own judgement; Claude owns throughput. Every artefact is a card in one project graph; hooks enforce the rules that must never break; four independent checkers review every gate; skills coach.
+One chain of evidence, from kick-off call to shipped ticket. People own judgement; Claude owns throughput. Every artefact is a card in one project graph. An orchestrator runs the playbook, specialist agents do the work with the SkillCloud method skills, four independent checkers review every gate, and hooks enforce the rules that must never break.
+
+## How it fits together (alpha.3)
+
+```text
+/koru:run  (the orchestrator: the main Claude Code session)
+   │  koru next --json      the playbook as data: which steps are ready, which wait on a person
+   │  koru next --order F5  a work order: step, package, skills, card types allowed, done test
+   ▼
+ worker agents (up to 4 in parallel, each preloads its skills)
+   researcher · synthesiser · architect · strategist · designer · quality · engineer
+   │  run the SkillCloud method (interview-synthesis, affinity-mapping, journey-map, …)
+   │  in "Koru mode": the method stays, its output becomes cards, never ux/ files
+   ▼
+ hooks (lib/guard.js) on every write and command
+   │  per-agent card types, people-only steps, consent, exact quotes, thresholds before results
+   ▼
+ checker agent (fresh context, read-only) → koru review → people give dispositions → gate
+```
+
+- **One map.** `lib/methods.js` says which agent owns which card types and which skill runs at which step. `tools/weave.js` writes a Koru mode block into each of the 32 skills from that map, so a skill used inside Koru writes cards, and the same skill used outside Koru still writes its `ux/` file. `koru skills` prints the map; `koru doctor` fails if a block is stale.
+- **The playbook as data.** `lib/plan.js` holds every step of Frame (F0 to F15), Explore (E1 to E8), Harden (H1 to H7) and Ship (S1 to S6). Each step names its agent or person, its skills, the card types it writes, what it needs first, and a done test computed from the cards. Nothing is ticked by hand. `koru plan` and the board's Workflow view show it.
+- **Agents stay in their lane.** The hook reads which agent is calling. A strategist that tries to write a researcher's card is refused with the owner's name, and the orchestrator re-routes the work. Checkers can run read-only commands only.
+- **Rigour profiles.** `rigour: sprint | standard | regulated` in the engagement sets the checker severity floor, whether enterprise structure (flows, objects, permissions) is required before Directions, who must sign a review, the second-method rule for Insights, and the state matrix roles.
 
 ## Install
 
@@ -28,7 +51,8 @@ In the project folder, in Claude Code:
 
 | Command | Does |
 | --- | --- |
-| `/koru:start` | Engagement pack, switches, contract, health check |
+| `/koru:start` | Engagement pack, switches, appetite, rigour and people (with their git emails), git hooks, health check |
+| `/koru:run [stage]` | The orchestrator: dispatches agents step by step until only people's steps are left, runs the checker, then hands over the `!` commands grouped by person |
 | `/koru:where` | Catch-up: what changed, what is open, the next step |
 | `/koru:join` | Joining view for someone new |
 | `/koru:note` | Logs an ad hoc client request as a card and sorts it |
@@ -39,9 +63,9 @@ In the project folder, in Claude Code:
 | `/koru:board` | Opens the board |
 
 **Person-only commands** (the hooks stop Claude from running them; a person types them with `!` in Claude Code or in any terminal):
-`koru sign` · `koru gate <stage> --pass` · `koru contract` · `koru share` · `koru pseudonymise` · `koru clear-flag`.
+`koru sign` · `koru gate <stage> --pass` · `koru contract` · `koru share` · `koru pseudonymise` · `koru clear-flag` · `koru result` · `koru caught` · `koru ds approve`.
 
-The full engine is `koru help`: cards (`new`, `check`, `quotes`, `dor`, `revise`), tests (`threshold`, `result`), decisions (`decide new`, `decide impact`), gates (`review`, `gate`), moments (`where`, `join`, `note`, `health`), and outputs (`index`, `share`).
+The full engine is `koru help`: cards, tests and decisions, gates, moments, the workflow (`next`, `plan`, `skills`, `pack`), the evidence loops (`result`, `playback import`, `compare`, `matrix`, `caught`, `stats`, `eval`), the team (`verify`, `ids`, `git-setup`) and the design system.
 
 ## What is in the plugin
 
@@ -50,14 +74,17 @@ The full engine is `koru help`: cards (`new`, `check`, `quotes`, `dor`, `revise`
 | Manifest and marketplace | `.claude-plugin/` | Plugin `koru`, private marketplace `koru` |
 | Engine | `lib/koru.js`, `lib/core.js`, `bin/koru` | The project graph: cards with fixed shapes, typed links, versions, sign-off, stale and writeback flags, gates, health |
 | Hooks | `hooks/hooks.json`, `lib/guard.js` | Tier 1 rules (below), provenance stamps, automatic versions, the session-start recap |
-| Commands | `commands/` | The nine `/koru:` commands |
+| Commands | `commands/` | The ten `/koru:` commands, `/koru:run` is the orchestrator |
+| Method map and planner | `lib/methods.js`, `lib/plan.js`, `tools/weave.js` | Which agent runs which skill and writes which cards; every step of the playbook with its done test; the Koru mode block woven into each skill |
 | Stage skills | `skills/koru/` | `koru-frame`, `koru-explore`, `koru-harden`, `koru-ship`, plus `koru-cards` and `koru-deliverables` |
-| Checkers | `agents/` | `research-checker`, `direction-checker`, `harden-checker`, `spec-checker`: fresh context, read-only, list and never fix |
+| Worker agents | `agents/` | `researcher`, `synthesiser`, `architect`, `strategist`, `designer`, `quality`, `engineer`: each preloads its method skills and may write only its card types |
+| Checkers | `agents/` | `research-checker`, `direction-checker`, `harden-checker`, `spec-checker`: fresh context, read-only, numbered rules (RC-01 and on), findings as `[SEV][RULE][CARD] finding · evidence · confidence — disposition` |
+| Team and evidence | `lib/team.js`, `lib/evidence.js` | Signer identity against roles, signatures, duplicate ids; test results, playback import, comparisons, state matrix, AI accuracy |
 | Output styles | `output-styles/` | Koru voice (plain language) and Koru coach (stops at judgement points, fades) |
 | Board and outputs | `lib/board.js` | `koru index` builds the board, decision log, trace, client page and finals-only Claude project knowledge |
 | Sharing | `lib/share.js` | Password-protected pages (AES-256-GCM, opened in the browser), share log, publishing to Koru's hosted service |
 | Reused skills | `skills/core`, `research`, `design`, `ai` | All SkillCloud skills, called from inside the stages |
-| Tests | `tests/koru/test.js` | 45 end-to-end checks with planted defects, run by `tools/validate.sh` |
+| Tests | `tests/koru/test.js` | 74 end-to-end checks with planted defects, run by `tools/validate.sh` with the weave check |
 
 ## Tier 1 rules the hooks enforce
 
@@ -73,6 +100,9 @@ The full engine is `koru help`: cards (`new`, `check`, `quotes`, `dor`, `revise`
 | Client tools follow the contract | Figma and Jira writes are refused unless the tier is full, and each allowed write asks a person |
 | Definition of Ready before tickets | Jira issue creation is refused for a ticket card that fails it or is unsigned |
 | Every AI write is stamped and versioned | Each Claude edit to a card is logged with session and sources and saved in `koru/history/` |
+| Each agent writes only its own card types; checkers write nothing | The hook reads the calling agent from the hook payload and names the right owner when it refuses |
+| The SkillCloud skills write cards, not `ux/` files, inside a Koru project | Writes into `ux/` are refused; `ux/project-context.md` is generated from the engagement |
+| A signature is the signer's, on the text they signed | The signer's git email must belong to a person holding that role in `engagement.md`; the signature is a hash of the card at signing, and `koru verify` and the finish gate catch any later change |
 | Generated views are never hand-edited | Writes into `koru/generated`, `koru/state` and `koru/history`, and shell writes into `koru/`, are refused |
 
 Gates are deterministic too: `koru gate` refuses to pass without a checker review newer than the stage's last change, a disposition for every finding, and no stale cards.
@@ -107,10 +137,19 @@ Each project picks one or more by the kind of work: a standalone HTML prototype,
 - `koru board --serve`: the board on your computer; draft cards can be edited in the browser through the same checks. Signing stays in Claude Code.
 - `koru discard ID`: remove a draft made by mistake (never signed, nothing cites it).
 
+## Team, evidence loops and AI accuracy (alpha.3)
+
+- **Many people, one graph.** `engagement.md` lists people with their emails and roles. `koru git-setup` adds a pre-commit check, a post-merge id check and union merges for logs. Ids are reserved atomically and checked across branches; `koru ids --fix` repairs duplicates after a merge.
+- **Enterprise structure.** Study, Segment, Flow (current and future, with actors and handoffs), Object model and Permissions cards. At standard rigour they are required before Directions; the state matrix (`koru matrix`) is drafted from the Permissions roles.
+- **Tests and results come back as evidence.** A Test card has a numeric threshold saved before any session. `koru result TST-001 --passed 5 --of 8` computes met or not met; a miss drafts a Decision for the design lead.
+- **Client feedback comes back as evidence.** Every shared page carries a feedback layer: the client pins a comment to a screen, state or component, then downloads the file. `koru playback import feedback.json` turns it into a Playback card where each row is typed (evidence, constraint, idea, preference) and becomes a Finding, Request, Idea or Decision.
+- **The checker can be wrong.** A finding can be closed as `rejected: why`. `koru stats` and the board's Agents view show how often people rejected each rule, how much they edited AI drafts before signing (word diff against the AI's last draft), and mistakes they logged with `koru caught`. `koru eval score` measures a checker's recall and precision against planted defects.
+
 ## Not built yet
 
 - **Koru's hosted service itself.** The plugin side is done (encryption, share log, publishing call); the service that stores the pages and serves the links is a separate build.
 - **Jira comments promoted to Decisions** automatically. Today a person or Claude opens the Decision with `/koru:decide`.
 - **Coach fading per person across sessions.** The coach style fades within a session only.
-- **`claude plugin eval` suites** for the checkers. The checkers were tried on a seeded project (the spec checker found 30 real gaps), but there is no scored eval yet.
+- **A planted-defect fixture set** for every checker. The scoring (`koru eval score`) is built and tested; the fixture projects are not.
+- **Role bundles** through plugin user settings, so a researcher sees only the research commands first.
 - **Figma and Jira tool names** are matched by pattern (`figma`, `jira`, `atlassian` plus write verbs). Check them against the connectors the team actually uses.

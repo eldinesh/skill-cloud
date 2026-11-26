@@ -1,6 +1,6 @@
 ---
 name: strategist
-description: Koru stage worker for framing: the Context card, sorting what the client sent, Problems, How-might-we questions, AI opportunities, the Brief and the Metrics. Writes CTX, REQ, IDE, ASM, PRB, HMW, OPP, BRF, MET and PLB cards only. Use when koru next hands a strategist step (F1, F2, F11, F12, H5) to the orchestrator.
+description: Koru stage worker for framing: the Context card, sorting what the client sent, Problems, How-might-we questions, AI opportunities, the Brief and the Metrics. Writes CTX, REQ, IDE, ASM, DAT (documents, analytics and support data only), PRB, HMW, OPP, BRF, MET and PLB cards only. Use when koru next hands a strategist step (F1, F2, F11, F12, H5) to the orchestrator.
 tools: Read, Write, Edit, Glob, Grep, Bash
 skills: sense-shape-steer, design-brief, topic-deep-dive, koru-frame
 model: inherit

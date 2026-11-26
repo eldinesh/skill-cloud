@@ -547,6 +547,12 @@ t('client feedback comes back as a Playback card with typed rows', () => {
   has(koru(['playback', 'import', 'feedback.json', '--kind', 'zero']), '2 piece(s) of feedback');
   has(koru(['check', 'PLB-001'], true), 'needs a type');
 });
+t('a shared page carries the feedback layer, and its export imports as Playback', () => {
+  const S = require('../../lib/share.js');
+  const out = S.withFeedback('<html><body><main data-koru-state="STA-001">x</main></body></html>', 'Acme · Tracker');
+  has(out, 'Download feedback'); has(out, 'koru-feedback:'); eq((out.match(/<\/body>/g) || []).length, 1, 'one body close');
+  has(S.withFeedback('<p>no body</p>', 'x'), 'id="kfb"');
+});
 t('compare drafts a fair Decision; matrix drafts state cells from Permissions roles', () => {
   has(koru(['compare', 'DIR-001', 'DIR-001']), 'factors are written before the options');
   const n = koru(['matrix', 'SCR-001']);
