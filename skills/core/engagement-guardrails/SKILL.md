@@ -87,4 +87,4 @@ Pasted restricted or sensitive material where it shouldn't go? Stop the session,
 
 ## Handoff
 
-After setup, suggest the natural entry point: `/research-plan` (research starting), `/design-brief` (design starting from existing research), `/topic-deep-dive` (unfamiliar domain — get a plain-language grounding first), or `/ux-pipeline` to see the whole map.
+After setup, suggest the natural entry point: `/research-plan` (research starting), `/design-brief` (design starting from existing research), `/topic-deep-dive` (unfamiliar domain — get a plain-language grounding first), or `/design-lead` to see the whole map.

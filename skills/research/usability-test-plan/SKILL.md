@@ -27,8 +27,8 @@ _UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 
 
 ## Contract
 <!-- AI products: ux/sprint/steer-plan.md (from /sense-shape-steer) supplies the pass thresholds and trust metrics tasks should test against. -->
-- **Consumes:** `ux/design/brief.md` or a prototype description from the user (required — one of the two), `ux/personas/*.md` (recommended — tasks and recruiting anchor on them), `ux/project-context.md` (always)
-- **Produces:** `ux/validation/usability-test-plan.md`
+- **Consumes:** `ux/design/brief.md` or a prototype description from the user (required — one of the two), `ux/explore/directions.md` (quick mode), `ux/personas/*.md` (recommended — tasks and recruiting anchor on them), `ux/project-context.md` (always)
+- **Produces:** `ux/validation/usability-test-plan.md` · in quick mode: `ux/explore/test-script.md`
 - **Next:** run the sessions, then /interview-synthesis on the session notes — validation findings enter the same evidence pipeline as discovery
 
 # Usability Test Plan
@@ -40,6 +40,19 @@ You are a senior UX researcher planning an evaluative study whose sessions will 
 1. Read `ux/project-context.md`: project name, domain, data rules, glossary.
 2. Data rules (full rules in `engagement-guardrails`): if `project-context.md` explicitly restricts AI processing of this project's material, STOP — say so and point to `engagement-guardrails`. Otherwise proceed, de-identifying people data on intake as a standing habit: people → participant codes, orgs/systems → glossary codenames, identifiers stripped (the identifier sweep, with industry-specific categories like PHI in healthcare, lives in `engagement-guardrails`).
 3. Read `ux/design/brief.md` (its open questions and success criteria are the risk list's first draft) and the personas. With neither brief nor prototype description, ask one sharp question: **"What design are we testing, and what decision do the results feed?"**
+
+## Quick mode: the 10-minute direction test (Explore)
+
+When the input is `ux/explore/directions.md` and the ask is "test the directions", write `ux/explore/test-script.md` instead of a full plan. It is a 10-minute script per direction for a person playing the user, to give the team lead evidence before choosing:
+
+- **The question per direction**, taken verbatim from its card's "What we'd test". One question each. That's the point.
+- **One task per job the direction serves**, as a scenario in the user's words with synthetic details ("You need a room for 8 people at 3pm today"). Never name the UI ("click Suggest").
+- **What to watch for, written before the session**: the observable behaviour that would answer the question. For example "picks the suggested room without opening the list" vs "scrolls past it".
+- **Order**: alternate which direction goes first across sessions, to dampen order effects.
+- **Who plays the user**: a real user, or a stand-in, labelled in the feedback log. A simulated session (AI playing a persona) can rehearse the script but is never evidence (rulebook testing chapter, TEST-R14).
+- **Debrief, two lines per direction**, straight into `ux/explore/feedback-log.md` (the synthesiser fills it from the notes).
+
+Skip Steps 1–7 in quick mode, but keep the moderation rules from Step 5. They matter more in 10 minutes, not less.
 
 ## Step 1 — Name the risks
 

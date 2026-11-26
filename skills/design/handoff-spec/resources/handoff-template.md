@@ -12,7 +12,7 @@ updated: <yyyy-mm-dd>
 **Figma:** <file link> — pinned version/branch: `<name, e.g. "handoff/<scope> v1">`
 **Design system:** <client library + token set version>
 **Decisions:** see `ux/design/rationale.md` — this spec cites DEC-NN, it does not re-argue them
-**Walkthrough:** <date + eng lead — status flips to `reviewed` after>
+**Walkthrough:** <date + eng lead — status flips to `review` after>
 
 ## Readiness check (per /figma-hygiene)
 

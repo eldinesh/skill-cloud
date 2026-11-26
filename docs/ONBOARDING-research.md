@@ -25,7 +25,7 @@ Each skill consumes the previous one's output and ends by telling you what's nex
 
 Two ways to start:
 
-- **`/ux-pipeline`** — on any project, any time. It reads what already exists in `ux/`, tells you where the project stands, and offers to run the next step (with your approval at each gate). When in doubt, start here.
+- **`/design-lead`** — on any project, any time. It reads what already exists in `ux/`, tells you where the project stands, and offers to run the next step (with your approval at each gate). When in doubt, start here.
 - **`/research-plan`** — when you're scoping a new study from zero.
 
 You don't have to memorize names. Paste an interview transcript into a session and `/interview-synthesis` offers itself. Describe a study you need to scope and `/research-plan` shows up. The skill descriptions are the router — just describe the work.

@@ -1,0 +1,305 @@
+#!/bin/bash
+# skillcloud-check: deterministic checks for a project's ux/ folder. Tools before opinions.
+#
+#   skillcloud-check status                    every artifact: status, version, signer, stale
+#   skillcloud-check trace <file>...           header complete · sources exist (and are final) · cited IDs resolve · quotes verbatim
+#   skillcloud-check pii [path]                identifier sweep (emails, phones, SSN/MRN shapes, DOB, card numbers, IPs)
+#   skillcloud-check signoffs                  every final artifact signed by a named person, with a decisions-log line
+#   skillcloud-check stale                     final artifacts whose sources changed after sign-off
+#   skillcloud-check lanes <role> <marker>     files changed since <marker> that are outside <role>'s lane
+#   skillcloud-check ia                        flow steps resolve to IA nodes; depth; duplicate step IDs
+#   skillcloud-check contrast <fg> <bg> [...]  WCAG contrast ratio per hex pair (AA text 4.5, large/UI 3.0)
+#   skillcloud-check tokens <file|dir>...      raw colour/spacing values outside token definitions; placeholder copy
+#
+# Output lines start with OK / WARN / FAIL <CODE>. Exit 1 if any FAIL. Run from the project root (or set SC_PROJECT).
+# Compatible with macOS /bin/bash 3.2. No network.
+
+set -u
+ROOT="${SC_PROJECT:-$(pwd)}"
+cd "$ROOT" || exit 2
+SC_REPO="$(cd "$(dirname "$0")/.." && pwd)"
+LANES_FILE="$SC_REPO/skills/core/design-lead/resources/lanes.txt"
+FAILS=0
+WARNS=0
+fail() { echo "FAIL $1"; FAILS=$((FAILS + 1)); }
+warn() { echo "WARN $1"; WARNS=$((WARNS + 1)); }
+ok()   { echo "OK   $1"; }
+
+field() {
+  awk -v k="$2" 'NR==1&&$0=="---"{f=1;next} f&&$0=="---"{exit}
+    f{ if (index($0, k":")==1) { v=substr($0, length(k)+2); sub(/^[ \t]+/,"",v); sub(/[ \t]+#.*$/,"",v); print v; exit } }' "$1" 2>/dev/null
+}
+has_header() { head -1 "$1" 2>/dev/null | grep -q '^---$'; }
+list_items() {
+  echo "$1" | sed 's/^\[//; s/\]$//' | tr ',' '\n' | sed 's/^[ \t]*//; s/[ \t]*$//; s/^"//; s/"$//' | grep -v '^$' || true
+}
+norm_status() { case "$1" in reviewed) echo review ;; *) echo "$1" ;; esac; }
+artifacts() {
+  find ux -type f -name '*.md' \
+    -not -path 'ux/team/*' -not -path 'ux/archive/*' -not -path 'ux/publish/*' -not -path 'ux/intake/raw/*' 2>/dev/null | sort
+}
+run() { # run <cmd...>: print output, then summary; exit 1 on any FAIL line
+  local out f w
+  out=$("$@")
+  [ -n "$out" ] && echo "$out"
+  f=$(printf "%s\n" "$out" | grep -c "^FAIL" || true)
+  w=$(printf "%s\n" "$out" | grep -c "^WARN" || true)
+  [ "$f" -eq 0 ] && echo "OK   $1: no failures"
+  echo "skillcloud-check: $f fail, $w warn"
+  [ "$f" -gt 0 ] && exit 1
+  exit 0
+}
+
+# ---------------------------------------------------------------- status
+cmd_status() {
+  [ -d ux ] || { echo "UX_FOLDER: none"; exit 0; }
+  printf "%-52s %-22s %-8s %-3s %-26s %s\n" "path" "artifact" "status" "v" "signed_off_by" "flags"
+  for f in $(artifacts); do
+    has_header "$f" || { printf "%-52s %s\n" "$f" "(no header)"; continue; }
+    st=$(norm_status "$(field "$f" status)"); flags=""
+    [ -n "$(field "$f" built_on_unsigned)" ] && flags="$flags built-on-unsigned"
+    [ -n "$(field "$f" conditions)" ] && flags="$flags conditions"
+    if [ "$st" = "final" ] && is_stale "$f"; then flags="$flags STALE"; fi
+    printf "%-52s %-22s %-8s %-3s %-26s %s\n" "$f" "$(field "$f" artifact)" "$st" "$(field "$f" version)" "$(field "$f" signed_off_by)" "$flags"
+  done
+  [ -d ux/team/checks ] && { echo ""; echo "checks:"; grep -H '^\*\*Verdict:\*\*' ux/team/checks/*.md 2>/dev/null | sed 's/^/  /'; }
+  exit 0
+}
+
+# ---------------------------------------------------------------- stale
+expand_sources() { # prints existing files for a sources: value (globs allowed)
+  for s in $(list_items "$1"); do
+    case "$s" in ux/*|deliverable/*) for m in $s; do [ -e "$m" ] && echo "$m"; done ;; esac
+  done
+}
+is_stale() { # final artifact whose any source has updated: later than its signed_off:
+  local f="$1" signed src su
+  signed=$(field "$f" signed_off); [ -z "$signed" ] && signed=$(field "$f" updated)
+  [ -z "$signed" ] && return 1
+  for src in $(expand_sources "$(field "$f" sources)"); do
+    su=$(field "$src" updated)
+    [ -n "$su" ] && [ "$su" \> "$signed" ] && return 0
+  done
+  return 1
+}
+cmd_stale() {
+  local n=0
+  for f in $(artifacts); do
+    [ "$(norm_status "$(field "$f" status)")" = "final" ] || continue
+    if is_stale "$f"; then warn "STALE $f: a source changed after sign-off ($(field "$f" signed_off))"; n=$((n+1)); fi
+  done
+  [ "$n" -eq 0 ] && ok "no stale finals"
+}
+
+# ---------------------------------------------------------------- trace
+ID_RE='(INS|JOB|OPP|PRIN|BET|HMW|ASM|FL|DEC|TKT|D)-[0-9]{2,3}(\.S[0-9]{2})?|DIR-[A-Z]'
+defined_ids() { # IDs that appear in a definition position anywhere in ux/
+  find ux -type f -name '*.md' -not -path 'ux/team/checks/*' 2>/dev/null | while read -r f; do
+    grep -E "^(#{1,6}[[:space:]].*|[|][[:space:]]*\**($ID_RE)\**[[:space:]]*[|].*|[-*][[:space:]]+\*\*($ID_RE)\*\*.*|\*\*($ID_RE)\*\*.*|id:[[:space:]]*($ID_RE).*)$" "$f" 2>/dev/null \
+      | grep -oE "$ID_RE"
+  done | sort -u
+}
+check_quotes() { # verbatim quote check: "…" — Pnn must exist in ux/interviews/Pnn.md
+  local f="$1"
+  # normalise curly quotes/dashes, then extract  quote<TAB>P-code<TAB>line
+  sed -e 's/[“”]/"/g' -e "s/[‘’]/'/g" "$f" | awk '
+    { line=$0; n=NR
+      # no regex intervals ({n}): mawk on CI lacks them, so the 12-char floor is checked in code
+      while (match(line, /"[^"]+"[*_ ,.]*(—|–|--|-)[ ]*(P[0-9][0-9])/)) {
+        seg=substr(line, RSTART, RLENGTH); line=substr(line, RSTART+RLENGTH)
+        q=seg; sub(/^"/,"",q); sub(/"[^"]*$/,"",q)
+        if (length(q) < 12) continue
+        p=seg; sub(/.*P/,"P",p); p=substr(p,1,3)
+        print q "\t" p "\t" n
+      } }' | while IFS="$(printf '\t')" read -r q p ln; do
+      src="ux/interviews/$p.md"
+      if [ ! -f "$src" ]; then fail "QUOTE-SOURCE-MISSING $f:$ln $p (no $src)"; continue; fi
+      body=$(sed -e 's/[“”]/"/g' -e "s/[‘’]/'/g" "$src" | tr '\n' ' ' | tr -s ' ')
+      # split on ellipses; each segment of 12+ chars must appear verbatim
+      echo "$q" | awk '{ gsub(/\.\.\./, "\n"); gsub(/…/, "\n"); print }' | sed 's/^[ ]*//; s/[ ]*$//' | while read -r seg; do
+        [ "${#seg}" -lt 12 ] && continue
+        case "$body" in *"$seg"*) : ;; *) fail "QUOTE-MISSING $f:$ln $p \"$(echo "$seg" | cut -c1-60)\"" ;; esac
+      done
+    done
+}
+cmd_trace() {
+  [ $# -gt 0 ] || { echo "usage: skillcloud-check trace <file>..."; exit 2; }
+  local defs; defs=$(defined_ids)
+  for f in "$@"; do
+    [ -f "$f" ] || { fail "NOT-FOUND $f"; continue; }
+    if ! has_header "$f"; then fail "MISSING-HEADER $f"; continue; fi
+    for k in artifact project created_by sources status updated; do
+      [ -n "$(field "$f" "$k")" ] || { [ "$k" = "sources" ] && grep -q '^sources:' "$f" && continue; fail "HEADER-FIELD $f: $k"; }
+    done
+    st=$(norm_status "$(field "$f" status)")
+    case "$st" in draft|review|final) : ;; *) fail "BAD-STATUS $f: '$st'" ;; esac
+    srcs=$(field "$f" sources)
+    for s in $(list_items "$srcs"); do
+      case "$s" in
+        ux/*|deliverable/*)
+          found=""
+          for m in $s; do [ -e "$m" ] && found=1 && {
+            ms=$(norm_status "$(field "$m" status)")
+            if [ -n "$ms" ] && [ "$ms" != "final" ]; then
+              if [ "$st" = "final" ]; then fail "SOURCE-UNSIGNED $f ← $m ($ms)"; else warn "SOURCE-UNSIGNED $f ← $m ($ms)"; fi
+            fi; }
+          done
+          [ -z "$found" ] && fail "SOURCE-MISSING $f ← $s"
+          ;;
+      esac
+    done
+    # cited IDs must be defined somewhere in ux/
+    for id in $(awk 'NR==1&&$0=="---"{f=1;next} f&&$0=="---"{f=0;next} !f' "$f" | grep -oE "$ID_RE" | sort -u); do
+      base=$(echo "$id" | sed 's/\.S[0-9][0-9]$//')
+      echo "$defs" | grep -qx "$id" && continue
+      [ "$base" != "$id" ] && echo "$defs" | grep -qx "$base" && { warn "STEP-UNDEFINED $f: $id (flow $base exists)"; continue; }
+      fail "UNRESOLVED-ID $f: $id"
+    done
+    check_quotes "$f"
+    # agents never sign (charter Art. 2/6): signed_off_by must not name an AI
+    sb=$(field "$f" signed_off_by)
+    echo "$sb" | grep -qiE 'claude|assistant|agent|\bai\b|sc-' && fail "AI-SIGNER $f: '$sb'"
+  done
+}
+
+# ---------------------------------------------------------------- pii
+cmd_pii() {
+  local target="${1:-ux}" hits
+  [ -e "$target" ] || { fail "NOT-FOUND $target"; return; }
+  scan() { # scan <code> <regex>
+    hits=$(grep -rnIE "$2" "$target" \
+      --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=.git --exclude-dir=checks \
+      --exclude-dir=test-results --exclude-dir=playwright-report --exclude='*.lock' --exclude='package-lock.json' 2>/dev/null \
+      | grep -vE 'example\.(com|org|net)|@example|skillcloud-check:ignore' || true)
+    [ -n "$hits" ] && echo "$hits" | while IFS= read -r h; do
+      loc=$(echo "$h" | cut -d: -f1-2)
+      fail "PII-$1 $loc"
+    done
+  }
+  scan EMAIL '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
+  scan PHONE '(\+?1[ .-]?)?\(?[0-9]{3}\)?[ .-][0-9]{3}[ .-][0-9]{4}\b'
+  scan SSN '\b[0-9]{3}-[0-9]{2}-[0-9]{4}\b'
+  scan MRN '\bMRN[:# ]*[0-9]{4,}'
+  scan DOB '\b(DOB|D\.O\.B\.|[Dd]ate of [Bb]irth)[: ]+[0-9]'
+  scan CARD '\b[0-9]{4}[ -][0-9]{4}[ -][0-9]{4}[ -][0-9]{4}\b'
+  scan IP '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b'
+}
+
+# ---------------------------------------------------------------- signoffs
+cmd_signoffs() {
+  local n=0 log=ux/decisions-log.md ctx=ux/project-context.md
+  for f in $(artifacts); do
+    [ "$(norm_status "$(field "$f" status)")" = "final" ] || continue
+    n=$((n+1))
+    sb=$(field "$f" signed_off_by); sd=$(field "$f" signed_off)
+    [ -z "$sb" ] && { fail "UNSIGNED-FINAL $f (status final, no signed_off_by)"; continue; }
+    [ -z "$sd" ] && fail "NO-SIGN-DATE $f"
+    echo "$sb" | grep -qiE 'claude|assistant|agent|\bai\b|sc-' && fail "AI-SIGNER $f: '$sb'"
+    name=$(echo "$sb" | sed 's/ *(.*//')
+    base=$(basename "$f" .md)
+    if [ -f "$log" ]; then
+      grep -iE 'sign-off|signed' "$log" | grep -F "$name" | grep -qiF "$base" \
+        || fail "NO-LOG-LINE $f: no sign-off line naming '$name' and '$base' in $log"
+    else
+      fail "NO-DECISIONS-LOG $f"
+    fi
+    [ -f "$ctx" ] && ! grep -qF "$name" "$ctx" && warn "SIGNER-NOT-IN-TEAM $f: '$name' not named in $ctx"
+  done
+}
+
+# ---------------------------------------------------------------- lanes
+cmd_lanes() {
+  local role="${1:-}" marker="${2:-}"
+  [ -n "$role" ] && [ -f "$marker" ] || { echo "usage: skillcloud-check lanes <role> <marker-file>"; exit 2; }
+  [ -f "$LANES_FILE" ] || { fail "NO-LANES-FILE $LANES_FILE"; return; }
+  pats=$(awk -v r="$role" '$1==r{print $2}' "$LANES_FILE")
+  [ -z "$pats" ] && { fail "UNKNOWN-ROLE $role"; return; }
+  changed=$(find ux deliverable -type f -newer "$marker" \
+      -not -path '*/node_modules/*' -not -path '*/dist/*' -not -path '*/test-results/*' \
+      -not -path '*/playwright-report/*' -not -path 'ux/team/.dispatch-*' 2>/dev/null | sort)
+  local n=0
+  for f in $changed; do
+    n=$((n+1)); inlane=""
+    for p in $pats; do
+      # shellcheck disable=SC2254
+      case "$f" in $p) inlane=1; break ;; esac
+    done
+    [ -z "$inlane" ] && fail "OUT-OF-LANE $role wrote $f"
+  done
+}
+
+# ---------------------------------------------------------------- ia
+cmd_ia() {
+  local ia=ux/structure/ia.md
+  [ -f "$ia" ] || { fail "NO-IA $ia"; return; }
+  nodes=$(grep -oE '^[[:space:]]*([-*]|#{1,6}|[|])[[:space:]]*\**N[0-9]+(\.[0-9]+)*\b' "$ia" | grep -oE 'N[0-9]+(\.[0-9]+)*' | sort -u)
+  [ -z "$nodes" ] && fail "NO-NODES $ia (sitemap lines must start with a node ID like '- N1.2 …')"
+  for nd in $nodes; do
+    depth=$(echo "$nd" | tr -cd '.' | wc -c | tr -d ' ')
+    [ "$depth" -ge 3 ] && warn "DEEP-NODE $nd (depth $((depth+1)); IA heuristic: ≤3 for primary content)"
+  done
+  for fl in ux/structure/flows/*.md; do
+    [ -f "$fl" ] || continue
+    for ref in $(grep -oE '\bN[0-9]+(\.[0-9]+)*\b' "$fl" | sort -u); do
+      echo "$nodes" | grep -qx "$ref" || fail "UNKNOWN-NODE $fl → $ref (not in $ia)"
+    done
+    dups=$(grep -oE '^[|][[:space:]]*\**FL-[0-9]+\.S[0-9]+' "$fl" | grep -oE 'FL-[0-9]+\.S[0-9]+' | sort | uniq -d)
+    [ -n "$dups" ] && fail "DUPLICATE-STEP $fl: $dups"
+    grep -qE 'FL-[0-9]+\.S[0-9]+' "$fl" || warn "NO-STEP-IDS $fl"
+  done
+}
+
+# ---------------------------------------------------------------- contrast
+contrast_ratio() { # hex hex -> ratio
+  awk -v a="$1" -v b="$2" '
+    function hex(s,   i,c,v){ v=0; s=tolower(s); for(i=1;i<=length(s);i++){ c=index("0123456789abcdef",substr(s,i,1))-1; v=v*16+c } return v }
+    function chan(v){ v=v/255; return (v<=0.04045)? v/12.92 : exp(2.4*log((v+0.055)/1.055)) }
+    function lum(h,   r,g,b){ sub(/^#/,"",h); if(length(h)==3){h=substr(h,1,1) substr(h,1,1) substr(h,2,1) substr(h,2,1) substr(h,3,1) substr(h,3,1)}
+      r=hex(substr(h,1,2)); g=hex(substr(h,3,2)); b=hex(substr(h,5,2)); return 0.2126*chan(r)+0.7152*chan(g)+0.0722*chan(b) }
+    BEGIN{ la=lum(a); lb=lum(b); if(la<lb){t=la;la=lb;lb=t}; printf "%.2f", (la+0.05)/(lb+0.05) }'
+}
+cmd_contrast() {
+  [ $# -ge 2 ] || { echo "usage: skillcloud-check contrast <fg> <bg> [<fg> <bg> ...]"; exit 2; }
+  while [ $# -ge 2 ]; do
+    fg="$1"; bg="$2"; shift 2
+    if ! echo "$fg$bg" | grep -qE '^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$'; then fail "BAD-HEX $fg $bg"; continue; fi
+    r=$(contrast_ratio "$fg" "$bg")
+    if awk -v r="$r" 'BEGIN{exit !(r>=4.5)}'; then ok "$fg on $bg  $r:1  AA text ✓"
+    elif awk -v r="$r" 'BEGIN{exit !(r>=3.0)}'; then warn "LOW-CONTRAST $fg on $bg  $r:1  large text / UI only (≥3:1), fails AA body text"
+    else fail "CONTRAST $fg on $bg  $r:1  fails AA (needs 4.5 text, 3.0 UI)"; fi
+  done
+}
+
+# ---------------------------------------------------------------- tokens
+cmd_tokens() {
+  [ $# -gt 0 ] || { echo "usage: skillcloud-check tokens <file|dir>..."; exit 2; }
+  files=$(find "$@" -type f \( -name '*.html' -o -name '*.css' -o -name '*.tsx' -o -name '*.ts' -o -name '*.jsx' -o -name '*.vue' \) \
+    -not -path '*/node_modules/*' -not -path '*/dist/*' -not -name 'tokens.css' -not -name 'starter-tokens.css' 2>/dev/null)
+  for f in $files; do
+    awk -v F="$f" '
+      # skip token definitions: inside a block whose selector is :root or [data-theme…]
+      /:root|\[data-theme/ { inroot=1 }
+      { line=$0
+        if (!inroot && line !~ /skillcloud-check:ignore/ && line !~ /token-request/) {
+          if (match(line, /#[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]([0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])?([^0-9a-zA-Z_-]|$)/) && line !~ /(href|src|url)\(?=?["'"'"']?#/) print "FAIL RAW-COLOUR " F ":" NR ": " substr(line, RSTART, 8)
+          if (match(line, /(rgb|rgba|hsl|hsla)\(/) && line !~ /var\(/) print "FAIL RAW-COLOUR " F ":" NR ": " substr(line, RSTART, 20)
+          if (match(line, /(margin|padding|gap|top|left|right|bottom|font-size)[a-z-]*:[^;]*[0-9]+px/)) print "FAIL RAW-SPACING " F ":" NR ": " substr(line, RSTART, 40)
+        }
+        if (tolower(line) ~ /lorem ipsum|\btodo\b|\btbd\b|title goes here/) print "FAIL PLACEHOLDER " F ":" NR
+        if (inroot && line ~ /}/) { inroot=0 } }' "$f"
+  done
+}
+
+case "${1:-}" in
+  status) cmd_status ;;
+  trace) shift; run cmd_trace "$@" ;;
+  pii) shift; run cmd_pii "${1:-ux}" ;;
+  signoffs) run cmd_signoffs ;;
+  stale) run cmd_stale ;;
+  lanes) shift; run cmd_lanes "${1:-}" "${2:-}" ;;
+  ia) run cmd_ia ;;
+  contrast) shift; run cmd_contrast "$@" ;;
+  tokens) shift; run cmd_tokens "$@" ;;
+  -h|--help|"") sed -n '2,16p' "$0" ;;
+  *) echo "unknown command: $1 (try --help)"; exit 2 ;;
+esac

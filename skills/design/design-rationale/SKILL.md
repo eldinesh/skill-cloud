@@ -70,7 +70,7 @@ When a decision changes: new entry, old one flips to `superseded by DEC-NN` with
 
 ## Step 4 — Write the artifact
 
-Create or append to `ux/design/rationale.md` — artifact header per PIPELINE.md (`artifact: design-rationale`, `sources:` brief + critiques + discussion notes), `status: draft` while any entry is `proposed`; `reviewed` once the client design lead has seen the log. Newest entries at the top, below the index.
+Create or append to `ux/design/rationale.md` — artifact header per PIPELINE.md (`artifact: design-rationale`, `sources:` brief + critiques + discussion notes), `status: draft` while any entry is `proposed`; `review` once the client design lead has seen the log. Newest entries at the top, below the index.
 
 ## Quality bar
 

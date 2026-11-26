@@ -2,6 +2,18 @@
 
 All notable changes to SkillCloud. Maintainers: bump `VERSION` and add an entry here in the same commit — the self-update prompt reads this file to show "what's new".
 
+## 0.11.0 — 2026-11-26
+
+SkillCloud becomes a design team made of agents, with Claude at its core and people in charge.
+
+- **`/design-lead`** (was `/ux-pipeline`) runs a project through **Frame → Explore → Harden → Ship** (→ Learn). It plans each stage as tickets for one "yes", routes each job to a specialist agent, has an independent checker and real tools challenge every handoff, and stops at every gate for the named person to sign off, overrule or send back. Claude never signs. Every sign-off, overrule and later-stage decision lands in `ux/decisions-log.md`.
+- **The team:** 8 agents (`./setup --agents`): researcher, synthesiser, strategist, information architect, designer, quality reviewer, engineer, checker. Each writes only in its own lane, and the lane is proven after every job.
+- **The board:** every job, gate and human task is a markdown ticket in `ux/team/board/`. Run the frontier, see what waits on you with its question and a recommendation, and open `ux/team/board.html` for a live local board. Each role runs on its own model and effort (`routing.txt`).
+- **The rulebook** (`/project-rulebook`): nine default chapters (evidence, AI experience, states and roles, accessibility, design system, content, code, testing, handoff), each with rules, patterns, decisions, checks, AI instructions and an owner. The code chapter is the engineering constitution for coded deliverables.
+- **New skills:** requirement-call (TRACES), experience-strategy (insight → job → problem → HMW → UX and AI opportunity, plus competitive scan), information-architecture, explore-directions (two directions, realistic offline prototypes with a review bar, with or without a design system), harden-review (role × action × state matrix, rulebook check, feasibility, scans), ship-code (React + TS scaffold with every check, or the client's stack), ship-tickets.
+- **Real tools, not trust:** `skillcloud-check` (verbatim quotes, IDs resolve, identifier sweep, human sign-offs, stale finals, lanes, IA, contrast, tokens) and `skillcloud-board`. Self-tested in CI against a fixture project with planted defects.
+- **Changed:** the framed brief is page one of `/design-brief` (one page, every fact with confidence and source). Status is `draft | review | final`, and only a named person makes something final. `/usability-test-plan` gains a 10-minute direction-test mode. Research pack limits: 1–2 personas, 5–8 jobs. New roles: `engineer`, and a `build` bundle for designers and engineers.
+
 ## 0.10.0 — 2026-06-12
 
 New: `sense-shape-steer` — the agency's framework for AI product UX, as a skill.

@@ -11,7 +11,7 @@ updated: <yyyy-mm-dd>
 
 **Registers in scope:** patient-facing (target: 6th–8th grade) · clinician-facing (glossary shorthand)
 **Glossary version/date used:** <from project-context.md>
-**Review gate:** patient-facing clinical copy requires SME sign-off before `status: reviewed`
+**Review gate:** patient-facing clinical copy requires SME sign-off before `status: review`
 
 ## Copy blocks
 

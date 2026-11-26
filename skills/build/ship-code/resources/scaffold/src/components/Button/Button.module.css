@@ -1,0 +1,14 @@
+.button {
+  min-height: var(--target-min);
+  min-width: var(--target-min);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  border: var(--border-width) solid var(--color-accent);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+.primary { background: var(--color-accent); color: var(--color-text-on-accent); }
+.primary:hover { background: var(--color-accent-hover); }
+.secondary { background: var(--color-surface); color: var(--color-accent); }
+.button:focus-visible { outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-width); }

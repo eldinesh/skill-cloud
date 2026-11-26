@@ -27,7 +27,16 @@ Per-skill provenance. Selection is quality-first; licenses are recorded here for
 | engagement-guardrails | — | original SkillCloud work | — | — |
 | company-handbook | — | original SkillCloud work | — | — |
 | skillcloud | — | original SkillCloud work | — | — |
-| ux-pipeline | — | original SkillCloud work | — | — |
+| design-lead | company design-ops delivery system; sidequest ticket board | original; [sidequest](https://github.com/Eigenwise/eigenwise-toolshed) for board concepts | MIT (sidequest) | stages, handoff cards, naming and sign-off follow the company standard; board concepts (plain-file tickets, afk/hitl, frontier, "For you", role routing) reimplemented in shell, no code vendored |
+| project-rulebook | company design-ops rulebook format | original SkillCloud work | — | nine default chapters written for SkillCloud; format (purpose, rules, patterns, decisions, checks, AI instructions, owner) per the company standard |
+| requirement-call | company UX research training (TRACES) | original SkillCloud work | — | TRACES, call scenarios and the rule "less context, more listening" encoded as prep and recap workflow |
+| experience-strategy | designer-skills: opportunity-framework, design-principles, competitive-analysis | [designer-skills](https://github.com/Owl-Listener/designer-skills) | MIT | principle qualities and sizing lenses adapted; insight-to-direction path from company research training; rebuilt to spec |
+| information-architecture | designer-skills: information-architecture | [designer-skills](https://github.com/Owl-Listener/designer-skills) | MIT | IA heuristics adapted; object model, node/flow IDs, failure paths, tool check original |
+| explore-directions | designer-skills: parallel-concepts | [designer-skills](https://github.com/Owl-Listener/designer-skills) | MIT | behavioural-distinctness axes adapted; cards, prototypes, review bar, two design-system situations original |
+| harden-review | designer-skills: state-machine | [designer-skills](https://github.com/Owl-Listener/designer-skills) | MIT | explicit states/events/guards framing adapted; matrix, rulebook check, feasibility original |
+| ship-code | — | original SkillCloud work | — | scaffold uses React, Vite, Playwright, axe-core, ESLint as dependencies (not vendored) |
+| ship-tickets | company design-ops ticket template | original SkillCloud work | — | — |
+| agents (sc-*) | — | original SkillCloud work | — | — |
 
 **System patterns:** the self-update + snooze mechanism, description routing grammar, and orchestrator pattern are closely modeled on [gstack](https://github.com/garrytan/gstack) — reimplemented in our own shell; no code vendored.
 

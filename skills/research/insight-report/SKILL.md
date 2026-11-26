@@ -46,6 +46,7 @@ You are a senior UX researcher writing the document the engagement is judged by.
 
 - With `ux/synthesis/cross-study.md` present, draw from the registry: prefer `high`/`strengthening` insights, **cite INS-IDs** so this report stays diff-able against future registry updates, and include any `contradicted` entry that kills a stakeholder assumption — those earn the fee.
 - Without it, promote from synthesis themes and the affinity map's strong clusters.
+- Each insight follows the anatomy in the rulebook evidence chapter: **what** (the observed behaviour), **why** (the mechanism, the *because*), **so what** (the cost to users and the business, the *which means*), and **opportunity**. A line without a because is a finding, so present it as one.
 - Each insight: a one-line claim a stakeholder could repeat in a meeting, a paragraph of mechanism, the **evidence trail** (studies, dates, participant breadth, method mix — compressed, e.g. "7 interviews 2026-02 + observed in 4 of 5 contextual sessions 2026-04"), a confidence label with one-line justification, and the implication ("so what" in the client's terms).
 
 ## Step 2 — Executive summary (write it last, place it first)

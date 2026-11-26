@@ -10,7 +10,7 @@ description: |
   "what should the AI do here", "is AI right for this", or "teach me the framework".
   Proactively suggest when a project involves designing an AI feature or experience and its
   role, risks, or success criteria aren't defined yet.
-  Three modes: run, facilitate, learn. Feeds /design-brief; alternate entry to /ux-pipeline. (skillcloud)
+  Three modes: run, facilitate, learn. Feeds /design-brief; alternate entry to /design-lead. (skillcloud)
 ---
 
 ## Preamble (run first)

@@ -2,14 +2,37 @@
 artifact: design-brief
 project: <client codename>
 created_by: skillcloud/design-brief v<VERSION>
-sources: [ux/insight-report.md]
+stage: frame
+sources: [ux/insight-report.md, ux/strategy/experience-strategy.md, ux/intake/calls/<file>.md]
 status: draft
+version: 1
 updated: <yyyy-mm-dd>
 ---
 
 # Design Brief — <client codename>: <effort name>
 
-**Read this first:** every factual claim cites an insight ID (`INS-NN`) or carries `[unvalidated]`. The non-goals list is binding until a DEC entry supersedes it.
+**Read this first:** page one is the framed brief: one page, every fact with a confidence level and a source. Everything below it is detail for longer engagements. The non-goals list is binding until a decision supersedes it.
+
+## The framed brief (one page)
+
+| Section | What goes in |
+|---|---|
+| **Problem** | <one sentence, solution-free> |
+| **Path** | roadmap item: hypothesis "we believe … we'll know when …" · or discovery: question "what makes … hard?" |
+| **Who it's for** | <specific roles, their context and skill level> |
+| **What we know** | <fact> **(high / medium / low)** · <source>, one row per fact |
+| **What we're assuming** | <assumptions Explore will test> (ASM-..) |
+| **Where AI fits** | screen / agent / both / neither, and why (OPP-.., JOB-..) |
+| **Constraints** | <tech, business, regulatory, time> |
+| **Success looks like** | <2–3 outcomes we could observe, each with how it's measured> |
+| **Open questions** | <what we still need from the client, each with who answers> |
+| **Signed off by** | <name, date: written by /design-lead from the person's sign-off, never by an agent> |
+
+Confidence: **high** = two or more independent sources including direct user or client evidence · **medium** = one direct source · **low** = anecdote or AI-inferred, until a person checks.
+
+---
+
+# Detail (longer engagements)
 
 ## Problem statement
 
@@ -68,4 +91,4 @@ updated: <yyyy-mm-dd>
 
 | Date | Reviewer | Outcome |
 |---|---|---|
-| <yyyy-mm-dd> | <client design lead / PM> | <edits captured → status: reviewed> |
+| <yyyy-mm-dd> | <client design lead / PM> | <edits captured → status: review> |

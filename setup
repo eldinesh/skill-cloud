@@ -8,7 +8,9 @@
 #
 # Usage:
 #   ./setup                      interactive role picker
-#   ./setup --role researcher    researcher | designer | both | core
+#   ./setup --role researcher    researcher | designer | engineer | both | core
+#   ./setup --agents             also install the design-team agents (sc-*) into ~/.claude/agents
+#   ./setup --no-agents          skip or remove the design-team agents
 #   ./setup --update             pull latest + relink + mark "just upgraded"
 #   ./setup --uninstall          remove SkillCloud symlinks and repo pointer
 #   ./setup --force              replace non-SkillCloud files occupying our names
@@ -20,12 +22,14 @@ set -u
 REPO_ROOT=$(cd "$(dirname "$0")" && pwd)
 SC_HOME="${SKILLCLOUD_HOME:-$HOME/.skillcloud}"
 SKILLS_DIR="${SKILLCLOUD_SKILLS_DIR:-$HOME/.claude/skills}"
+AGENTS_DIR="${SKILLCLOUD_AGENTS_DIR:-$HOME/.claude/agents}"
 CONFIG="$REPO_ROOT/bin/skillcloud-config"
 
 ROLE=""
 DO_UPDATE="no"
 DO_UNINSTALL="no"
 FORCE="no"
+AGENTS=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -33,7 +37,9 @@ while [ $# -gt 0 ]; do
     --update) DO_UPDATE="yes"; shift ;;
     --uninstall) DO_UNINSTALL="yes"; shift ;;
     --force) FORCE="yes"; shift ;;
-    -h|--help) sed -n '2,16p' "$0"; exit 0 ;;
+    --agents) AGENTS="yes"; shift ;;
+    --no-agents) AGENTS="no"; shift ;;
+    -h|--help) sed -n '2,18p' "$0"; exit 0 ;;
     *) echo "Unknown flag: $1 (try --help)"; exit 1 ;;
   esac
 done
@@ -41,8 +47,9 @@ done
 groups_for_role() {
   case "$1" in
     researcher) echo "core ai research" ;;
-    designer)   echo "core ai design" ;;
-    both)       echo "core ai research design" ;;
+    designer)   echo "core ai design build" ;;
+    engineer)   echo "core ai build" ;;
+    both)       echo "core ai research design build" ;;
     core)       echo "core ai" ;;
     *) echo "" ;;
   esac
@@ -71,6 +78,10 @@ uninstall_all() {
       rm -f "$d"
       removed=$((removed + 1))
     fi
+  done
+  for a in "$AGENTS_DIR"/sc-*.md; do
+    [ -e "$a" ] || [ -L "$a" ] || continue
+    if link_points_to_repo "$a"; then rm -f "$a"; removed=$((removed + 1)); fi
   done
   rm -f "$SC_HOME/repo"
   # Strip the skillcloud section from ~/.claude/CLAUDE.md if present
@@ -112,9 +123,10 @@ if [ -z "$ROLE" ]; then
   echo ""
   echo "Which bundle fits your work?"
   echo "  1) Researcher   (core + research skills)"
-  echo "  2) Designer     (core + design skills)"
-  echo "  3) Both         (core + research + design)"
-  echo "  4) Core only    (handbook, guardrails, pipeline)"
+  echo "  2) Designer     (core + design + build skills)"
+  echo "  3) Both         (core + research + design + build)"
+  echo "  4) Core only    (handbook, guardrails, design lead, rulebook)"
+  echo "  5) Engineer     (core + build skills)"
   if [ -n "$SAVED_ROLE" ]; then
     echo ""
     echo "  [enter] keep current role: $SAVED_ROLE"
@@ -126,6 +138,7 @@ if [ -z "$ROLE" ]; then
     2) ROLE="designer" ;;
     3) ROLE="both" ;;
     4) ROLE="core" ;;
+    5) ROLE="engineer" ;;
     "") ROLE="${SAVED_ROLE:-both}" ;;
     *) echo "Unrecognized choice."; exit 1 ;;
   esac
@@ -133,7 +146,7 @@ fi
 
 SC_GROUPS=$(groups_for_role "$ROLE")
 if [ -z "$SC_GROUPS" ]; then
-  echo "Invalid role: $ROLE (use researcher | designer | both | core)"
+  echo "Invalid role: $ROLE (use researcher | designer | engineer | both | core)"
   exit 1
 fi
 
@@ -198,9 +211,46 @@ for d in "$SKILLS_DIR"/*; do
   fi
 done
 
+# --- Design-team agents ------------------------------------------------------
+# The sc-* subagents (orchestrated by /design-lead) are linked into ~/.claude/agents.
+# They read skills from the repo pointer, so they work with any role. Opt-in once; remembered.
+if [ -z "$AGENTS" ]; then
+  SAVED_AGENTS=$("$CONFIG" get agents)
+  if [ -n "$SAVED_AGENTS" ]; then
+    AGENTS="$SAVED_AGENTS"
+  elif [ -t 0 ] && [ "$DO_UPDATE" != "yes" ]; then
+    printf "Install the design team (8 agents run by /design-lead: researcher, synthesiser, strategist,\ninformation architect, designer, quality reviewer, engineer, checker)? [Y/n] "
+    read -r ans
+    case "$ans" in n|N|no) AGENTS="no" ;; *) AGENTS="yes" ;; esac
+  else
+    AGENTS="no"
+  fi
+fi
+"$CONFIG" set agents "$AGENTS"
+A_LINKED=0
+if [ "$AGENTS" = "yes" ]; then
+  mkdir -p "$AGENTS_DIR"
+  for src in "$REPO_ROOT"/agents/sc-*.md; do
+    [ -f "$src" ] || continue
+    dst="$AGENTS_DIR/$(basename "$src")"
+    if [ -e "$dst" ] || [ -L "$dst" ]; then
+      if link_points_to_repo "$dst" || [ "$FORCE" = "yes" ]; then rm -f "$dst"
+      else echo "  ! skipping agent '$(basename "$src")' — something else already lives at $dst (--force to replace)"; continue; fi
+    fi
+    ln -s "$src" "$dst"
+    A_LINKED=$((A_LINKED + 1))
+  done
+fi
+# prune our agent links that are gone from the repo, or all of them when agents are off
+for a in "$AGENTS_DIR"/sc-*.md; do
+  [ -L "$a" ] || continue
+  link_points_to_repo "$a" || continue
+  if [ "$AGENTS" != "yes" ] || [ ! -f "$REPO_ROOT/agents/$(basename "$a")" ]; then rm -f "$a"; fi
+done
+
 VERSION=$(cat "$REPO_ROOT/VERSION" 2>/dev/null || echo "?")
 echo ""
-echo "SkillCloud v$VERSION — role: $ROLE ($LINKED skills linked, $SKIPPED skipped, $PRUNED pruned)."
+echo "SkillCloud v$VERSION — role: $ROLE ($LINKED skills linked, $SKIPPED skipped, $PRUNED pruned; team agents: $AGENTS, $A_LINKED linked)."
 echo "Skills load in Claude Code and Cowork from ~/.claude/skills. Manage with /skillcloud."
 
 # --- CLAUDE.md section -------------------------------------------------------
@@ -228,6 +278,7 @@ write_claude_md_section() {
     echo "SkillCloud is installed (internal skill system; skills live in ~/.claude/skills and work in Claude Code and Cowork)."
     echo "When a request matches one of these skills, invoke it via the Skill tool. When in doubt, invoke the skill."
     echo "Project material follows the data rules in the project's ux/project-context.md — /engagement-guardrails is the rule."
+    echo "Run a project with /design-lead: it routes work to the design-team agents (when installed), has every handoff checked, and stops at each gate for a named person to sign off. Claude never signs."
     echo "Manage/update with /skillcloud. Per-project routing rules: $REPO_ROOT/docs/ROUTING.md"
     echo ""
     printf "Available skills:"

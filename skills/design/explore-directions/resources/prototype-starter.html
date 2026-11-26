@@ -1,0 +1,186 @@
+<!doctype html>
+<!--
+  SkillCloud prototype starter (Explore). One self-contained file: offline, no CDN, no fetched fonts.
+  Replace the :root block with the project's tokens (or keep the starter tokens), the data with the
+  project's synthetic data, and the screens with the flow's steps. Keep the review bar (CODE-R28).
+  Direction: DIR-? · Flow: FL-01 · Version: 1
+  Example content is the fictional "Deskly" booking tool. Replace all of it.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deskly · Today · DIR-A prototype</title>
+<style>
+:root {
+  --color-bg: #f6f7f9; --color-surface: #ffffff; --color-surface-sunken: #eceef2;
+  --color-border: #d9dde4; --color-border-strong: #8a93a3;
+  --color-text: #161b24; --color-text-muted: #545d6e; --color-text-on-accent: #ffffff;
+  --color-accent: #1f5fd1; --color-accent-hover: #194db0; --color-accent-subtle: #eef4ff; --color-focus: #1f5fd1;
+  --color-success: #1c6b3a; --color-success-subtle: #ecf8f0; --color-warning: #7a4b00; --color-warning-subtle: #fff6e5;
+  --color-danger: #b42323; --color-danger-subtle: #fdeeee; --color-ai: #5b3fc4; --color-ai-subtle: #f3f0ff;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --text-xs: 0.75rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.125rem; --text-xl: 1.375rem;
+  --leading-normal: 1.5; --weight-medium: 500; --weight-bold: 650;
+  --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem; --space-5: 1.5rem; --space-6: 2rem;
+  --radius-sm: 4px; --radius-md: 8px; --radius-lg: 12px; --radius-pill: 999px;
+  --border-width: 1px; --focus-width: 2px; --target-min: 24px; --content-max: 44rem;
+  --shadow-1: 0 1px 2px rgb(22 27 36 / 0.08); --shadow-2: 0 4px 12px rgb(22 27 36 / 0.12);
+  --z-sticky: 10; --z-overlay: 100;
+  --duration-fast: 120ms; --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+@media (prefers-reduced-motion: reduce) { :root { --duration-fast: 0ms; } }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--color-bg); color: var(--color-text); font: var(--text-md)/var(--leading-normal) var(--font-sans); }
+a { color: var(--color-accent); }
+:focus-visible { outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-width); }
+.skip { position: absolute; left: var(--space-2); top: calc(-1 * var(--space-6)); background: var(--color-surface); padding: var(--space-2); }
+.skip:focus { top: var(--space-2); }
+.app-header { background: var(--color-surface); border-bottom: var(--border-width) solid var(--color-border); padding: var(--space-3) var(--space-4); display: flex; gap: var(--space-4); align-items: center; }
+.app-header strong { font-size: var(--text-lg); }
+.app-header nav a { margin-right: var(--space-3); text-decoration: none; color: var(--color-text-muted); }
+.app-header nav a[aria-current="page"] { color: var(--color-text); font-weight: var(--weight-bold); }
+main { max-width: var(--content-max); margin: 0 auto; padding: var(--space-5) var(--space-4) var(--space-6); }
+h1 { font-size: var(--text-xl); margin: 0 0 var(--space-4); }
+.muted { color: var(--color-text-muted); }
+.card { background: var(--color-surface); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-4); box-shadow: var(--shadow-1); }
+.suggestion { border-color: var(--color-ai); background: var(--color-ai-subtle); margin-bottom: var(--space-4); }
+.ai-label { color: var(--color-ai); font-size: var(--text-sm); font-weight: var(--weight-medium); }
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+.row { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); }
+.row .name { font-weight: var(--weight-medium); overflow-wrap: anywhere; }
+.btn { min-height: var(--target-min); min-width: var(--target-min); padding: var(--space-2) var(--space-4); border-radius: var(--radius-sm); border: var(--border-width) solid var(--color-accent); background: var(--color-accent); color: var(--color-text-on-accent); font: inherit; cursor: pointer; }
+.btn:hover { background: var(--color-accent-hover); }
+.btn.secondary { background: var(--color-surface); color: var(--color-accent); }
+.banner { border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); margin-bottom: var(--space-4); }
+.banner.error { background: var(--color-danger-subtle); color: var(--color-danger); }
+.banner.info { background: var(--color-warning-subtle); color: var(--color-warning); }
+.skeleton { height: var(--space-6); border-radius: var(--radius-sm); background: var(--color-surface-sunken); }
+.chip { font-size: var(--text-xs); border: var(--border-width) solid var(--color-border-strong); border-radius: var(--radius-pill); padding: 0 var(--space-2); color: var(--color-text-muted); }
+
+/* Review bar (dev/review only; ?review=off hides it) */
+.review { position: fixed; right: var(--space-3); bottom: var(--space-3); z-index: var(--z-overlay); background: var(--color-surface); border: var(--border-width) solid var(--color-border-strong); border-radius: var(--radius-lg); box-shadow: var(--shadow-2); padding: var(--space-3); font-size: var(--text-sm); display: grid; gap: var(--space-2); }
+.review label { display: flex; justify-content: space-between; gap: var(--space-3); }
+.review .step { font-family: ui-monospace, Menlo, monospace; color: var(--color-text-muted); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<header class="app-header">
+  <strong>Deskly</strong>
+  <nav aria-label="Main"><a href="#" aria-current="page">Book</a><a href="#">My bookings</a><a href="#">Help</a></nav>
+</header>
+
+<main id="main" tabindex="-1">
+  <section data-step="FL-01.S01" aria-labelledby="h-today">
+    <h1 id="h-today">Rooms free today</h1>
+    <div id="screen"></div>
+  </section>
+  <p id="live" class="sr-only" aria-live="polite"></p>
+</main>
+
+<aside class="review" id="review" aria-label="Review controls">
+  <strong>Review</strong>
+  <label>State <select id="r-state"></select></label>
+  <label>Role <select id="r-role"><option value="member">Member</option><option value="admin">Space admin</option></select></label>
+  <label>Data <select id="r-volume"><option value="typical">Typical</option><option value="none">None</option><option value="one">One</option><option value="lots">A lot</option></select></label>
+  <span class="step" id="r-step">FL-01.S01</span>
+</aside>
+
+<script>
+// ---- synthetic data: four volumes (STR-R09). Fictional; replace with the project's codenamed data.
+var ROOMS = [
+  { name: "Juniper", seats: 8, features: ["Screen", "Whiteboard"], free: "until 4:00 pm" },
+  { name: "Harbour View Collaboration Suite (Floor 3, East Wing)", seats: 14, features: ["Screen", "Video"], free: "until 5:30 pm" },
+  { name: "Nook 2", seats: 2, features: [], free: "all afternoon" },
+  { name: "Atlas", seats: 6, features: ["Screen"], free: "3:00 to 3:45 pm" }
+];
+var DATA = {
+  none: [],
+  one: [ROOMS[0]],
+  typical: ROOMS,
+  lots: (function () { var out = []; for (var i = 0; i < 40; i++) { var r = ROOMS[i % ROOMS.length]; out.push({ name: r.name + " " + (i + 1), seats: r.seats, features: r.features, free: r.free }); } return out; })()
+};
+// ---- states this screen has so far (Explore: ready, empty, AI states the card depends on; Harden adds the rest)
+var STATES = ["ready", "loading", "empty", "error", "ai-thinking", "ai-low-confidence", "ai-off"];
+
+var params = new URLSearchParams(location.search);
+var s = { state: params.get("state") || "ready", role: params.get("role") || "member", volume: params.get("volume") || "typical" };
+if (params.get("review") === "off") document.getElementById("review").hidden = true;
+
+function el(tag, attrs, children) {
+  var n = document.createElement(tag);
+  for (var k in (attrs || {})) { if (k === "text") n.textContent = attrs[k]; else n.setAttribute(k, attrs[k]); }
+  (children || []).forEach(function (c) { n.appendChild(c); });
+  return n;
+}
+function roomRow(r) {
+  var meta = r.seats + " seats" + (r.features.length ? " · " + r.features.join(", ") : "") + " · free " + r.free;
+  return el("li", { class: "card row" }, [
+    el("div", {}, [el("div", { class: "name", text: r.name }), el("div", { class: "muted", text: meta })]),
+    el("button", { class: "btn secondary", type: "button", "aria-label": "Book " + r.name, text: "Book" })
+  ]);
+}
+function suggestion(r, low) {
+  if (low) {
+    return el("div", { class: "card suggestion" }, [
+      el("div", { class: "ai-label", text: "Suggested by assistant · not sure which fits" }),
+      el("p", { text: "Two rooms could work for 8 people at 3 pm. Which matters more?" }),
+      el("div", { class: "row" }, [
+        el("button", { class: "btn secondary", type: "button", text: "Juniper · has a screen" }),
+        el("button", { class: "btn secondary", type: "button", text: "Atlas · closer to you" })
+      ])
+    ]);
+  }
+  return el("div", { class: "card suggestion" }, [
+    el("div", { class: "ai-label", text: "Suggested by assistant" }),
+    el("div", { class: "row" }, [
+      el("div", {}, [el("div", { class: "name", text: r.name }), el("div", { class: "muted", text: "Why: fits " + r.seats + ", has a screen, free " + r.free })]),
+      el("button", { class: "btn", type: "button", text: "Book " + r.name })
+    ])
+  ]);
+}
+function render() {
+  var root = document.getElementById("screen"); root.innerHTML = "";
+  var rooms = DATA[s.volume] || DATA.typical;
+  var live = document.getElementById("live");
+  if (s.state === "loading") {
+    root.appendChild(el("p", { class: "muted", text: "Checking which rooms are free…" }));
+    [1, 2, 3].forEach(function () { root.appendChild(el("div", { class: "skeleton", "aria-hidden": "true" })); });
+  } else if (s.state === "error") {
+    root.appendChild(el("div", { class: "banner error", role: "alert" }, [
+      el("strong", { text: "Couldn't load today's rooms. " }),
+      el("span", { text: "Your connection dropped. Rooms you saw a minute ago are below. " }),
+      el("button", { class: "btn secondary", type: "button", text: "Try again" })
+    ]));
+  } else if (s.state === "empty" || rooms.length === 0) {
+    root.appendChild(el("div", { class: "card" }, [
+      el("p", { text: "No rooms are free for the rest of today." }),
+      el("button", { class: "btn secondary", type: "button", text: "See tomorrow morning" })
+    ]));
+  } else {
+    if (s.state === "ai-thinking") { root.appendChild(el("div", { class: "card suggestion" }, [el("span", { class: "ai-label", text: "Assistant is finding the best fit…" })])); live.textContent = "Finding a suggestion"; }
+    else if (s.state === "ai-low-confidence") { root.appendChild(suggestion(rooms[0], true)); live.textContent = "Two suggestions ready"; }
+    else if (s.state !== "ai-off") { root.appendChild(suggestion(rooms[0], false)); live.textContent = "Suggestion ready: " + rooms[0].name; }
+    if (s.role === "admin") root.appendChild(el("div", { class: "banner info" }, [el("span", { text: "3 rooms booked but not checked into. " }), el("a", { href: "#", text: "Review releases" })]));
+    root.appendChild(el("p", { class: "muted", text: rooms.length + (rooms.length === 1 ? " room" : " rooms") + " free · checked 2 min ago" }));
+    var ul = el("ul", { class: "list" }); rooms.forEach(function (r) { ul.appendChild(roomRow(r)); }); root.appendChild(ul);
+  }
+  document.getElementById("r-step").textContent = "FL-01.S01 · " + s.state + " · " + s.role + " · " + s.volume;
+}
+function sync() {
+  var p = new URLSearchParams(location.search); p.set("state", s.state); p.set("role", s.role); p.set("volume", s.volume);
+  history.replaceState(null, "", "?" + p.toString()); render();
+}
+var stateSel = document.getElementById("r-state");
+STATES.forEach(function (st) { stateSel.appendChild(el("option", { value: st, text: st })); });
+stateSel.value = s.state; document.getElementById("r-role").value = s.role; document.getElementById("r-volume").value = s.volume;
+stateSel.onchange = function () { s.state = this.value; sync(); };
+document.getElementById("r-role").onchange = function () { s.role = this.value; sync(); };
+document.getElementById("r-volume").onchange = function () { s.volume = this.value; sync(); };
+render();
+</script>
+</body>
+</html>

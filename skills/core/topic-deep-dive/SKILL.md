@@ -53,7 +53,7 @@ You explain unfamiliar territory to smart people who simply haven't lived in it.
 
 ## Save it for the team
 
-After any Level 2+ explanation, offer to append the topic to `ux/domain-primer.md` (template: `resources/primer-template.md`): the Level 1 explanation, meeting vocabulary, UX implications, and open SME questions. The primer accumulates across the project — the next person onboarding reads it cold and starts ahead. Set `status: draft`; SME answers promote entries to `reviewed`.
+After any Level 2+ explanation, offer to append the topic to `ux/domain-primer.md` (template: `resources/primer-template.md`): the Level 1 explanation, meeting vocabulary, UX implications, and open SME questions. The primer accumulates across the project — the next person onboarding reads it cold and starts ahead. Set `status: draft`; SME answers promote entries to `review`.
 
 ## Handoff
 

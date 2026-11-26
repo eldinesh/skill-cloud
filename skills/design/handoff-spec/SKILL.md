@@ -81,7 +81,7 @@ Two honest lists that prevent silent guessing:
 
 ## Step 8 — Write, then walk through
 
-Write `ux/delivery/handoff-<scope>.md` from `resources/handoff-template.md` — artifact header per PIPELINE.md (`artifact: handoff-spec`, `sources:` the designs, components, rationale, audit, copy), `status: draft`. Then book a 30-minute walkthrough with the eng lead — the questions raised there get folded in, and status flips to `reviewed`. A handoff nobody walked through is a handoff nobody read.
+Write `ux/delivery/handoff-<scope>.md` from `resources/handoff-template.md` — artifact header per PIPELINE.md (`artifact: handoff-spec`, `sources:` the designs, components, rationale, audit, copy), `status: draft`. Then book a 30-minute walkthrough with the eng lead — the questions raised there get folded in, and status flips to `review`. A handoff nobody walked through is a handoff nobody read.
 
 ## Quality bar
 

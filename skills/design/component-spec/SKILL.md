@@ -79,7 +79,7 @@ The section a developer implements from: **role** (native element first; ARIA on
 
 ## Step 8 — Write the artifact
 
-Write `ux/design/components/<name>.md` from `resources/component-spec-template.md` — artifact header per PIPELINE.md (`artifact: component-spec`, `sources:` the Figma link + design system reference), `status: draft`. Status flips to `reviewed` after the client's design system owner has seen it — net-new components and modifications always get that review.
+Write `ux/design/components/<name>.md` from `resources/component-spec-template.md` — artifact header per PIPELINE.md (`artifact: component-spec`, `sources:` the Figma link + design system reference), `status: draft`. Status flips to `review` after the client's design system owner has seen it — net-new components and modifications always get that review.
 
 ## Quality bar
 

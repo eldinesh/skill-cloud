@@ -1,0 +1,128 @@
+/*
+ * SkillCloud starter tokens: neutral, accessible, product-like.
+ * For projects with no design system yet (DSY-R04). Explore runs on these so directions
+ * look like a real product from day one. When a direction is chosen, copy this file to
+ * ux/design/tokens.css, retune primitives to the direction, give it an owner, and keep
+ * the semantic names: code and prototypes only ever use semantic tokens.
+ *
+ * Contrast ratios are computed against the paired surface (verify with
+ * `skillcloud-check contrast <fg> <bg>` after any change).
+ */
+
+:root {
+  /* ---- primitives (never referenced by components) ---- */
+  --gray-0: #ffffff;
+  --gray-50: #f6f7f9;
+  --gray-100: #eceef2;
+  --gray-200: #d9dde4;
+  --gray-400: #8a93a3;
+  --gray-600: #545d6e;
+  --gray-700: #3d4553;
+  --gray-900: #161b24;
+  --blue-50: #eef4ff;
+  --blue-600: #1f5fd1;
+  --blue-700: #194db0;
+  --green-50: #ecf8f0;
+  --green-700: #1c6b3a;
+  --amber-50: #fff6e5;
+  --amber-800: #7a4b00;
+  --red-50: #fdeeee;
+  --red-700: #b42323;
+  --violet-50: #f3f0ff;
+  --violet-700: #5b3fc4;
+
+  /* ---- semantic: colour ---- */
+  --color-bg: var(--gray-50);
+  --color-surface: var(--gray-0);
+  --color-surface-sunken: var(--gray-100);
+  --color-border: var(--gray-200);
+  --color-border-strong: var(--gray-400);         /* 3.1:1 on surface: UI boundaries (≥3:1) */
+  --color-text: var(--gray-900);                  /* 17.3:1 on surface */
+  --color-text-muted: var(--gray-600);            /* 6.6:1 on surface, 6.2:1 on bg */
+  --color-text-on-accent: var(--gray-0);          /* 5.8:1 on accent */
+  --color-accent: var(--blue-600);                /* 5.8:1 on surface: links, primary */
+  --color-accent-hover: var(--blue-700);
+  --color-accent-subtle: var(--blue-50);
+  --color-focus: var(--blue-600);                 /* focus ring, 3:1+ vs surface and bg */
+  --color-success: var(--green-700);              /* 6.5:1 on surface */
+  --color-success-subtle: var(--green-50);
+  --color-warning: var(--amber-800);              /* 7.4:1 on surface */
+  --color-warning-subtle: var(--amber-50);
+  --color-danger: var(--red-700);                 /* 6.6:1 on surface */
+  --color-danger-subtle: var(--red-50);
+  --color-ai: var(--violet-700);                  /* AI-generated marker, 7.1:1 on surface */
+  --color-ai-subtle: var(--violet-50);
+
+  /* ---- semantic: type ---- */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --text-xs: 0.75rem;     /* 12 */
+  --text-sm: 0.875rem;    /* 14 */
+  --text-md: 1rem;        /* 16, body */
+  --text-lg: 1.125rem;    /* 18 */
+  --text-xl: 1.375rem;    /* 22 */
+  --text-2xl: 1.75rem;    /* 28 */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-bold: 650;
+
+  /* ---- semantic: space (4px base) ---- */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  /* ---- semantic: shape, elevation, layers ---- */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+  --border-width: 1px;
+  --focus-width: 2px;
+  --shadow-1: 0 1px 2px rgb(22 27 36 / 0.08);
+  --shadow-2: 0 4px 12px rgb(22 27 36 / 0.12);
+  --z-sticky: 10;
+  --z-overlay: 100;
+  --z-toast: 200;
+  --target-min: 24px;     /* WCAG 2.5.8; set 44px for touch-first/gloved contexts */
+
+  /* ---- semantic: motion ---- */
+  --duration-fast: 120ms;
+  --duration-normal: 200ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --duration-fast: 0ms; --duration-normal: 0ms; }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #0f131a;
+    --color-surface: #161b24;
+    --color-surface-sunken: #0b0e13;
+    --color-border: #2a3140;
+    --color-border-strong: #6b7590;   /* 3.8:1 on surface, 4.1:1 on bg */
+    --color-text: #eef1f6;
+    --color-text-muted: #a9b1bf;
+    --color-text-on-accent: #0b0e13;
+    --color-accent: #7fa8ff;
+    --color-accent-hover: #a3c0ff;
+    --color-accent-subtle: #1a2742;
+    --color-focus: #7fa8ff;
+    --color-success: #6fd394;
+    --color-success-subtle: #12291b;
+    --color-warning: #f2c25c;
+    --color-warning-subtle: #2e2410;
+    --color-danger: #ff8a8a;
+    --color-danger-subtle: #331616;
+    --color-ai: #b9a6ff;
+    --color-ai-subtle: #221b3d;
+  }
+}

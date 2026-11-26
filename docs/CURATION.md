@@ -18,7 +18,7 @@ Best-of-breed wins regardless of source — quality first. Adapted skills are re
 
 ## Bundle caps
 
-core ≤ 6 · research ≤ 12 · design ≤ 12. At the cap: add one, remove one. The cap is the feature — it's what keeps this from becoming the pile it replaced.
+core ≤ 6 · research ≤ 12 · design ≤ 12 · build ≤ 6 · ai ≤ 3. Agents: one per role on the team, and a new role needs a lane in `lanes.txt` and a gate it serves. At the cap: add one, remove one. The cap is the feature — it's what keeps this from becoming the pile it replaced.
 
 ## Lifecycle
 

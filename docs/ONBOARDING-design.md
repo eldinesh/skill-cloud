@@ -18,7 +18,7 @@ Design work in SkillCloud starts where research ends: **`/design-brief` consumes
 - **Delivery:** `/handoff-spec` (Figma-fluent, states enumerated, a11y annotations) → after the build, `/design-qa-checklist` against the spec, not memory.
 - **File discipline:** `/figma-hygiene` sets up or cleans up the Figma file — run it when a project starts and before any handoff.
 
-Lost? `/ux-pipeline` shows where the project stands and what's next. Every skill ends by telling you the next step anyway.
+Lost? `/design-lead` shows where the project stands and what's next. Every skill ends by telling you the next step anyway.
 
 ## The ux/ folder
 

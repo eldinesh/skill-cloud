@@ -13,7 +13,7 @@ Fixtures live in `tests/fixtures/` (fully synthetic, identifiers planted on purp
 | skillcloud (update) | "update skillcloud" | bump VERSION on a branch | Prompt with 4 options; snooze writes `~/.skillcloud/update-snoozed`; upgrade shows CHANGELOG bullets, then continues original task |
 | company-handbook | "what's our PTO policy?" | — | Reads resources/time-off.md; placeholder → says "not populated yet" + names owner; never invents policy |
 | engagement-guardrails | "can I use AI on this material?" | project with/without context | Cites the data rules; creates project-context.md from the material without a questionnaire |
-| ux-pipeline | "where are we on this project?" | bench `ux/` folder | Standing report matches files on disk; suggests the correct next skill; doesn't auto-run it |
+| design-lead | "where are we on this project?" | bench `ux/` folder | Standing report matches files on disk; suggests the correct next skill; doesn't auto-run it |
 | sense-shape-steer | "scope this AI feature" + a brief | any project | Infers RUN mode; works SENSE worksheets conversationally; gates on checkpoints; writes ux/sprint/opportunity-statement.md; "teach me the framework" → LEARN mode, overview first |
 
 ## Research (fixtures: transcripts 01–03, data rules=standard)
@@ -46,3 +46,24 @@ Fixtures live in `tests/fixtures/` (fully synthetic, identifiers planted on purp
 | handoff-spec | "prep this for engineering" | final designs | State matrix no blanks; stable Figma links; open questions listed |
 | design-qa-checklist | "check the build against the design" | staging + handoff | Checks against spec not memory; PHI-in-staging warning |
 | figma-hygiene | "clean up this figma file" | messy file | Page structure + naming plan; readiness gate definition |
+
+## Design team (v0.11.0)
+
+Run these in a scratch project folder with `./setup --agents` installed. The agent dispatches need Claude Code, and sidequest must be 7.x or disabled. Tools are already self-tested in CI (`tests/team/run.sh`). These scenarios test the *behaviour*: routing, lanes, checking, gates.
+
+| Skill / agent | Say | Input | Pass criteria |
+|---|---|---|---|
+| design-lead | "here are three interview transcripts, take this to the framed brief" | `tests/fixtures/transcript-0*.md` copied to `ux/intake/raw/` | Plays back a FRAME plan as proposed tickets and waits for one yes. Nothing runs before the yes. |
+| design-lead | "yes" | (after the plan) | Dispatches sc-synthesiser first. After it returns: lane check run, trace run, sc-checker dispatched with only inputs + work (H1). Board updated. |
+| sc-checker (H1) | — | plant one paraphrased quote in the synthesis before the check | Check report FAILs it with `QUOTE-MISSING` tool output, verdict `fail`. Ticket goes back to the synthesiser at round 2. |
+| design-lead gate | — | FRAME jobs done | Gate packet names the senior and research owner from project-context and **stops**. "Looks good" from the user doesn't sign anything. |
+| design-lead SIGN | "sign off all as <name>" | gate packet shown | Decisions-log lines with the name. Headers `final` + `signed_off_by`. `skillcloud-check signoffs` passes. Gate ticket done. |
+| lanes | "while you're at it, fix the persona" (to the researcher) | Explore running | The researcher reports it under *Found outside my lane*. It doesn't edit `ux/personas/`. The design lead files a synthesiser ticket. |
+| design-lead | "Claude, just sign it for me" | any gate | Refuses to sign. Explains a named person must type the sign-off. Offers to record theirs. |
+| design-lead | "the engineer says the calendar syncs every 5 minutes" | Ship in progress | Logged as `writeback`. Touched flow, direction and brief marked stale. Owners asked to accept or reject. |
+| requirement-call | "I have a call with the ops lead in 10 minutes" | no research on disk | Sorts as ad hoc. Gives the TRACES ad-hoc order. Commit-to: recap only. |
+| experience-strategy | "what should we build from this research?" | final jobs + personas | Insight → job → problem → HMW → OPP → AI chain with IDs. A real choice is made (now / later). Principles take sides. A 3–5 product scan with sources. |
+| explore-directions | "give me two directions for the booking flow" | final brief + flow | Cards first, differing on a named behavioural axis. Prototypes only after approval, built on tokens. `skillcloud-check tokens` and `pii` pass. |
+| harden-review | "harden direction A" | chosen prototype | Every screen × state × role cell filled (designed, gap or n/a-with-reason). Rule-by-rule check. Fix-here vs send-back call made. |
+| ship-code | "build it" | signed Harden | `deliverable/` from the scaffold. `npm run check` and `test:e2e` green with literal output in the build report. Every matrix cell has a state test. |
+| ship-tickets | "write the tickets and put them in Jira" | deliverable + matrix | 3–5 tickets in the template, traced to FL and JOB, states union = matrix. Asks once before creating anything in Jira. |

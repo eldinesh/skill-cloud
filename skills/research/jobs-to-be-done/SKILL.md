@@ -76,6 +76,8 @@ Map the core job's stages end to end — define → locate → prepare → confi
 
 Write `ux/synthesis/jobs-to-be-done.md` from `resources/jtbd-template.md`: artifact header per PIPELINE.md (`artifact: jobs-to-be-done`, `sources:` listing the synthesis inputs), `status: draft`. Order core jobs by **importance × dissatisfaction** (importance from frequency and stakes in evidence; dissatisfaction from pain severity and workaround effort) — that ordering is the skill's opinion, state it plainly.
 
+Give each core job a stable ID (`### JOB-01 — <job>` as its heading). Downstream artifacts (strategy, flows, tickets) cite jobs by ID. Each job carries a confidence level with its evidence (high, medium or low: rulebook evidence chapter, EVD-R05). For a Frame research pack, keep to **5–8 core jobs** (EVD-R16). If the evidence supports more, list the extras under "also seen" and let the research owner decide.
+
 ## Quality bar
 
 - Every job story passes the tests: concrete situation, solution-free motivation, outcome in the performer's terms.

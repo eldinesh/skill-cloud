@@ -9,7 +9,7 @@ updated: <yyyy-mm-dd>
 
 # Figma Conventions — <client codename>
 
-Where the client has existing conventions, theirs win; this document extends, never replaces. Status flips to `reviewed` once the client design lead has agreed to it.
+Where the client has existing conventions, theirs win; this document extends, never replaces. Status flips to `review` once the client design lead has agreed to it.
 
 ## Files
 

@@ -76,7 +76,7 @@ Link/button text meaningful out of context (screen-reader rotor reads labels alo
 
 ## Step 6 — Write the artifact
 
-Write `ux/design/copy/<scope>.md` — artifact header per PIPELINE.md (`artifact: ux-copy`, `sources:` brief, personas, glossary), `status: draft`. Status moves to `reviewed` only after the SME review queue is cleared by the client's clinical reviewer — patient-facing clinical copy ships through SME review, no exceptions.
+Write `ux/design/copy/<scope>.md` — artifact header per PIPELINE.md (`artifact: ux-copy`, `sources:` brief, personas, glossary), `status: draft`. Status moves to `review` only after the SME review queue is cleared by the client's clinical reviewer — patient-facing clinical copy ships through SME review, no exceptions.
 
 ## Quality bar
 

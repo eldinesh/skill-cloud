@@ -68,7 +68,7 @@ For each participant, write `ux/interviews/P<NN>.md` (artifact header per PIPELI
 
 Write or update `ux/synthesis/interview-synthesis.md`:
 
-1. **Themes** (3–7): name, one-paragraph claim, and the evidence line — which participants support it (`P01, P03, P05`), which contradict it. A theme with one supporter is a "signal", not a theme — label it as such.
+1. **Themes** (3–7): name, one-paragraph claim, and the evidence line — which participants support it (`P01, P03, P05`), which contradict it. A theme with one supporter is a "signal", not a theme — label it as such. Themes are **findings** (what happened across people). Promote one to an **insight** only when you can write its *because* and *which means*, tied to a user need and a business goal (rulebook evidence chapter, EVD-R01 to R03). Label each claim's layer and confidence (high, medium or low with its source, EVD-R05).
 2. **Pain point ranking** — by frequency × severity, each row linking back to participant records.
 3. **JTBD signals** — raw job stories spotted ("when …, I want …, so I can …") for /jobs-to-be-done to formalize.
 4. **Coverage check** — if a guide exists: which research questions are answered, partially answered, untouched.

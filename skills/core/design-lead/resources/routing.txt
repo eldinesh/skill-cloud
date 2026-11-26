@@ -1,0 +1,14 @@
+# Routing: which model and effort each role's work runs on. Read by /design-lead at ticket start.
+# A project overrides any line in ux/team/routing.txt (same format). Unlisted roles inherit the session model.
+# Format: <role> <model> <effort>     models: haiku | sonnet | opus | fable    effort: low | medium | high | xhigh | max
+# Rationale: judgment-heavy work (synthesis, strategy, review, checking) runs deep; volume work runs standard.
+# Checkers never run on a lighter model than the producer they check.
+
+researcher             sonnet  medium
+synthesiser            opus    high
+strategist             opus    high
+information-architect  sonnet  high
+designer               opus    medium
+quality-reviewer       opus    high
+engineer               sonnet  high
+checker                opus    high

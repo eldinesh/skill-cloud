@@ -83,6 +83,8 @@ Per `resources/persona-template.md` (worked synthetic example: `resources/exampl
 
 One file per persona at `ux/personas/<slug>.md` (slug from the archetype: `coordinating-nurse.md`): artifact header per PIPELINE.md (`artifact: persona`, `sources:` listing every synthesis artifact used), `status: draft`.
 
+For a Frame research pack: **1–2 personas** (EVD-R16). Every attribute traces to P-codes, and attributes resting on one participant are marked as a signal with low confidence. Nobody said it, so it doesn't go in.
+
 ## Quality bar
 
 - Every attribute carries `(P-codes)` or `[assumption]` — sweep for naked claims before writing.

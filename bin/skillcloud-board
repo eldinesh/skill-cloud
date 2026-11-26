@@ -1,0 +1,222 @@
+#!/bin/bash
+# skillcloud-board: read and render the team board (ux/team/board/*.md tickets).
+#
+#   skillcloud-board summary     counts, what waits on people, the frontier
+#   skillcloud-board frontier    ready + afk tickets whose blockers are done and whose resources are free
+#   skillcloud-board waiting     hitl / needs-you tickets with their question
+#   skillcloud-board list [status]
+#   skillcloud-board html [out]  render a self-contained board page (default ux/team/board.html)
+#
+# Run from the project root (or set SC_PROJECT). Plain files in, plain text or one HTML file out.
+# Compatible with macOS /bin/bash 3.2. No network, no dependencies beyond awk/sed.
+
+set -u
+ROOT="${SC_PROJECT:-$(pwd)}"
+BOARD="$ROOT/ux/team/board"
+
+field() { # field <file> <key> -> raw value (frontmatter only)
+  awk -v k="$2" 'NR==1&&$0=="---"{f=1;next} f&&$0=="---"{exit}
+    f{ if (index($0, k":")==1) { v=substr($0, length(k)+2); sub(/^[ \t]+/,"",v); sub(/[ \t]+#.*$/,"",v); print v; exit } }' "$1"
+}
+list_items() { # "[a, b]" -> one per line
+  echo "$1" | sed 's/^\[//; s/\]$//' | tr ',' '\n' | sed 's/^[ \t]*//; s/[ \t]*$//; s/^"//; s/"$//' | grep -v '^$' || true
+}
+tickets() { ls "$BOARD"/*.md 2>/dev/null || true; }
+status_of() { [ -f "$BOARD/$1.md" ] && field "$BOARD/$1.md" status || echo "missing"; }
+
+need_board() {
+  if [ ! -d "$BOARD" ]; then echo "BOARD: none (no ux/team/board/ in $ROOT)"; exit 0; fi
+}
+
+is_frontier() { # is_frontier <file>
+  local f="$1" st md b u held
+  st=$(field "$f" status); md=$(field "$f" mode)
+  [ "$st" = "ready" ] || return 1
+  [ "$md" = "afk" ] || return 1
+  for b in $(list_items "$(field "$f" blockedBy)"); do
+    [ "$(status_of "$b")" = "done" ] || return 1
+  done
+  for u in $(list_items "$(field "$f" uses)"); do
+    for t in $(tickets); do
+      [ "$t" = "$f" ] && continue
+      [ "$(field "$t" status)" = "doing" ] || continue
+      list_items "$(field "$t" uses)" | grep -qx "$u" && return 1
+    done
+  done
+  return 0
+}
+
+for_you_question() {
+  awk '/^## For you/{f=1;next} /^## /{f=0} f && /\*\*Question:\*\*/{sub(/.*\*\*Question:\*\*[ ]*/,""); print; exit}' "$1"
+}
+
+cmd_list() {
+  need_board
+  local want="${1:-}"
+  for f in $(tickets); do
+    st=$(field "$f" status)
+    [ -n "$want" ] && [ "$st" != "$want" ] && continue
+    printf "%-12s %-10s %-6s %-9s %-22s %s\n" "$(field "$f" id)" "$st" "$(field "$f" mode)" "$(field "$f" stage)" "$(field "$f" role)" "$(field "$f" title)"
+  done
+}
+
+cmd_frontier() {
+  need_board
+  local n=0
+  for f in $(tickets); do
+    if is_frontier "$f"; then
+      printf "%-10s %-22s %-12s %s\n" "$(field "$f" id)" "$(field "$f" role)" "$(field "$f" route)" "$(field "$f" title)"
+      n=$((n + 1))
+    fi
+  done
+  [ "$n" -eq 0 ] && echo "(frontier empty)"
+  return 0
+}
+
+cmd_waiting() {
+  need_board
+  local n=0
+  for f in $(tickets); do
+    st=$(field "$f" status); md=$(field "$f" mode)
+    if { [ "$md" = "hitl" ] && [ "$st" = "ready" ]; } || [ "$st" = "needs-you" ]; then
+      blocked=""
+      for b in $(list_items "$(field "$f" blockedBy)"); do
+        [ "$(status_of "$b")" = "done" ] || blocked="$blocked $b"
+      done
+      [ -n "$blocked" ] && continue
+      q=$(for_you_question "$f")
+      printf "%-12s %-16s %s\n" "$(field "$f" id)" "$(field "$f" role)" "${q:-$(field "$f" title)}"
+      n=$((n + 1))
+    fi
+  done
+  [ "$n" -eq 0 ] && echo "(nothing waits on people)"
+  return 0
+}
+
+cmd_summary() {
+  need_board
+  local s c
+  printf "BOARD %s\n" "$BOARD"
+  for s in proposed ready doing review needs-you done dropped; do
+    c=0
+    for f in $(tickets); do [ "$(field "$f" status)" = "$s" ] && c=$((c + 1)); done
+    [ "$c" -gt 0 ] && printf "  %-10s %d\n" "$s" "$c"
+  done
+  echo "WAITS ON PEOPLE"; cmd_waiting | sed 's/^/  /'
+  echo "FRONTIER"; cmd_frontier | sed 's/^/  /'
+  echo "DOING"; local d=0
+  for f in $(tickets); do
+    if [ "$(field "$f" status)" = "doing" ]; then
+      printf "  %-10s %-22s %s\n" "$(field "$f" id)" "$(field "$f" role)" "$(field "$f" title)"; d=$((d + 1))
+    fi
+  done
+  [ "$d" -eq 0 ] && echo "  (nothing running)"
+  return 0
+}
+
+esc() { sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g' -e 's/"/\&quot;/g'; }
+
+card() { # card <file> <column>
+  local f="$1" id title stage role route st md verdict body q cls
+  id=$(field "$f" id | esc); title=$(field "$f" title | esc); stage=$(field "$f" stage | esc)
+  role=$(field "$f" role | esc); route=$(field "$f" route | esc); st=$(field "$f" status | esc)
+  md=$(field "$f" mode | esc); verdict=$(field "$f" verdict | esc)
+  q=$(for_you_question "$f" | esc)
+  body=$(awk 'NR==1&&$0=="---"{f=1;next} f&&$0=="---"{f=0;b=1;next} b{print}' "$f" | esc)
+  cls="card stage-$stage"
+  [ "$md" = "hitl" ] && cls="$cls hitl"
+  printf '<details class="%s" data-id="%s"><summary><span class="id">%s</span> <span class="title">%s</span>' "$cls" "$id" "$id" "$title"
+  printf '<span class="meta"><span class="chip">%s</span><span class="chip">%s</span>' "$stage" "$role"
+  [ -n "$route" ] && printf '<span class="chip route">%s</span>' "$route"
+  [ -n "$verdict" ] && printf '<span class="chip v-%s">%s</span>' "$verdict" "$verdict"
+  printf '</span>'
+  [ -n "$q" ] && printf '<span class="q">%s</span>' "$q"
+  printf '</summary><pre>%s</pre></details>\n' "$body"
+}
+
+cmd_html() {
+  need_board
+  local out="${1:-$ROOT/ux/team/board.html}" project now
+  project=$(field "$ROOT/ux/project-context.md" project 2>/dev/null)
+  [ -z "$project" ] && project=$(basename "$ROOT")
+  now=$(date '+%Y-%m-%d %H:%M')
+  {
+    cat <<'HEAD'
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+HEAD
+    printf '<title>Team board · %s</title>\n' "$(echo "$project" | esc)"
+    cat <<'CSS'
+<style>
+:root{--bg:#f6f7f9;--surface:#fff;--text:#161b24;--muted:#545d6e;--border:#d9dde4;--accent:#1f5fd1;--you:#7a4b00;--you-bg:#fff6e5;
+--frame:#1f5fd1;--explore:#5b3fc4;--harden:#b42323;--ship:#1c6b3a;--learn:#545d6e;--all:#545d6e}
+@media (prefers-color-scheme:dark){:root{--bg:#0f131a;--surface:#161b24;--text:#eef1f6;--muted:#a9b1bf;--border:#2a3140;--accent:#7fa8ff;--you:#f2c25c;--you-bg:#2e2410;
+--frame:#7fa8ff;--explore:#b9a6ff;--harden:#ff8a8a;--ship:#6fd394;--learn:#a9b1bf;--all:#a9b1bf}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{padding:16px;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline}
+h1{font-size:18px;margin:0}header .muted{color:var(--muted)}
+main{padding:16px;display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));align-items:start}
+section{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px}
+section h2{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:2px 4px 10px}
+section.you{border-color:var(--you);background:var(--you-bg)}section.you h2{color:var(--you)}
+.card{border:1px solid var(--border);border-left:4px solid var(--all);border-radius:8px;background:var(--surface);margin:0 0 8px;padding:8px}
+.card.stage-frame{border-left-color:var(--frame)}.card.stage-explore{border-left-color:var(--explore)}
+.card.stage-harden{border-left-color:var(--harden)}.card.stage-ship{border-left-color:var(--ship)}.card.stage-learn{border-left-color:var(--learn)}
+summary{cursor:pointer;list-style:none}summary::-webkit-details-marker{display:none}
+.id{font:12px ui-monospace,Menlo,monospace;color:var(--muted)}.title{font-weight:600}
+.meta{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.chip{font-size:11px;border:1px solid var(--border);border-radius:999px;padding:1px 7px;color:var(--muted)}
+.v-pass{color:var(--ship)}.v-fail{color:var(--harden)}.v-pass-with-notes{color:var(--you)}
+.q{display:block;margin-top:6px;color:var(--you);font-weight:600}
+pre{white-space:pre-wrap;word-break:break-word;font:12px/1.5 ui-monospace,Menlo,monospace;margin:8px 0 0;max-height:420px;overflow:auto}
+.empty{color:var(--muted);margin:4px}footer{padding:0 16px 16px;color:var(--muted);font-size:12px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style></head><body>
+CSS
+    printf '<header><h1>%s · team board</h1><span class="muted">rendered %s from ux/team/board/ · reloads every 5s (paused while a ticket is open)</span></header>\n<main>\n' "$(echo "$project" | esc)" "$now"
+
+    # Waits on you
+    printf '<section class="you" aria-labelledby="h-you"><h2 id="h-you">Waits on you</h2>\n'
+    local n=0
+    for f in $(tickets); do
+      st=$(field "$f" status); md=$(field "$f" mode); blk=""
+      for b in $(list_items "$(field "$f" blockedBy)"); do [ "$(status_of "$b")" = "done" ] || blk=1; done
+      if { [ "$md" = "hitl" ] && [ "$st" = "ready" ] && [ -z "$blk" ]; } || [ "$st" = "needs-you" ]; then card "$f"; n=$((n+1)); fi
+    done
+    [ "$n" -eq 0 ] && printf '<p class="empty">Nothing waits on you.</p>\n'
+    printf '</section>\n'
+
+    col() { # col <title> <status> [frontier-only]
+      printf '<section aria-label="%s"><h2>%s</h2>\n' "$1" "$1"
+      local c=0
+      for f in $(tickets); do
+        [ "$(field "$f" status)" = "$2" ] || continue
+        [ "$2" = "ready" ] && [ "$(field "$f" mode)" = "hitl" ] && continue
+        card "$f"; c=$((c+1))
+      done
+      [ "$c" -eq 0 ] && printf '<p class="empty">None.</p>\n'
+      printf '</section>\n'
+    }
+    col "Doing" doing
+    col "Ready" ready
+    col "Being checked" review
+    col "Proposed" proposed
+    col "Done" done
+    printf '</main><footer>Tickets are plain files: edit them by hand and the board follows. Gates and fieldwork are people'"'"'s work and are never dispatched.</footer>\n'
+    cat <<'JS'
+<script>
+(function(){var t=setInterval(function(){if(document.querySelector('details[open]'))return;location.reload();},5000);})();
+</script></body></html>
+JS
+  } > "$out"
+  echo "board: $out"
+}
+
+case "${1:-summary}" in
+  summary) cmd_summary ;;
+  frontier) cmd_frontier ;;
+  waiting) cmd_waiting ;;
+  list) shift; cmd_list "${1:-}" ;;
+  html) shift; cmd_html "${1:-}" ;;
+  -h|--help) sed -n '2,11p' "$0" ;;
+  *) echo "unknown command: $1 (try --help)"; exit 1 ;;
+esac

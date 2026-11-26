@@ -97,7 +97,7 @@ The file is handoff-ready when (this is the gate /handoff-spec Step 1 checks):
 - [ ] Dev-mode annotations on; version named or branch pinned for the handoff
 - [ ] Cover status current
 
-If asked to write conventions down, produce `ux/design/figma-conventions.md` from `resources/figma-conventions-template.md` — artifact header per PIPELINE.md, `status: draft`, then `reviewed` once the client design lead agrees (their conventions take precedence where they exist).
+If asked to write conventions down, produce `ux/design/figma-conventions.md` from `resources/figma-conventions-template.md` — artifact header per PIPELINE.md, `status: draft`, then `review` once the client design lead agrees (their conventions take precedence where they exist).
 
 ## Quality bar
 

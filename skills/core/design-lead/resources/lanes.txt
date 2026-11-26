@@ -1,0 +1,56 @@
+# Lanes: which paths each role may write. Read by `skillcloud-check lanes`.
+# Format: <role> <pattern>   (shell case-pattern; * matches across /)
+# A file changed during a job that matches none of the role's patterns fails the handoff.
+# Paths are relative to the project root.
+
+researcher            ux/intake/calls/*
+researcher            ux/research-plan.md
+researcher            ux/interviews/guide.md
+researcher            ux/explore/test-script.md
+researcher            ux/validation/*
+researcher            ux/domain-primer.md
+
+synthesiser           ux/intake/clean/*
+synthesiser           ux/interviews/P*.md
+synthesiser           ux/synthesis/*
+synthesiser           ux/personas/*
+synthesiser           ux/journeys/*
+synthesiser           ux/insight-report.md
+synthesiser           ux/explore/feedback-log.md
+
+strategist            ux/strategy/*
+strategist            ux/design/brief.md
+strategist            ux/sprint/*
+
+information-architect ux/structure/*
+
+designer              ux/explore/directions.md
+designer              ux/explore/*/prototype.html
+designer              ux/explore/*/notes.md
+designer              ux/design/components/*
+designer              ux/design/copy/*
+designer              ux/design/rationale.md
+designer              ux/design/tokens.css
+designer              ux/design/design-system.md
+designer              ux/delivery/handoff-*.md
+
+quality-reviewer      ux/harden/hardening-matrix.md
+quality-reviewer      ux/harden/rulebook-check.md
+quality-reviewer      ux/harden/scans/*
+quality-reviewer      ux/design/critiques/*
+quality-reviewer      ux/design/heuristic-eval.md
+quality-reviewer      ux/design/accessibility-audit.md
+quality-reviewer      ux/delivery/qa-checklist.md
+
+engineer              ux/harden/feasibility.md
+engineer              ux/ship/*
+engineer              deliverable/*
+
+checker               ux/team/checks/*
+
+design-lead           ux/team/*
+design-lead           ux/decisions-log.md
+design-lead           ux/project-context.md
+design-lead           ux/rulebook/*
+design-lead           ux/archive/*
+design-lead           ux/publish/*
