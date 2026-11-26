@@ -150,6 +150,6 @@ Each project picks one or more by the kind of work: a standalone HTML prototype,
 - **Koru's hosted service itself.** The plugin side is done (encryption, share log, publishing call); the service that stores the pages and serves the links is a separate build.
 - **Jira comments promoted to Decisions** automatically. Today a person or Claude opens the Decision with `/koru:decide`.
 - **Coach fading per person across sessions.** The coach style fades within a session only.
-- **A planted-defect fixture set** for every checker. The scoring (`koru eval score`) is built and tested; the fixture projects are not.
+- **Planted-defect fixtures for the other three checkers.** The research checker has one (`tests/koru/evals/frame-meridian`, run with `tools/eval-checker.sh`): 8 of 8 defects found after one fix to the pack.
 - **Role bundles** through plugin user settings, so a researcher sees only the research commands first.
 - **Figma and Jira tool names** are matched by pattern (`figma`, `jira`, `atlassian` plus write verbs). Check them against the connectors the team actually uses.

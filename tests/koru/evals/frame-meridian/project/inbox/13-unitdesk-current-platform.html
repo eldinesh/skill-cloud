@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>UnitDesk - Meridian Health</title>
+<style>
+  body { margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #222; background: #e9ecef; }
+  .note { background: #fff8d6; border-bottom: 1px solid #e0c96b; padding: 8px 12px; font-size: 13px; color: #5a4a00; }
+  .app { width: 1340px; margin: 0 auto; background: #fff; min-height: 760px; border: 1px solid #b8bec6; }
+  .top { background: #2d4a6b; color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; }
+  .top b { font-size: 15px; letter-spacing: .5px; }
+  .top .user { font-size: 11px; }
+  .top .user span { background: #c0392b; padding: 1px 4px; margin-left: 4px; }
+  .nav { background: #dfe4ea; border-bottom: 1px solid #b8bec6; padding: 0 6px; }
+  .nav a { display: inline-block; padding: 6px 10px; color: #1a4d8f; text-decoration: underline; cursor: pointer; }
+  .nav a.on { background: #fff; border: 1px solid #b8bec6; border-bottom: 1px solid #fff; margin-bottom: -1px; color: #000; text-decoration: none; font-weight: bold; }
+  .nav a.off { color: #888; text-decoration: none; cursor: default; }
+  .timeout { background: #fdecea; color: #8a1f11; padding: 4px 10px; border-bottom: 1px solid #f0b8b0; font-size: 11px; }
+  .page { padding: 10px 12px; display: none; }
+  .page.on { display: block; }
+  h2 { font-size: 14px; margin: 4px 0 8px; color: #2d4a6b; }
+  table { border-collapse: collapse; width: 100%; }
+  th { background: #c9d1da; text-align: left; padding: 4px 6px; border: 1px solid #a9b2bd; font-size: 11px; }
+  td { padding: 4px 6px; border: 1px solid #d3d8de; vertical-align: top; }
+  tr:nth-child(even) td { background: #f4f6f8; }
+  .st { color: #555; }
+  .filters { margin-bottom: 8px; }
+  .filters select, .filters input { font-size: 11px; }
+  fieldset { border: 1px solid #b8bec6; margin: 0 0 10px; padding: 8px 10px; width: 640px; }
+  legend { font-weight: bold; color: #2d4a6b; }
+  .row { margin: 6px 0; }
+  .row label { display: inline-block; width: 150px; vertical-align: top; }
+  .row select, .row input, .row textarea { font-size: 12px; }
+  .codes { width: 420px; height: 110px; }
+  .btn { background: linear-gradient(#f9f9f9, #dcdcdc); border: 1px solid #8f8f8f; padding: 3px 12px; font-size: 12px; cursor: pointer; }
+  .btn.new { background: linear-gradient(#3b8ff0, #2F80ED); color: #fff; border: 1px solid #1f6fd9; border-radius: 6px; padding: 6px 14px; font-weight: bold; font-family: "Segoe UI", Arial, sans-serif; }
+  .help { color: #777; font-size: 11px; }
+  .detail td:first-child { width: 160px; background: #eef1f4; font-weight: bold; }
+  .log { border: 1px solid #d3d8de; padding: 6px; background: #fafafa; width: 640px; }
+  .nodata { color: #999; padding: 30px; text-align: center; border: 1px solid #d3d8de; }
+  .sort { color: #1a4d8f; cursor: pointer; }
+  .foot { border-top: 1px solid #b8bec6; padding: 6px 10px; color: #888; font-size: 10px; }
+</style>
+</head>
+<body>
+<div class="note"><b>Brief pack note:</b> this is a mock of Meridian's current tool, UnitDesk, as staff see it today on a 1366 × 768 workstation. Use the links along the top to see each screen. It's illustration only and doesn't save anything.</div>
+
+<div class="app">
+  <div class="top">
+    <b>UnitDesk</b>
+    <div class="user">Meridian North &nbsp;|&nbsp; Logged in as: 4WEST_SHARED <span>SHARED LOGIN</span> &nbsp;|&nbsp; <u>Log out</u></div>
+  </div>
+  <div class="nav">
+    <a class="on" data-p="home">My Requests</a>
+    <a data-p="new">New Request</a>
+    <a data-p="detail">Request Detail</a>
+    <a data-p="approvals">Approvals</a>
+    <a class="off" title="Reports are generated monthly by Operations Technology">Reports</a>
+    <a class="off" title="Not available">Inventory</a>
+  </div>
+  <div class="timeout">Your session will time out after 10 minutes of inactivity. Unsaved requests will be lost.</div>
+
+  <section class="page on" id="home">
+    <h2>My Requests (unit: 4 West)</h2>
+    <div class="filters">Show: <select><option>All</option><option>Submitted</option><option>Closed</option></select> &nbsp; From: <input value="01/08/2026" size="10"> To: <input value="25/11/2026" size="10"> <button class="btn">Go</button></div>
+    <table>
+      <tr><th>Req #</th><th>Date</th><th>Type</th><th>Item</th><th>Qty</th><th>Requested by</th><th>Status</th></tr>
+      <tr><td><a href="#" data-go="detail">UD-88412</a></td><td>25/11/2026 07:42</td><td>Supplies</td><td>DRSG FOAM SIL 10X10</td><td>20</td><td>4WEST_SHARED</td><td class="st">Submitted</td></tr>
+      <tr><td>UD-88409</td><td>25/11/2026 07:40</td><td>Supplies</td><td>DRSG FOAM SIL 10X10</td><td>20</td><td>4WEST_SHARED</td><td class="st">Submitted</td></tr>
+      <tr><td>UD-88377</td><td>25/11/2026 02:11</td><td>Supplies</td><td>iv start kit</td><td>10</td><td>4WEST_SHARED</td><td class="st">Submitted</td></tr>
+      <tr><td>UD-88301</td><td>24/11/2026 16:04</td><td>Equipment</td><td>Bariatric chair</td><td>1</td><td>G.Moreau</td><td class="st">Pending Approval</td></tr>
+      <tr><td>UD-88265</td><td>24/11/2026 11:30</td><td>Other</td><td>walker + oxygen for pt going home tmrw, bed 12</td><td>1</td><td>G.Moreau</td><td class="st">Submitted</td></tr>
+      <tr><td>UD-88210</td><td>24/11/2026 09:15</td><td>Transport</td><td>Discharge transport bed 7</td><td>1</td><td>4WEST_SHARED</td><td class="st">Submitted</td></tr>
+      <tr><td>UD-87954</td><td>21/11/2026 14:02</td><td>Supplies</td><td>GLOVE NITR M</td><td>50</td><td>G.Moreau</td><td class="st">Closed</td></tr>
+      <tr><td>UD-87911</td><td>21/11/2026 10:47</td><td>Supplies</td><td>gloves medium (blue)</td><td>50</td><td>4WEST_SHARED</td><td class="st">Closed</td></tr>
+      <tr><td>UD-81230</td><td>14/08/2026 13:22</td><td>Supplies</td><td>SUCT CAN 1500ML</td><td>12</td><td>G.Moreau</td><td class="st">Submitted</td></tr>
+    </table>
+    <p class="help">Showing 9 of 9 requests. Requests remain "Submitted" until Materials Management updates them.</p>
+  </section>
+
+  <section class="page" id="new">
+    <h2>New Request</h2>
+    <fieldset>
+      <legend>Request details</legend>
+      <div class="row"><label>Request type *</label><select><option>-- Select --</option><option>Supplies</option><option>Equipment</option><option>Transport</option><option>Other</option></select></div>
+      <div class="row"><label>Item *</label><select class="codes" size="7">
+        <option>DRSG FOAM SIL 10X10</option><option>DRSG FOAM SIL 15X15</option><option>DRSG FOAM BORD 10X10</option><option>GLOVE NITR S</option><option>GLOVE NITR M</option><option>GLOVE NITR M XTND CUFF</option><option>GLOVE NITR L</option><option>GLOVE LTX M PF</option><option>IV START KIT STD</option><option>IV START KIT PED</option><option>SUCT CAN 1500ML</option><option>SUCT CAN 3000ML</option><option>... 6,388 more</option>
+      </select><br><span class="help" style="margin-left:154px">Can't find it? Type the item name in "Other details" below.</span></div>
+      <div class="row"><label>Quantity *</label><input size="6"></div>
+      <div class="row"><label>Needed by</label><input size="12" placeholder="dd/mm/yyyy"></div>
+      <div class="row"><label>Urgent?</label><input type="checkbox"> <span class="help">Urgent requests are not prioritised differently.</span></div>
+      <div class="row"><label>Other details</label><textarea rows="3" cols="58"></textarea></div>
+    </fieldset>
+    <fieldset>
+      <legend>Cost centre</legend>
+      <div class="row"><label>Cost centre code *</label><input size="12" value="4W-3310"></div>
+      <div class="row"><label>Approver</label><select><option>J. Patel (Nurse Manager)</option></select> <span class="help">Required for requests over $500</span></div>
+    </fieldset>
+    <button class="btn">Submit</button> <button class="btn">Clear</button>
+    <span style="margin-left:10px">or <button class="btn new">+ New request (beta)</button></span>
+    <p class="help">The beta button opens the same form. It was added in release 3.2 using Meridian UI.</p>
+  </section>
+
+  <section class="page" id="detail">
+    <h2>Request UD-88412</h2>
+    <table class="detail" style="width:640px">
+      <tr><td>Type</td><td>Supplies</td></tr>
+      <tr><td>Item</td><td>DRSG FOAM SIL 10X10</td></tr>
+      <tr><td>Quantity</td><td>20</td></tr>
+      <tr><td>Unit</td><td>4 West, Meridian North</td></tr>
+      <tr><td>Requested by</td><td>4WEST_SHARED</td></tr>
+      <tr><td>Submitted</td><td>25/11/2026 07:42</td></tr>
+      <tr><td>Status</td><td>Submitted</td></tr>
+      <tr><td>Expected delivery</td><td><i class="help">Not available</i></td></tr>
+      <tr><td>Stock on hand</td><td><i class="help">Not available</i></td></tr>
+    </table>
+    <h2 style="margin-top:12px">History</h2>
+    <div class="log">25/11/2026 07:42 - Request created by 4WEST_SHARED</div>
+    <p><button class="btn">Cancel request</button> <button class="btn">Print</button></p>
+    <p class="help">To check progress, call Stores on ext. 4410 (North) or 5120 (Central).</p>
+  </section>
+
+  <section class="page" id="approvals">
+    <h2>Approvals (release 3.2)</h2>
+    <p class="help">Requests over $500 waiting for your approval. Approver: J. Patel (on leave until 03/12). No delegate set.</p>
+    <table style="font-family:'Segoe UI',Arial,sans-serif">
+      <tr><th><input type="checkbox"></th><th class="sort">Date &#9660;</th><th>Req #</th><th>Unit</th><th>Item</th><th>Qty</th><th>Est. cost</th><th>Requested by</th><th></th></tr>
+      <tr><td><input type="checkbox"></td><td>24/11/2026</td><td>UD-88301</td><td>4 West</td><td>Bariatric chair</td><td>1</td><td>$1,240</td><td>G.Moreau</td><td><button class="btn new" style="padding:2px 10px">Approve</button></td></tr>
+      <tr><td><input type="checkbox"></td><td>20/11/2026</td><td>UD-87720</td><td>5 East</td><td>Infusion pump (loan)</td><td>2</td><td>$3,900</td><td>5EAST_SHARED</td><td><button class="btn new" style="padding:2px 10px">Approve</button></td></tr>
+      <tr><td><input type="checkbox"></td><td>18/11/2026</td><td>UD-87502</td><td>4 West</td><td>Pressure mattress</td><td>1</td><td>$2,150</td><td>G.Moreau</td><td><button class="btn new" style="padding:2px 10px">Approve</button></td></tr>
+      <tr><td><input type="checkbox"></td><td>12/11/2026</td><td>UD-86980</td><td>ICU</td><td>Suction regulator</td><td>3</td><td>$870</td><td>ICU_SHARED</td><td><button class="btn new" style="padding:2px 10px">Approve</button></td></tr>
+    </table>
+    <p class="help">Showing 4 of 40. Only the Date column can be sorted. The table overflows on 1366-wide screens.</p>
+    <h2 style="margin-top:14px">Approvals, when there's nothing to approve</h2>
+    <div class="nodata">No data</div>
+  </section>
+
+  <div class="foot">UnitDesk v3.2 &nbsp;|&nbsp; &copy; 2017 Meridian Health Operations Technology &nbsp;|&nbsp; Best viewed in Internet Explorer 11 or Chrome</div>
+</div>
+
+<script>
+  var links = document.querySelectorAll('.nav a[data-p]');
+  function show(p) {
+    document.querySelectorAll('.page').forEach(function (s) { s.classList.toggle('on', s.id === p); });
+    links.forEach(function (a) { a.classList.toggle('on', a.getAttribute('data-p') === p); });
+  }
+  links.forEach(function (a) { a.addEventListener('click', function () { show(a.getAttribute('data-p')); }); });
+  document.querySelectorAll('[data-go]').forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); show(a.getAttribute('data-go')); }); });
+</script>
+</body>
+</html>

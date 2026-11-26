@@ -1,0 +1,47 @@
+{
+ "checker": "research-checker",
+ "fixture": "Meridian Frame, 8 planted defects",
+ "defects": [
+  {
+   "card": "FND-002",
+   "rule": "RC-02",
+   "what": "causal words in a Finding"
+  },
+  {
+   "card": "INS-004",
+   "rule": "RC-05",
+   "what": "high confidence on two prompted participants"
+  },
+  {
+   "card": "PRB-002",
+   "rule": "RC-06",
+   "what": "a stakeholder claim used as proof"
+  },
+  {
+   "card": "HMW-005",
+   "rule": "RC-10",
+   "what": "How-might-we with no Problem"
+  },
+  {
+   "card": "IDE-002",
+   "rule": "RC-12",
+   "what": "client idea with no reverse trace"
+  },
+  {
+   "card": "CON-008",
+   "rule": "RC-08",
+   "what": "conflict settled by majority"
+  },
+  {
+   "card": "INS-002",
+   "rule": "RC-04",
+   "what": "contradicting Finding unlinked"
+  },
+  {
+   "card": "CTX-001",
+   "rule": "RC-11",
+   "what": "Users question unanswered"
+  }
+ ],
+ "stage": "frame"
+}

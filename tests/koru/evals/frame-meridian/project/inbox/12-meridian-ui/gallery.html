@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meridian UI v1.4.2 gallery</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+tailwind.config = { theme: { extend: {
+  colors: {
+    brand: { 50:'#EEF5FE',100:'#D6E7FC',500:'#2F80ED',600:'#1F6FD9',700:'#1858AD' },
+    ink: { 900:'#1A2433',700:'#3D4A5C',500:'#6B7789',300:'#B6BFCC',100:'#EEF1F5' },
+    danger: { 500:'#D64545',50:'#FDEDED' }, warning: { 500:'#E8A33D',50:'#FDF5E7' }
+  },
+  fontFamily: { sans: ['"Source Sans 3"','Segoe UI','Arial','sans-serif'] },
+  borderRadius: { DEFAULT: '6px' }
+}}};
+</script>
+</head>
+<body class="bg-ink-100 font-sans text-ink-900">
+<main class="max-w-3xl mx-auto p-8 space-y-8">
+  <header>
+    <h1 class="text-2xl font-semibold">Meridian UI v1.4.2</h1>
+    <p class="text-sm text-ink-700">Every component that exists in code. If it isn't on this page, it hasn't been built.</p>
+  </header>
+
+  <section class="bg-white border border-ink-100 rounded shadow-sm p-4 space-y-3">
+    <h2 class="font-semibold">Buttons</h2>
+    <div class="flex flex-wrap gap-2">
+      <button class="bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold px-4 py-2 rounded">Submit request</button>
+      <button class="bg-white border border-ink-300 text-ink-900 text-sm font-semibold px-4 py-2 rounded hover:bg-ink-100">Cancel</button>
+      <button class="text-brand-600 text-sm font-semibold px-3 py-2 rounded hover:bg-brand-50">View details</button>
+      <button class="bg-brand-500 text-white text-sm font-semibold px-4 py-2 rounded opacity-50 cursor-not-allowed" disabled>Disabled</button>
+    </div>
+  </section>
+
+  <section class="bg-white border border-ink-100 rounded shadow-sm p-4 space-y-3">
+    <h2 class="font-semibold">Form fields</h2>
+    <div>
+      <label class="block text-sm font-semibold mb-1" for="item">Item</label>
+      <input id="item" class="w-full border border-ink-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" value="DRSG FOAM SIL 10X10">
+    </div>
+    <div>
+      <label class="block text-sm font-semibold mb-1" for="qty">Quantity</label>
+      <input id="qty" class="w-full border border-danger-500 rounded px-3 py-2 text-sm" aria-invalid="true">
+      <p class="text-xs text-danger-500 mt-1">Enter a quantity</p>
+    </div>
+    <div>
+      <label class="block text-sm font-semibold mb-1" for="type">Request type</label>
+      <select id="type" class="w-full border border-ink-300 rounded px-3 py-2 text-sm bg-white"><option>Supplies</option><option>Equipment</option><option>Transport</option><option>Other</option></select>
+    </div>
+    <label class="flex items-center gap-2 text-sm"><input type="checkbox" class="h-4 w-4 accent-brand-500"> Urgent</label>
+    <label class="flex items-center gap-2 text-sm"><input type="radio" name="d" class="h-4 w-4 accent-brand-500" checked> Next round</label>
+  </section>
+
+  <section class="bg-white border border-ink-100 rounded shadow-sm p-4 space-y-3">
+    <h2 class="font-semibold">Tabs and avatar</h2>
+    <div class="flex border-b border-ink-100 text-sm">
+      <button class="px-4 py-2 border-b-2 border-brand-500 text-brand-600 font-semibold">Open</button>
+      <button class="px-4 py-2 text-ink-500">Closed</button>
+    </div>
+    <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-brand-700 text-xs font-semibold">GM</span>
+  </section>
+
+  <section class="space-y-2">
+    <h2 class="font-semibold">Alerts</h2>
+    <div class="bg-warning-50 border-l-4 border-warning-500 text-sm p-3">Delivery rounds are at 10:00 and 16:00.</div>
+    <div class="bg-danger-50 border-l-4 border-danger-500 text-sm p-3">Something went wrong.</div>
+  </section>
+
+  <section class="space-y-2">
+    <h2 class="font-semibold">Modal</h2>
+    <div class="bg-ink-900/40 rounded p-6 flex justify-center">
+      <div class="bg-white rounded shadow-lg w-full max-w-md p-6">
+        <h3 class="text-lg font-semibold mb-2">Cancel this request?</h3>
+        <p class="text-sm text-ink-700 mb-6">Materials will stop working on it.</p>
+        <div class="flex justify-end gap-2">
+          <button class="bg-white border border-ink-300 text-sm font-semibold px-4 py-2 rounded">Keep request</button>
+          <button class="bg-brand-500 text-white text-sm font-semibold px-4 py-2 rounded">Cancel request</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

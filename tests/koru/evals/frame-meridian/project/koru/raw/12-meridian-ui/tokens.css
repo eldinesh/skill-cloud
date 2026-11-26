@@ -1,0 +1,18 @@
+/* Meridian UI v1.4.2: colour tokens. No spacing or type tokens exist. */
+:root {
+  --brand-50: #EEF5FE;
+  --brand-100: #D6E7FC;
+  --brand-500: #2F80ED;
+  --brand-600: #1F6FD9;
+  --brand-700: #1858AD;
+  --ink-900: #1A2433;
+  --ink-700: #3D4A5C;
+  --ink-500: #6B7789;
+  --ink-300: #B6BFCC;
+  --ink-100: #EEF1F5;
+  --danger-500: #D64545;
+  --danger-50: #FDEDED;
+  --warning-500: #E8A33D;
+  --warning-50: #FDF5E7;
+  /* --success-*: not defined */
+}
