@@ -3,6 +3,7 @@
 SkillCloud runs a project as a design team made of agents, with Claude at its core and people in charge. Claude does the depth and the volume: every state, every source line, every rule checked on every screen. People keep the judgement: framing, accepting evidence, choosing a direction, passing the rules, agreeing feasibility, signing off.
 
 ```
+/skillcloud:start     in any folder: sets it up from whatever material is there and proposes the first plan
 /design-lead          "where are we?" · "take this to the brief" · "run Explore" · "sign off the pack as Ben Ito"
 ```
 
@@ -104,4 +105,4 @@ Without the plugin, `./setup --agents` installs the same skills and agents from 
 
 - **Claude Code**: full team mode.
 - **Cowork, claude.ai, or no agents**: `/design-lead` runs inline. It works each role itself, from the same agent files, in lane, and runs the checker as a separate cold pass. Gate packets say the check wasn't independent.
-- **sidequest 3.x installed alongside**: its hook refuses agent launches it didn't dispatch. Disable it in projects where you run the team, or update it to 7.x.
+- **sidequest alongside**: 7.x coexists. It re-routes only its own and the generic built-in agents, and leaves the `sc-*` agents on the model `/design-lead` gives them. The older 3.x refused agent launches it didn't dispatch, so update it.

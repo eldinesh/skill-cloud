@@ -1,0 +1,138 @@
+#!/bin/bash
+# skillcloud-init: turn the current folder into a SkillCloud project. Safe to re-run (idempotent).
+#
+#   skillcloud-init            create the ux/ structure, keystone files and the project's rulebook
+#   skillcloud-init --import   also copy loose material in this folder (pdf, docx, md, txt, csv, images, …)
+#                              into ux/intake/raw/. Originals are left where they are.
+#   skillcloud-init --name X   project name (default: the folder's name)
+#
+# Prints one line per action (CREATED / EXISTS / IMPORTED / SKIPPED) and a NEXT line.
+# Compatible with macOS /bin/bash 3.2. No network.
+
+set -u
+REPO="$(cd "$(dirname "$0")/.." && pwd)"
+VERSION=$(cat "$REPO/VERSION" 2>/dev/null || echo "?")
+TODAY=$(date '+%Y-%m-%d')
+IMPORT="no"
+NAME=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --import) IMPORT="yes"; shift ;;
+    --name) NAME="${2:-}"; shift 2 ;;
+    -h|--help) sed -n '2,10p' "$0"; exit 0 ;;
+    *) echo "unknown option: $1"; exit 2 ;;
+  esac
+done
+
+here=$(pwd)
+if [ "$here" = "$HOME" ] || [ "$here" = "/" ] || [ "$here" = "$HOME/Desktop" ] || [ "$here" = "$HOME/Downloads" ] || [ "$here" = "$HOME/Documents" ]; then
+  echo "STOP this is $here, not a project folder. Make or open one folder per project, then run this inside it."
+  exit 3
+fi
+[ -z "$NAME" ] && NAME=$(basename "$here")
+
+made() { if [ -e "$1" ]; then echo "EXISTS  $1"; return 1; fi; return 0; }
+
+# 1. structure
+for d in ux/intake/raw ux/intake/clean ux/intake/calls ux/team/board ux/team/checks ux/team/gates ux/team/handoffs ux/rulebook ux/archive ux/publish; do
+  if [ -d "$d" ]; then :; else mkdir -p "$d" && echo "CREATED $d/"; fi
+done
+
+# 2. keystone files (filled from templates; the skill fills the inferred fields next)
+fill() { # fill <template> <dest>
+  sed -e "s/<project name or codename>/$NAME/g" -e "s/<project name>/$NAME/g" -e "s/<project>/$NAME/g" -e "s/<VERSION>/$VERSION/g" \
+      -e "s/<yyyy-mm-dd>/$TODAY/g" "$1" > "$2"
+}
+if made ux/project-context.md; then
+  fill "$REPO/skills/core/engagement-guardrails/resources/project-context-template.md" ux/project-context.md
+  echo "CREATED ux/project-context.md (name: $NAME, every other field still to infer from the material)"
+fi
+if made ux/decisions-log.md; then
+  fill "$REPO/skills/core/design-lead/resources/decisions-log-template.md" ux/decisions-log.md
+  # keep the header and the table head; drop the example rows
+  awk '/^\| D-00[0-9] /{next} {print}' ux/decisions-log.md > ux/decisions-log.md.tmp && mv ux/decisions-log.md.tmp ux/decisions-log.md
+  echo "CREATED ux/decisions-log.md"
+fi
+if made ux/team/ledger.md; then
+  fill "$REPO/skills/core/design-lead/resources/ledger-template.md" ux/team/ledger.md
+  awk '/^\| J-001 /{next} {print}' ux/team/ledger.md > ux/team/ledger.md.tmp && mv ux/team/ledger.md.tmp ux/team/ledger.md
+  echo "CREATED ux/team/ledger.md"
+fi
+
+# 3. the project's rulebook: default chapters as drafts until an owner adapts and signs them
+n=0
+for c in "$REPO"/skills/core/project-rulebook/resources/chapters/*.md; do
+  dst="ux/rulebook/$(basename "$c")"
+  [ -e "$dst" ] && continue
+  sed -e "s/^project: SkillCloud default/project: $NAME/" -e 's/^status: final/status: draft/' \
+      -e 's/^owner: .*/owner: <unassigned>/' -e "s/^updated: .*/updated: $TODAY/" \
+      -e "s#^created_by: .*#created_by: skillcloud/project-rulebook v$VERSION (seeded from the defaults)#" "$c" > "$dst"
+  n=$((n + 1))
+done
+[ "$n" -gt 0 ] && echo "CREATED ux/rulebook/ ($n default chapters, draft, owners unassigned)"
+if made ux/rulebook/index.md; then
+  {
+    echo "---"; echo "artifact: rulebook-index"; echo "project: $NAME"
+    echo "created_by: skillcloud/project-rulebook v$VERSION"; echo "sources: []"; echo "status: draft"; echo "updated: $TODAY"; echo "---"
+    echo ""; echo "# Rulebook · $NAME"; echo ""
+    echo "Only final artifacts are context. Names: <project>-<stage>-<artifact>-v<n>-<status>. Agents load only the chapters their job needs."
+    echo ""; echo "| Chapter | Owner | Status | Loaded by |"; echo "|---|---|---|---|"
+    for c in ux/rulebook/*.md; do
+      [ "$(basename "$c")" = "index.md" ] && continue
+      ab=$(awk '/^applies_to:/{sub(/^applies_to: */,""); print; exit}' "$c")
+      echo "| $(basename "$c" .md) | <unassigned> | draft | $ab |"
+    done
+  } > ux/rulebook/index.md
+  echo "CREATED ux/rulebook/index.md"
+fi
+
+# 4. material in the folder → ux/intake/raw (copies; originals untouched)
+if [ "$IMPORT" = "yes" ]; then
+  k=0; sk=0
+  for f in *; do
+    [ -f "$f" ] || continue
+    case "$f" in CLAUDE.md|AGENTS.md|.*) continue ;; esac
+    ext=$(echo "${f##*.}" | tr 'A-Z' 'a-z')
+    case "$ext" in
+      pdf|doc|docx|md|txt|rtf|csv|tsv|xls|xlsx|ppt|pptx|key|pages|json|html|htm|vtt|srt|png|jpg|jpeg|gif|webp|fig|mp3|m4a|wav|mp4|mov)
+        if [ -e "ux/intake/raw/$f" ]; then echo "SKIPPED $f (already in ux/intake/raw/)"; sk=$((sk + 1))
+        else cp -p "$f" "ux/intake/raw/$f" && echo "IMPORTED $f"; k=$((k + 1)); fi ;;
+    esac
+  done
+  # folders of material one level down (e.g. "transcripts/", "brief/"), never ux/ or code folders
+  for d in */; do
+    d=${d%/}
+    case "$d" in ux|deliverable|node_modules|.git|dist|build|src) continue ;; esac
+    [ -d "$d" ] || continue
+    if [ -e "ux/intake/raw/$d" ]; then echo "SKIPPED $d/ (already in ux/intake/raw/)"; sk=$((sk + 1))
+    else cp -Rp "$d" "ux/intake/raw/$d" && echo "IMPORTED $d/"; k=$((k + 1)); fi
+  done
+  [ "$k" -eq 0 ] && [ "$sk" -eq 0 ] && echo "IMPORTED nothing (no material files found here; add them to ux/intake/raw/ any time)"
+fi
+
+# 5. raw material stays out of git
+if git rev-parse --git-dir >/dev/null 2>&1; then
+  ex="$(git rev-parse --git-dir)/info/exclude"
+  if ! grep -qxF "ux/intake/raw/" "$ex" 2>/dev/null; then
+    mkdir -p "$(dirname "$ex")"; echo "ux/intake/raw/" >> "$ex"; echo "CREATED git exclude for ux/intake/raw/ (raw material never gets committed)"
+  fi
+fi
+
+# 6. project CLAUDE.md: tell any session this folder is a SkillCloud project
+MARK_S="<!-- SKILLCLOUD_PROJECT_START -->"
+MARK_E="<!-- SKILLCLOUD_PROJECT_END -->"
+if ! grep -qF "$MARK_S" CLAUDE.md 2>/dev/null; then
+  {
+    [ -s CLAUDE.md ] && echo ""
+    echo "$MARK_S"
+    echo "## SkillCloud project"
+    echo ""
+    echo "This folder is a SkillCloud project. Its memory is \`ux/\`: start from \`ux/project-context.md\` (it outranks chat memory) and the board in \`ux/team/board/\`."
+    echo "Run work through /skillcloud:design-lead (\"where are we\", \"what's next\"). It routes jobs to the design team and stops at each gate for the named person."
+    echo "Only final artifacts are inputs. Claude never signs: sign-offs are typed by the named person and recorded in \`ux/decisions-log.md\`."
+    echo "$MARK_E"
+  } >> CLAUDE.md
+  echo "CREATED CLAUDE.md section (SkillCloud project pointer)"
+fi
+
+echo "NEXT    fill ux/project-context.md from the material, then /skillcloud:design-lead proposes the first plan"

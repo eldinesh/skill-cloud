@@ -12,7 +12,15 @@ if [ -n "$ROOT" ] && [ -d "$ROOT/skills" ]; then
     [ "$cur" = "$ROOT" ] || { rm -f "$SC/repo" 2>/dev/null; ln -s "$ROOT" "$SC/repo" 2>/dev/null; }
   fi
 fi
-[ -f ux/project-context.md ] || exit 0
+if [ ! -f ux/project-context.md ]; then
+  # a folder with material but no SkillCloud setup: one quiet line, nothing else
+  case "$(pwd)" in "$HOME"|"/"|"$HOME/Desktop"|"$HOME/Downloads"|"$HOME/Documents") exit 0 ;; esac
+  [ -d .git ] && [ -f package.json ] && exit 0      # a code repo, not a project folder
+  if ls *.pdf *.docx *.doc *.pptx *.xlsx *.md *.txt *.vtt 2>/dev/null | grep -qv '^CLAUDE.md$'; then
+    echo "SkillCloud: this folder has project material but isn't set up. /skillcloud:start sets it up and proposes the first plan."
+  fi
+  exit 0
+fi
 B="$SC/repo/bin/skillcloud-board"
 if [ -d ux/team/board ] && [ -x "$B" ]; then
   waiting=$("$B" waiting 2>/dev/null | grep -v '^(nothing' | head -5)

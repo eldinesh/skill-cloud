@@ -11,6 +11,8 @@ Internal skill system for UX work. One repo, versioned, curated — research and
 /plugin install skillcloud@skill-cloud
 ```
 
+Then open (or create) a folder for the project, start Claude Code in it, and run `/skillcloud:start`. It sets everything up from whatever material is in the folder and proposes the first plan.
+
 Trying a branch or a local checkout: `/plugin marketplace add ~/Developer/SkillCloud`, then the same install. Update with `/plugin update skillcloud`.
 
 **As a clone + setup** (Cowork, claude.ai skill uploads, or no plugin support): use one install method, not both, or every skill appears twice.

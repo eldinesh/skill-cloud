@@ -32,7 +32,7 @@ ls -d "$HOME"/.claude/plugins/cache/eigenwise-toolshed/sidequest/3.* >/dev/null 
 
 - If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `~/.skillcloud/repo/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
 - If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `~/.skillcloud/repo/CHANGELOG.md` in 3–5 bullets. Then continue.
-- If `PROJECT_CONTEXT: missing`: this is step zero. Run the **engagement-guardrails** setup first: read `~/.skillcloud/repo/skills/core/engagement-guardrails/SKILL.md` and follow "Setting up a project".
+- If `PROJECT_CONTEXT: missing`: this is a fresh folder. Run the start flow in `~/.skillcloud/repo/commands/start.md` (it sets up `ux/`, imports the material, fills the keystone, then comes back here to Step 1). The person never builds the structure by hand.
 - If `TEAM_AGENTS: missing`: run in **inline mode** (Step 4b) and say so in one line. Installing the plugin (`/plugin install skillcloud@skill-cloud`) or `./setup --agents` adds the team.
 - If `SIDEQUEST: 3.x present` and the plugin is enabled, its PreToolUse hook denies agent launches that didn't come from its own dispatch, so `sc-*` dispatches will be refused. Say so once. The fix is updating sidequest to 7.x, which keeps other agent types' own models. Until then, run in inline mode. Never try to bypass another plugin's hook.
 
