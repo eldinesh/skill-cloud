@@ -1,0 +1,175 @@
+#!/bin/bash
+# skillcloud-history: version control for everything a SkillCloud project produces (ux/ and deliverable/).
+# A private history in ux/.history: it never touches a git repository the folder may already be in,
+# and nobody has to know git. Every job, sign-off and decision is an event; nothing is ever rewritten.
+#
+#   skillcloud-history init                        start the history (idempotent); first event "Project started"
+#   skillcloud-history record --kind K --title T [--ticket ID] [--stage S] [--actor WHO] [--detail D]
+#                             [--chose X --over Y]   record an event with whatever changed since the last one
+#   skillcloud-history checkpoint                  record unrecorded changes, if any (safety net after each turn)
+#   skillcloud-history log [--json]                every event, oldest first
+#   skillcloud-history show <version>              one event: what, who, when, files changed
+#   skillcloud-history versions <path>             every version of one file
+#   skillcloud-history restore <version> <path>    bring an earlier version back, recorded as a new event
+#
+# Kinds: start plan job check gate decision writeback send-back override restore release checkpoint
+# Run from the project root (or set SC_PROJECT). Compatible with macOS /bin/bash 3.2.
+
+set -u
+IFS=$'\n'
+ROOT="${SC_PROJECT:-$(pwd)}"
+cd "$ROOT" || exit 2
+GD="ux/.history"
+g() { git --git-dir="$GD" --work-tree=. -c core.quotePath=false "$@"; }
+
+need() { [ -d "$GD" ] || { echo "No history yet: run 'skillcloud-history init' (or /skillcloud:start)."; exit 3; }; }
+
+paths() { # what the history tracks, only if present
+  [ -d ux ] && echo ux
+  [ -d deliverable ] && echo deliverable
+  return 0
+}
+
+stage_all() {
+  local p; p=$(paths)
+  [ -z "$p" ] && return 0
+  # shellcheck disable=SC2086
+  g add -A -- $p >/dev/null 2>&1
+}
+
+cmd_init() {
+  command -v git >/dev/null 2>&1 || { echo "git is not installed: version history is off for this project."; exit 4; }
+  mkdir -p ux
+  if [ ! -d "$GD" ]; then
+    git init -q --bare "$GD" 2>/dev/null || git init -q "$GD"
+    g config core.bare false
+    g config user.name "SkillCloud"
+    g config user.email "history@skillcloud.local"
+    g config commit.gpgsign false
+    mkdir -p "$GD/info"
+    cat > "$GD/info/exclude" <<'EOF'
+/ux/.history/
+/ux/intake/raw/
+/ux/team/board.html
+/ux/team/.dispatch-*
+node_modules/
+dist/
+test-results/
+playwright-report/
+.DS_Store
+EOF
+    # a git repository the folder is already in must not pick up the history itself
+    if git rev-parse --git-dir >/dev/null 2>&1; then
+      ex="$(git rev-parse --git-dir)/info/exclude"
+      grep -qxF "ux/.history/" "$ex" 2>/dev/null || echo "ux/.history/" >> "$ex"
+    fi
+    stage_all
+    g commit -q --allow-empty -m "Project started" -m "SC-Kind: start
+SC-Stage: frame
+SC-Actor: ${SC_ACTOR:-SkillCloud}" >/dev/null
+    echo "CREATED ux/.history (version history: every job, sign-off and decision is kept)"
+  fi
+}
+
+cmd_record() {
+  need
+  local kind="" title="" ticket="" stage="" actor="${SC_ACTOR:-}" detail="" chose="" over=""
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --kind) kind="$2"; shift 2 ;; --title) title="$2"; shift 2 ;; --ticket) ticket="$2"; shift 2 ;;
+      --stage) stage="$2"; shift 2 ;; --actor) actor="$2"; shift 2 ;; --detail) detail="$2"; shift 2 ;;
+      --chose) chose="$2"; shift 2 ;; --over) over="$2"; shift 2 ;;
+      *) echo "unknown option: $1"; exit 2 ;;
+    esac
+  done
+  [ -n "$kind" ] && [ -n "$title" ] || { echo "usage: record --kind K --title T [...]"; exit 2; }
+  stage_all
+  local trailers="SC-Kind: $kind"
+  [ -n "$ticket" ] && trailers="$trailers
+SC-Ticket: $ticket"
+  [ -n "$stage" ] && trailers="$trailers
+SC-Stage: $stage"
+  [ -n "$actor" ] && trailers="$trailers
+SC-Actor: $actor"
+  [ -n "$chose" ] && trailers="$trailers
+SC-Chose: $chose"
+  [ -n "$over" ] && trailers="$trailers
+SC-Over: $over"
+  if [ -n "$detail" ]; then
+    g commit -q --allow-empty -m "$title" -m "$detail" -m "$trailers" >/dev/null
+  else
+    g commit -q --allow-empty -m "$title" -m "$trailers" >/dev/null
+  fi
+  echo "RECORDED $(g rev-parse --short HEAD) $kind: $title"
+}
+
+cmd_checkpoint() {
+  [ -d "$GD" ] || exit 0
+  stage_all
+  g diff --cached --quiet && exit 0
+  local n; n=$(g diff --cached --name-only | wc -l | tr -d ' ')
+  g commit -q -m "Unrecorded changes ($n file$( [ "$n" = 1 ] || echo s))" -m "SC-Kind: checkpoint" >/dev/null
+  echo "RECORDED $(g rev-parse --short HEAD) checkpoint: $n file(s)"
+}
+
+json_escape() { # stdin -> JSON string body
+  awk 'BEGIN{ORS=""} { gsub(/\\/,"\\\\"); gsub(/"/,"\\\""); gsub(/\t/,"\\t"); gsub(/\r/,""); gsub(/<\//,"<\\/"); if (NR>1) print "\\n"; print }'
+}
+
+cmd_log() {
+  need
+  local json="no"; [ "${1:-}" = "--json" ] && json="yes"
+  local fmt='%H%x1f%h%x1f%aI%x1f%s%x1f%(trailers:key=SC-Kind,valueonly,separator=)%x1f%(trailers:key=SC-Ticket,valueonly,separator=)%x1f%(trailers:key=SC-Stage,valueonly,separator=)%x1f%(trailers:key=SC-Actor,valueonly,separator=)%x1f%(trailers:key=SC-Chose,valueonly,separator=)%x1f%(trailers:key=SC-Over,valueonly,separator=)'
+  if [ "$json" = "no" ]; then
+    g log --reverse --format="$fmt" | awk -F'\037' '{ printf "%s  %s  %-10s %-10s %s%s\n", $2, substr($3,1,16), $5, $6, $4, ($8!=""?"  ("$8")":"") }'
+    return
+  fi
+  printf '['
+  local first=1 line h
+  for line in $(g log --reverse --format="$fmt"); do
+    h=${line%%$'\037'*}
+    local body files
+    body=$(g log -1 --format=%b "$h" | grep -v '^SC-[A-Za-z]*:' | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}' | json_escape)
+    files=$(g show --format= --name-status "$h" -- 2>/dev/null | head -40 | awk -F'\t' 'BEGIN{ORS=""; n=0} NF>=2 { gsub(/\\/,"\\\\",$NF); gsub(/"/,"\\\"",$NF); if (n++) print ","; print "{\"s\":\"" substr($1,1,1) "\",\"p\":\"" $NF "\"}" }')
+    [ $first -eq 1 ] || printf ','
+    first=0
+    printf '%s' "$line" | awk -F'\037' -v body="$body" -v files="$files" '
+      function q(s) { gsub(/\\/,"\\\\",s); gsub(/"/,"\\\"",s); gsub(/<\//,"<\\/",s); return "\"" s "\"" }
+      { printf "{\"id\":%s,\"short\":%s,\"at\":%s,\"title\":%s,\"kind\":%s,\"ticket\":%s,\"stage\":%s,\"actor\":%s,\"chose\":%s,\"over\":%s,\"detail\":\"%s\",\"files\":[%s]}",
+          q($1), q($2), q($3), q($4), q($5==""?"checkpoint":$5), q($6), q($7), q($8), q($9), q($10), body, files }'
+  done
+  printf ']\n'
+}
+
+cmd_show() {
+  need; [ -n "${1:-}" ] || { echo "usage: show <version>"; exit 2; }
+  g show --stat --format='%h  %aI%n%s%n%n%b' "$1"
+}
+
+cmd_versions() {
+  need; [ -n "${1:-}" ] || { echo "usage: versions <path>"; exit 2; }
+  g log --format='%h  %aI  %s' --follow -- "$1"
+}
+
+cmd_restore() {
+  need
+  local ref="${1:-}" path="${2:-}"
+  [ -n "$ref" ] && [ -n "$path" ] || { echo "usage: restore <version> <path>"; exit 2; }
+  case "$path" in ux/*|deliverable/*) ;; *) echo "Only files under ux/ or deliverable/ are versioned."; exit 2 ;; esac
+  g cat-file -e "$ref:$path" 2>/dev/null || { echo "No version of $path at $ref."; exit 3; }
+  mkdir -p "$(dirname "$path")"
+  g show "$ref:$path" > "$path"
+  SC_ACTOR="${SC_ACTOR:-design-lead}" cmd_record --kind restore --title "Restored $path from version $ref" --detail "Brought back the version of $path recorded at $ref. Nothing was deleted: the version it replaced is still in the history."
+}
+
+case "${1:-}" in
+  init) cmd_init ;;
+  record) shift; cmd_record "$@" ;;
+  checkpoint) cmd_checkpoint ;;
+  log) shift; cmd_log "${1:-}" ;;
+  show) shift; cmd_show "${1:-}" ;;
+  versions) shift; cmd_versions "${1:-}" ;;
+  restore) shift; cmd_restore "${1:-}" "${2:-}" ;;
+  -h|--help|"") sed -n '2,17p' "$0" ;;
+  *) echo "unknown command: $1 (try --help)"; exit 2 ;;
+esac

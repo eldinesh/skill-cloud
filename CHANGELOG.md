@@ -2,6 +2,18 @@
 
 All notable changes to SkillCloud. Maintainers: bump `VERSION` and add an entry here in the same commit — the self-update prompt reads this file to show "what's new".
 
+## 0.14.0 — 2026-11-26
+
+Version control for everything a project produces, a visual lifecycle, and sidequest built in.
+
+- **History (`skillcloud-history`):** a private history in `ux/.history` for everything in `ux/` and `deliverable/`. The design lead records each plan, job, check, sign-off, decision (with the option taken and the one dropped), writeback and restore. Unnamed changes are saved as a checkpoint after every turn. Restoring brings an old version back as a new event, and nothing is ever rewritten. It never touches a git repository the folder is already in. `/skillcloud:start` turns it on.
+- **Board page, redesigned** (Anthropic theme, light and dark, offline): a lifecycle rail across the five stages, then two tabs:
+  - **Board:** cards open a detail drawer.
+  - **History:** the lifecycle tree from day one to today, grouped by day and stage, with decisions drawn as forks. Each event shows when, who, what, how and the files changed, with a copy-ready restore request. It has filters and search, keeps your place across auto-refreshes, and has keyboard shortcuts (1 and 2, Esc).
+- **Pane:** a History section with the latest events, and a button to open the board page. After each turn the pane saves a checkpoint and re-renders the page.
+- **Sidequest comes with SkillCloud** (a plugin dependency). Big Ship builds run through its plan, run and land loop, with our lane check, checker H6 and the Ship gate on the result.
+- Docs: installing in the desktop app (+ → Plugins → Add marketplace).
+
 ## 0.13.0 — 2026-11-26
 
 The board is a live pane beside the chat, with controls.

@@ -88,5 +88,26 @@ out=$(cat ux/team/board.html 2>/dev/null)
 expect "board page renders the waiting gate" 'G-frame-1' "$out"
 expect "board page escapes and closes" '</html>' "$out"
 
+# history: version control for what the project produces
+H="$REPO/bin/skillcloud-history"
+"$H" init >/dev/null 2>&1
+echo "v1" > ux/brief-test.md
+out=$("$H" record --kind job --title "Brief drafted" --ticket J-005 --actor sc-strategist 2>&1)
+expect "an event is recorded" 'RECORDED [0-9a-f]+ job: Brief drafted' "$out"
+v1=$(git --git-dir=ux/.history log -1 --format=%h)
+"$H" record --kind decision --title "Chose A" --chose DIR-A --over DIR-B >/dev/null
+echo "v2" > ux/brief-test.md
+out=$("$H" checkpoint 2>&1)
+expect "unrecorded changes are kept as a checkpoint" 'checkpoint: 1 file' "$out"
+out=$("$H" log --json 2>&1)
+expect "history exports the decision fork" '"chose":"DIR-A","over":"DIR-B"' "$out"
+expect "history exports files per event" '"p":"ux/brief-test.md"' "$out"
+"$H" restore "$v1" ux/brief-test.md >/dev/null 2>&1
+expect "restore brings the old version back" '^v1$' "$(cat ux/brief-test.md)"
+out=$("$H" log 2>&1)
+expect "restore is a new event, nothing rewritten" 'restore .*Restored ux/brief-test.md' "$out"
+"$BOARD" html >/dev/null 2>&1
+expect "board page carries the history" '"kind":"decision"' "$(cat ux/team/board.html)"
+
 echo "tests/team: $PASS passed, $FAILN failed"
 [ "$FAILN" -eq 0 ]

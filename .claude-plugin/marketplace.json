@@ -7,7 +7,7 @@
       "name": "skillcloud",
       "source": "./",
       "description": "A design team made of agents, with Claude at its core and people in charge: Frame, Explore, Harden, Ship with named sign-offs.",
-      "version": "0.13.0",
+      "version": "0.14.0",
       "category": "productivity"
     }
   ]

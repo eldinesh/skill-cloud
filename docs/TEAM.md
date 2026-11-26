@@ -51,6 +51,17 @@ Edit ticket files by hand whenever you like. The design lead reads the board bef
 
 Each role runs on a set model and effort level (`routing.txt`: judgment-heavy roles run deep, volume roles run standard). Override per project in `ux/team/routing.txt`.
 
+## History: version control without git
+
+Every project keeps its own history in `ux/.history`: every version of everything in `ux/` and `deliverable/`, and an event for every move. It covers the plan approved, each job and who did it, each check and its verdict, each sign-off by name, each decision with the option taken and the one dropped, writebacks and restores. Anything nobody named gets saved as a "changes" checkpoint at the end of each turn, so nothing is lost. Nothing is ever rewritten. Restoring a file brings the old version back as a new event, and the replaced version stays in the history.
+
+The board page's **History** tab draws it as the project's lifecycle tree, from day one to today: grouped by day and stage, decisions as forks, and every event with when, who, what, how and which files changed. Ask the design lead "restore the brief to version 3766b2e", "who changed the persona?" or "when did we choose direction A?".
+
+```bash
+~/.skillcloud/repo/bin/skillcloud-history log        # every event
+~/.skillcloud/repo/bin/skillcloud-history versions ux/design/brief.md
+```
+
 ## Signing off, overruling, deciding
 
 At a gate you get a packet: what was produced, checker verdicts, the literal tool output, open findings, what got caught, and a recommendation. Reply in plain words:
@@ -105,4 +116,4 @@ Without the plugin, `./setup --agents` installs the same skills and agents from 
 
 - **Claude Code**: full team mode.
 - **Cowork, claude.ai, or no agents**: `/design-lead` runs inline. It works each role itself, from the same agent files, in lane, and runs the checker as a separate cold pass. Gate packets say the check wasn't independent.
-- **sidequest alongside**: 7.x coexists. It re-routes only its own and the generic built-in agents, and leaves the `sc-*` agents on the model `/design-lead` gives them. The older 3.x refused agent launches it didn't dispatch, so update it.
+- **sidequest comes with it.** SkillCloud depends on sidequest 7.x and installs it alongside. The design lead hands big Ship builds to sidequest's plan, run and land loop: parallel workers in their own worktrees, one landed change, with our lane check, checker and Ship gate on the result. Sidequest leaves the `sc-*` agents on the models `/design-lead` gives them.

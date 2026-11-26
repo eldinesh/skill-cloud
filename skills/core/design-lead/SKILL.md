@@ -171,6 +171,7 @@ The same applies later: a ticket a person drops mid-stage ("stop J-004, we don't
 
 **SHIP**
 1. `sc-engineer`: /ship-code → `deliverable/` + `ux/ship/build-report.md`.
+   **Big builds go through sidequest** (it comes with SkillCloud). When the deliverable is more than about three screens, or its states fan out wide, run the code work through sidequest's loop instead of one long engineer job. File one sidequest story for the flow, with its tickets cut from the hardening matrix (a screen and its states each). Sidequest plans them with you for one yes, runs its workers in parallel worktrees on their routed models, reviews each, and lands one change into `deliverable/` (or the client's repo, when project-context names one). It stays the engineer's ticket on our board: start it, then run the lane check (role `engineer`), checker H6 and the Ship gate on what landed, exactly as for a single build. Record the landing in the history (`--kind release`).
 2. `sc-engineer`: /ship-tickets → `ux/ship/tickets/` + `ux/ship/handoff-note.md`. Creating tickets in a tracker is outward-facing: draft locally, and create them only after the person says so.
 3. `sc-quality-reviewer`: /design-qa-checklist against the running deliverable.
 4. Checker H6 → **gate: engineer reviews the handoff.** Their "still need to ask" list must be empty or answered.
@@ -232,6 +233,25 @@ A decision at any stage, for example an engineer at Ship finding that the calend
 ## Step 8: Publish (PUBLISH)
 
 Copy every `final` artifact to `ux/publish/<project>-<stage>-<artifact>-v<n>-final.md`, plus the rulebook chapters and a `00-read-me-first.md` (what the project is, who's on it, where things live, the rule that only finals are context). This is the set to load into a Claude project's knowledge or share with the client. Never publish drafts. The client view is review and final only.
+
+## Step 9: History (version control, on every move)
+
+Every project keeps a private history in `ux/.history`: every version of everything in `ux/` and `deliverable/`, and an event for every move. It never touches a git repository the folder is already in, and nobody has to know git. `/skillcloud:start` turns it on. For an older project, run `skillcloud-history init` once. Record as you go, using the person's words and names exactly:
+
+```bash
+H=~/.skillcloud/repo/bin/skillcloud-history
+$H record --kind plan     --title "Frame plan approved (5 jobs, 2 gates)" --stage frame --actor "<name>"
+$H record --kind job      --title "<what was produced>" --ticket J-002 --stage frame --actor sc-synthesiser --detail "<return packet, 2-3 lines>"
+$H record --kind check    --title "J-002 checked: pass-with-notes" --ticket J-002 --actor sc-checker --detail "<verdict line, counts>"
+$H record --kind gate     --title "Research pack signed off" --ticket G-frame-1 --actor "Ben Ito" --detail "<conditions, if any>"
+$H record --kind decision --title "Chose Smart suggest" --stage explore --actor "<team lead>" --chose DIR-A --over DIR-B --detail "<the reason, the evidence>"
+$H record --kind send-back | writeback | override | release  --title … --actor …
+```
+
+- Record **after** the files are written, so the event carries them. The board pane also records any unrecorded changes at the end of every turn as a "changes" checkpoint, so nothing is ever lost, but a named event reads better than a checkpoint.
+- "Restore <file> to version <v>", from a person, from the board, or because a gate went back, runs `$H restore <v> <file>`. That is a new event. The version it replaced stays in the history. Never rewrite or delete history.
+- "What happened to X", "who changed Y", "when did we decide Z": answer from `$H log`, `$H versions <file>` and `$H show <v>`, with version IDs.
+- The board page's **History** tab draws all of this as the project's lifecycle tree, from day one to today.
 
 ## Decision principles
 

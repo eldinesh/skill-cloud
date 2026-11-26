@@ -23,7 +23,7 @@ test('the pane shows the plan and the gate, and its buttons send the person\'s w
   on('fs.exists', (_, e) => ({ value: ['ux/project-context.md', 'ux/team/board'].includes(rel(e.path)) }))
   on('fs.read', (_, e) => ({ value: rel(e.path) === 'ux/project-context.md' ? '---\nproject: Meridian\n---' : FILES[rel(e.path)] ?? '' }))
   on('clock.every', () => ({ value: undefined }))
-  on('fs.list', () => ({ value: Object.keys(FILES).map(f => ({ name: f.split('/').pop(), kind: 'file', size: 1, mtimeMs: 1, isLink: false })) }))
+  on('fs.list', () => ({ value: Object.keys(FILES).map(f => ({ name: f.split('/').pop() ?? f, kind: 'file', size: 1, mtimeMs: 1, isLink: false })) }))
   on('command.register', () => ({ value: { command: 'skillcloud-board' } }))
   on('ui.open', () => ({ value: { isPlaced: true } }))
   on('prompt.submit', (_, e) => { submitted.push(e.text); return { text: e.text } })

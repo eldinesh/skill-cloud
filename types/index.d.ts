@@ -20,6 +20,21 @@ export type Ticket = {
   mtimeMs: number
 }
 
+export type HistoryEvent = {
+  id: string
+  short: string
+  at: string
+  title: string
+  kind: string
+  ticket: string
+  stage: string
+  actor: string
+  chose: string
+  over: string
+  detail: string
+  files: { s: string; p: string }[]
+}
+
 export type BoardView = {
   isProject: boolean
   hasBoard: boolean
@@ -31,6 +46,7 @@ declare module 'claude-code' {
   interface PluginState {
     skillcloud: {
       board: Shaped<BoardView>
+      history: Shaped<HistoryEvent[]>
       picks: Record<string, 'approve' | 'decline'>
       names: Record<string, string>
       notes: Record<string, string>

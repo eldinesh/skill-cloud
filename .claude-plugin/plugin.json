@@ -1,6 +1,6 @@
 {
   "name": "skillcloud",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "description": "A design team made of agents, with Claude at its core and people in charge. /design-lead runs a project through Frame, Explore, Harden and Ship: it plans each stage as tickets on a local board, routes each job to a specialist agent, has an independent checker and real tools challenge every handoff, and stops at every gate for a named person to sign off. Claude never signs.",
   "author": {
     "name": "SkillCloud maintainers"
@@ -24,5 +24,8 @@
     "./skills/build/",
     "./skills/ai/"
   ],
-  "types": "./types/index.d.ts"
+  "types": "./types/index.d.ts",
+  "dependencies": [
+    "sidequest@eigenwise-toolshed"
+  ]
 }

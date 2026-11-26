@@ -160,82 +160,57 @@ card() { # card <file> <column>
   printf '</summary><pre>%s</pre></details>\n' "$body"
 }
 
+ticket_json() { # one ticket file -> one JSON object
+  awk -v file="$(basename "$1")" '
+    function q(s) { gsub(/\\/,"\\\\",s); gsub(/"/,"\\\"",s); gsub(/\t/," ",s); gsub(/\r/,"",s); gsub(/<\//,"<\\/",s); return "\"" s "\"" }
+    function clean(s) { sub(/^[ \t]+/,"",s); sub(/[ \t]+#.*$/,"",s); if (s=="\"\"" || s=="[]") s=""; gsub(/^"|"$/,"",s); return s }
+    function arr(s,   n,i,parts,out) { s=clean(s); gsub(/^\[|\]$/,"",s); n=split(s,parts,","); out=""; for (i=1;i<=n;i++) { gsub(/^[ \t"]+|[ \t"]+$/,"",parts[i]); if (parts[i]!="") out=out (out==""?"":",") q(parts[i]) } return "[" out "]" }
+    NR==1 && $0=="---" { fm=1; next }
+    fm && $0=="---" { fm=0; next }
+    fm { k=$0; sub(/:.*/,"",k); v=$0; sub(/^[^:]*:/,"",v); f[k]=v; next }
+    /^##[ \t]+/ { sec=tolower($0); sub(/^##[ \t]+/,"",sec); sub(/[ \t]+$/,"",sec); next }
+    sec!="" { if ($0 ~ /^<!--/ ) next; b[sec]=b[sec] (b[sec]==""?"":"\n") $0
+      if (sec=="for you" && $0 ~ /\*\*Question:\*\*/) { qq=$0; sub(/.*\*\*Question:\*\*[ ]*/,"",qq); question=qq }
+      if (sec=="log" && $0 ~ /^[ \t]*-/) { logs[++nl]=$0 } }
+    END {
+      lg=""; for (i=(nl>6?nl-5:1); i<=nl; i++) lg=lg (lg==""?"":",") q(logs[i])
+      for (k in b) { x=b[k]; sub(/^[\n ]+/,"",x); sub(/[\n ]+$/,"",x); b[k]=x }
+      id=clean(f["id"]); if (id=="") { id=file; sub(/\.md$/,"",id) }
+      printf "{\"id\":%s,\"title\":%s,\"stage\":%s,\"kind\":%s,\"mode\":%s,\"role\":%s,\"status\":%s,\"route\":%s,\"verdict\":%s,\"blockedBy\":%s,\"question\":%s,\"what\":%s,\"doneWhen\":%s,\"log\":[%s]}",
+        q(id), q(clean(f["title"])), q(clean(f["stage"])), q(clean(f["kind"])==""?"job":clean(f["kind"])), q(clean(f["mode"])==""?"afk":clean(f["mode"])),
+        q(clean(f["role"])), q(clean(f["status"])==""?"proposed":clean(f["status"])), q(clean(f["route"])), q(clean(f["verdict"])), arr(f["blockedBy"]),
+        q(question), q(b["what"]), q(b["done when"]), lg
+    }' "$1"
+}
+
 cmd_html() {
-  need_board
-  local out="${1:-$ROOT/ux/team/board.html}" project now
+  local out="${1:-$ROOT/ux/team/board.html}" project now tpl data first=1 f events
+  tpl="$(cd "$(dirname "$0")" && pwd)/board-app.html"
+  [ -f "$tpl" ] || { echo "board template missing: $tpl"; exit 2; }
   project=$(field "$ROOT/ux/project-context.md" project 2>/dev/null)
   [ -z "$project" ] && project=$(basename "$ROOT")
-  now=$(date '+%Y-%m-%d %H:%M')
+  now=$(date '+%Y-%m-%dT%H:%M:%S')
+  events="[]"
+  if [ -d "$ROOT/ux/.history" ]; then
+    events=$(cd "$ROOT" && "$(dirname "$0")/skillcloud-history" log --json 2>/dev/null) || events="[]"
+    [ -z "$events" ] && events="[]"
+  fi
+  data="$out.data.$$"
   {
-    cat <<'HEAD'
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-HEAD
-    printf '<title>Team board · %s</title>\n' "$(echo "$project" | esc)"
-    cat <<'CSS'
-<style>
-:root{--bg:#f6f7f9;--surface:#fff;--text:#161b24;--muted:#545d6e;--border:#d9dde4;--accent:#1f5fd1;--you:#7a4b00;--you-bg:#fff6e5;
---frame:#1f5fd1;--explore:#5b3fc4;--harden:#b42323;--ship:#1c6b3a;--learn:#545d6e;--all:#545d6e}
-@media (prefers-color-scheme:dark){:root{--bg:#0f131a;--surface:#161b24;--text:#eef1f6;--muted:#a9b1bf;--border:#2a3140;--accent:#7fa8ff;--you:#f2c25c;--you-bg:#2e2410;
---frame:#7fa8ff;--explore:#b9a6ff;--harden:#ff8a8a;--ship:#6fd394;--learn:#a9b1bf;--all:#a9b1bf}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-header{padding:16px;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline}
-h1{font-size:18px;margin:0}header .muted{color:var(--muted)}
-main{padding:16px;display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));align-items:start}
-section{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px}
-section h2{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:2px 4px 10px}
-section.you{border-color:var(--you);background:var(--you-bg)}section.you h2{color:var(--you)}
-.card{border:1px solid var(--border);border-left:4px solid var(--all);border-radius:8px;background:var(--surface);margin:0 0 8px;padding:8px}
-.card.stage-frame{border-left-color:var(--frame)}.card.stage-explore{border-left-color:var(--explore)}
-.card.stage-harden{border-left-color:var(--harden)}.card.stage-ship{border-left-color:var(--ship)}.card.stage-learn{border-left-color:var(--learn)}
-summary{cursor:pointer;list-style:none}summary::-webkit-details-marker{display:none}
-.id{font:12px ui-monospace,Menlo,monospace;color:var(--muted)}.title{font-weight:600}
-.meta{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.chip{font-size:11px;border:1px solid var(--border);border-radius:999px;padding:1px 7px;color:var(--muted)}
-.v-pass{color:var(--ship)}.v-fail{color:var(--harden)}.v-pass-with-notes{color:var(--you)}
-.q{display:block;margin-top:6px;color:var(--you);font-weight:600}
-pre{white-space:pre-wrap;word-break:break-word;font:12px/1.5 ui-monospace,Menlo,monospace;margin:8px 0 0;max-height:420px;overflow:auto}
-.empty{color:var(--muted);margin:4px}footer{padding:0 16px 16px;color:var(--muted);font-size:12px}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-</style></head><body>
-CSS
-    printf '<header><h1>%s · team board</h1><span class="muted">rendered %s from ux/team/board/ · reloads every 5s (paused while a ticket is open)</span></header>\n<main>\n' "$(echo "$project" | esc)" "$now"
-
-    # Waits on you
-    printf '<section class="you" aria-labelledby="h-you"><h2 id="h-you">Waits on you</h2>\n'
-    local n=0
-    for f in $(tickets); do
-      st=$(field "$f" status); md=$(field "$f" mode); blk=""
-      for b in $(list_items "$(field "$f" blockedBy)"); do [ "$(status_of "$b")" = "done" ] || blk=1; done
-      strand=""; case "$st" in done|dropped) ;; *) strand=$(blocked_by_dropped "$f") ;; esac
-      if { [ "$md" = "hitl" ] && [ "$st" = "ready" ] && [ -z "$blk" ]; } || [ "$st" = "needs-you" ] || [ -n "$strand" ]; then card "$f"; n=$((n+1)); fi
-    done
-    [ "$n" -eq 0 ] && printf '<p class="empty">Nothing waits on you.</p>\n'
-    printf '</section>\n'
-
-    col() { # col <title> <status> [frontier-only]
-      printf '<section aria-label="%s"><h2>%s</h2>\n' "$1" "$1"
-      local c=0
+    printf '{"project":"%s","generated":"%s","tickets":[' "$(printf '%s' "$project" | sed 's/\\/\\\\/g; s/"/\\"/g')" "$now"
+    if [ -d "$BOARD" ]; then
       for f in $(tickets); do
-        [ "$(field "$f" status)" = "$2" ] || continue
-        [ "$2" = "ready" ] && [ "$(field "$f" mode)" = "hitl" ] && continue
-        card "$f"; c=$((c+1))
+        [ $first -eq 1 ] || printf ','
+        first=0
+        ticket_json "$f"
       done
-      [ "$c" -eq 0 ] && printf '<p class="empty">None.</p>\n'
-      printf '</section>\n'
-    }
-    col "Doing" doing
-    col "Ready" ready
-    col "Being checked" review
-    col "Proposed" proposed
-    col "Done" done
-    col "Dropped" dropped
-    printf '</main><footer>Tickets are plain files: edit them by hand and the board follows. Gates and fieldwork are people'"'"'s work and are never dispatched.</footer>\n'
-    cat <<'JS'
-<script>
-(function(){var t=setInterval(function(){if(document.querySelector('details[open]'))return;location.reload();},5000);})();
-</script></body></html>
-JS
-  } > "$out"
+    fi
+    printf '],"events":%s}' "$events"
+  } > "$data"
+  awk -v title="$(printf '%s' "$project" | sed 's/[&<>]/ /g') · SkillCloud" -v datafile="$data" '
+    { if (index($0, "__DATA__")) { pre=$0; sub(/__DATA__.*/, "", pre); post=$0; sub(/.*__DATA__/, "", post); printf "%s", pre; while ((getline line < datafile) > 0) printf "%s", line; print post; next }
+      gsub(/__TITLE__/, title); print }' "$tpl" > "$out"
+  rm -f "$data"
   echo "board: $out"
 }
 

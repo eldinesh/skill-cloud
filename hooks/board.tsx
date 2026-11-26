@@ -5,7 +5,7 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import type { BoardView, Ticket } from '../types'
+import type { BoardView, HistoryEvent, Ticket } from '../types'
 
 const PANE = 'skillcloud-board'
 const TITLE = 'SkillCloud board'
@@ -13,6 +13,7 @@ const DIR = 'ux/team/board'
 
 const board = atom({ plugin: 'skillcloud', key: 'board' } as const,
   { isProject: false, hasBoard: false, project: '', tickets: [] } as BoardView, { shape: 'board-1' })
+const history = atom({ plugin: 'skillcloud', key: 'history' } as const, [] as HistoryEvent[], { shape: 'history-1' })
 const picks = atom({ plugin: 'skillcloud', key: 'picks' } as const, {} as Record<string, 'approve' | 'decline'>)
 const names = atom({ plugin: 'skillcloud', key: 'names' } as const, {} as Record<string, string>)
 const notes = atom({ plugin: 'skillcloud', key: 'notes' } as const, {} as Record<string, string>)
@@ -152,6 +153,33 @@ export const planText = (proposed: Ticket[], choice: Record<string, 'approve' | 
   return `Partial yes: run ${approved.join(', ') || 'nothing'}; decline ${declined.join(', ')}. Show me what declining strands before anything runs.`
 }
 
+// ---------------------------------------------------------------- history + the board page
+
+const run = async ($: EngineInterface, argv: string[]) =>
+  $.process.run(argv).catch(() => ({ exitCode: 1, stdout: '', stderr: '' }))
+
+// After every turn: keep every change (a checkpoint when nothing named it), refresh the history
+// the pane shows, and re-render the board page.
+const sync = async ($: EngineInterface): Promise<void> => {
+  const view = await read($, board)
+  if (!view.isProject) return
+  const bin = `${$.plugin.root}/bin`
+  await run($, [`${bin}/skillcloud-history`, 'checkpoint'])
+  const log = await run($, [`${bin}/skillcloud-history`, 'log', '--json'])
+  if (log.exitCode === 0 && log.stdout.trim().startsWith('[')) {
+    try {
+      const events = JSON.parse(log.stdout) as HistoryEvent[]
+      await update($, history, () => events.slice(-60))
+    } catch { /* keep what we had */ }
+  }
+  await run($, [`${bin}/skillcloud-board`, 'html'])
+}
+
+const KIND_WORD: Record<string, string> = {
+  start: 'started', plan: 'plan', job: 'work', check: 'check', gate: 'signed', decision: 'decided',
+  writeback: 'writeback', 'send-back': 'sent back', override: 'override', restore: 'restored', release: 'release', checkpoint: 'changes',
+}
+
 // ---------------------------------------------------------------- register
 
 export const register: Register = on => {
@@ -164,6 +192,7 @@ export const register: Register = on => {
     try { timer = $.clock.every(3000, () => { void refresh($) }) } catch { timer = undefined }
     const view = await read($, board)
     if (view.hasBoard) void $.ui.open({ id: PANE, title: view.project ? `${TITLE} · ${view.project}` : TITLE })
+    void sync($)
     return next(e)
   })
 
@@ -177,7 +206,7 @@ export const register: Register = on => {
   })
 
   on('turn.complete', async ($, e, next) => {
-    void refresh($)
+    void refresh($).then(() => sync($))
     return next(e)
   })
 
@@ -211,6 +240,7 @@ export const register: Register = on => {
     const typedNotes = await read($, notes)
     const open = await read($, opened)
     const wasSent = await read($, sent)
+    const events = await read($, history)
     const width = e.props.bodyColumns ?? 60
 
     if (!view.isProject) {
@@ -375,6 +405,28 @@ export const register: Register = on => {
         {section('Ready', s.ready, t => (s.isUnblocked(t) ? 'can start' : `after ${t.blockedBy.join(', ')}`))}
         {section('Done', s.done, t => t.verdict)}
         {section('Dropped', s.dropped)}
+        <Box flexDirection="column" marginBottom={1}>
+          {heading('History', events.filter(ev => ev.kind !== 'checkpoint').length, 'subtle')}
+          {events.length === 0 ? <Text dimColor>Starts when the project is set up. Every job, sign-off and decision is kept.</Text> : null}
+          {events.filter(ev => ev.kind !== 'checkpoint').slice(-6).reverse().map(ev => (
+            <Text key={`ev-${ev.short}`} wrap="truncate-end">
+              <Text dimColor>{ev.at.slice(5, 10)} {ev.at.slice(11, 16)} </Text>
+              <Text color={ev.kind === 'gate' ? 'success' : ev.kind === 'decision' ? 'warning' : undefined}>{KIND_WORD[ev.kind] ?? ev.kind} </Text>
+              {ev.title}{ev.chose ? ` (${ev.chose}${ev.over ? ` over ${ev.over}` : ''})` : ''}
+              <Text dimColor>{ev.actor ? ` · ${ev.actor}` : ''}</Text>
+            </Text>
+          ))}
+          <Box marginTop={1}>
+            <Button key="open-history" label="Open the board and full history"
+              onPress={() => {
+                void (async () => {
+                  await run($, [`${$.plugin.root}/bin/skillcloud-board`, 'html'])
+                  const r = await run($, ['open', 'ux/team/board.html'])
+                  if (r.exitCode !== 0) await run($, ['xdg-open', 'ux/team/board.html'])
+                })()
+              }} />
+          </Box>
+        </Box>
         <Text dimColor wrap="wrap">Buttons send your words to the session, and the design lead records them. Claude never signs.</Text>
       </Box>
     )

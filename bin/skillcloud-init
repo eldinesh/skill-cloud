@@ -135,4 +135,7 @@ if ! grep -qF "$MARK_S" CLAUDE.md 2>/dev/null; then
   echo "CREATED CLAUDE.md section (SkillCloud project pointer)"
 fi
 
+# 7. version history: every job, sign-off and decision from here on is kept, and nothing is ever rewritten
+"$REPO/bin/skillcloud-history" init 2>/dev/null | sed 's/^/        /' || true
+
 echo "NEXT    fill ux/project-context.md from the material, then /skillcloud:design-lead proposes the first plan"
