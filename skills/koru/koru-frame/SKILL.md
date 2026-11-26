@@ -114,7 +114,7 @@ Desk research and a competitive scan of 3 to 5 products. Every claim becomes a D
 ## The gate
 
 1. Run the **research-checker** agent on the Frame cards. Save its numbered findings to a file and record them: `koru review frame --checker research-checker --file <findings.md>`.
-2. The person gives each finding a disposition in the REV card: fixed · accepted risk · deferred TKT-000.
+2. The person gives each finding a disposition in the REV card: fixed · accepted risk · deferred TKT-000 or deferred to explore, harden or ship · rejected: why (the checker was wrong).
 3. `koru gate frame` shows the exit contract. When every line is ✓, a signer types `! koru gate frame --pass --name "…" --role "engagement lead"`.
 
 ## What the hooks will stop (and what to say)
