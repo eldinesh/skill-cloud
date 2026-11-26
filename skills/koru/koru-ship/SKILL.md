@@ -53,9 +53,19 @@ Split the hardened design into MVP and later; confirm feasibility per item; name
 
 ## S2. Build the chosen deliverables
 
+**Tech stack first.** Read `tech_stack` and `frontend_dir` in the engagement. If either is unknown, ask the engineer before any code: framework and version, styling (Tailwind, CSS modules, CSS-in-JS), the component library the client already uses, state and data fetching, test tools, CI. Record it, and every choice that departs from the client's existing code, as a Decision.
+
+**Foundation before features.** `koru scaffold` (react-tailwind and react-library today) generates the foundation from the design system and the cards, and it must pass `npm run check` before any feature is written:
+- **Tokens:** `src/styles/tokens.css` and `tailwind.preset.cjs`, copied from `koru ds build`. The preset replaces Tailwind's palette, spacing and type scale, so only tokens exist.
+- **UI layer:** `src/ui/`, one component per manifest entry, the only place raw `<button>`, `<input>`, `<dialog>` appear, with keyboard and ARIA behaviour built in. Each has a story per state and a test that renders every state through axe.
+- **Features:** `src/features/<screen>/`, one folder per Screen card, with its **data and API contract** (`contract.ts`, agreed with the engineer) and its states as `data-testid="state-STA-…"`. `src/features/states.ts` is generated from the State cards, so tests, tickets and code name the same ids.
+- **Rules in the tools:** ESLint (jsx-a11y strict; no raw controls, inline styles or literal colours in features; no other UI library), Stylelint (tokens only), TypeScript strict, `npm run lint:ds` (the Koru design-system lint) in CI. The design-system hook guards `frontend_dir` as it guards prototypes.
+- For other stacks, follow the same four layers by hand and run `koru ds lint <dir>`.
+
 Read the `deliverables` switch and load `koru-deliverables`. Whatever the mix (standalone HTML, Figma frames, full front-end code), all of it renders from the same SCR and STA cards: Screen IDs and state names in the code match the cards.
 
-- Tokens only. Raw colour and pixel values are drift; flag them.
+- Tokens only. Raw colour and pixel values are drift; the hook and `npm run lint:ds` refuse them.
+- Each Ticket names its STA ids, the contract it reads, the ui components it uses and its test ids. A component the system lacks is added with `koru ds component add` and its spec first, never built inside a feature.
 - Measure **Code Connect coverage** when the client has Figma components mapped to code; code for unmapped components is marked provisional.
 - Write a `component-spec` for anything classified extend, snowflake or new.
 

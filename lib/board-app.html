@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>__TITLE__</title>
+<style>
+:root{--bg:#f5f6f8;--panel:#fff;--sunk:#eef1f4;--ink:#1b2230;--ink2:#3b4556;--muted:#5b6577;--line:#e2e6eb;--accent:#1f5fbf;--accent-bg:#eaf1fc;--ok:#1e6b3a;--ok-bg:#e8f5ec;--warn:#8a5300;--warn-bg:#fdf3e1;--bad:#b3261e;--bad-bg:#fcebeb;--ai:#5b3fb8;--ai-bg:#f1edfc;--shadow:0 8px 24px rgba(27,34,48,.14);--r:8px}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f1419;--panel:#171e26;--sunk:#1d2630;--ink:#e6ebf1;--ink2:#c3ccd7;--muted:#97a3b1;--line:#2a3541;--accent:#7fb0ff;--accent-bg:#1a2b45;--ok:#6cc58d;--ok-bg:#16301f;--warn:#e9b061;--warn-bg:#33270f;--bad:#f2867e;--bad-bg:#3a1a19;--ai:#b9a6ff;--ai-bg:#261e44;--shadow:0 8px 24px rgba(0,0,0,.5)}}
+*{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.top{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line);padding:12px 20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.top h1{font-size:17px;margin:0;font-weight:650}.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600;background:var(--sunk);color:var(--ink2)}
+.pill.stage{background:var(--accent-bg);color:var(--accent)}.pill.live{background:var(--ok-bg);color:var(--ok)}.pill.static{background:var(--sunk);color:var(--muted)}
+.search{margin-left:auto;min-width:240px;height:36px;border:1px solid var(--line);border-radius:var(--r);background:var(--bg);padding:0 12px}
+.layout{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 61px)}
+nav.side{border-right:1px solid var(--line);padding:12px;background:var(--panel)}nav.side button{display:flex;justify-content:space-between;width:100%;text-align:left;border:0;background:none;padding:8px 10px;border-radius:6px;cursor:pointer;color:var(--ink2)}
+nav.side button[aria-current=page]{background:var(--accent-bg);color:var(--accent);font-weight:600}nav.side .n{color:var(--muted);font-size:12px}
+main{padding:20px 24px 60px;min-width:0}h2{font-size:15px;margin:0 0 12px}h3{font-size:13px;margin:18px 0 8px;color:var(--ink2)}.muted{color:var(--muted)}.small{font-size:12px}
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.gate h3{margin:0 0 6px;display:flex;justify-content:space-between;color:var(--ink)}.bar{height:6px;background:var(--sunk);border-radius:99px;overflow:hidden;margin:6px 0 10px}.bar i{display:block;height:100%;background:var(--accent)}
+.rows{list-style:none;margin:0;padding:0;font-size:13px}.rows li{display:flex;gap:8px;padding:3px 0}.rows .y{color:var(--ok)}.rows .x{color:var(--bad)}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}.chipbtn{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:4px 10px;cursor:pointer;font-size:12px}.chipbtn[aria-pressed=true]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.cols{display:grid;grid-template-columns:repeat(4,minmax(240px,1fr));gap:14px;align-items:start}.col>h3{margin:0 0 8px;text-transform:uppercase;letter-spacing:.05em;font-size:11px}
+.group{margin:0 0 12px}.group>.gh{font-size:12px;color:var(--muted);margin:0 0 6px;display:flex;justify-content:space-between}
+.card{display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:var(--r);padding:8px 10px;margin:0 0 6px;cursor:pointer}
+.card:hover{border-color:var(--accent)}.card.final{border-left-color:var(--ok)}.card.review{border-left-color:var(--warn)}.card.draft{border-left-color:var(--muted)}.card.superseded{opacity:.55}
+.card .id{font:600 11px ui-monospace,Menlo,monospace;color:var(--accent)}.card .t{display:block;margin:2px 0 4px;color:var(--ink)}
+.tag{display:inline-block;font-size:11px;border-radius:999px;padding:0 7px;margin:2px 4px 0 0;background:var(--sunk);color:var(--ink2)}
+.tag.final{background:var(--ok-bg);color:var(--ok)}.tag.review{background:var(--warn-bg);color:var(--warn)}.tag.stale,.tag.writeback,.tag.block{background:var(--bad-bg);color:var(--bad)}.tag.assumption,.tag.warn{background:var(--warn-bg);color:var(--warn)}.tag.ai{background:var(--ai-bg);color:var(--ai)}
+table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}th{font-size:12px;color:var(--muted);font-weight:600}
+td .linkbtn,.linkbtn{border:0;background:none;padding:0;color:var(--accent);cursor:pointer;font:600 12px ui-monospace,Menlo,monospace}
+.chain{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px}.lane{min-width:170px;flex:1}.lane h3{margin:0 0 8px;font-size:12px}
+.lane .card{font-size:13px}.card.on{outline:2px solid var(--accent)}.card.dim{opacity:.35}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(620px,100%);background:var(--panel);border-left:1px solid var(--line);box-shadow:var(--shadow);z-index:20;display:flex;flex-direction:column}
+.drawer[hidden]{display:none}.dh{padding:14px 18px;border-bottom:1px solid var(--line)}.dh .row{display:flex;gap:8px;align-items:center}.dh h2{margin:6px 0 4px;font-size:17px}
+.close{margin-left:auto;border:1px solid var(--line);background:var(--panel);border-radius:6px;width:32px;height:32px;cursor:pointer}
+.dtabs{display:flex;gap:2px;padding:0 12px;border-bottom:1px solid var(--line)}.dtabs button{border:0;background:none;padding:10px 10px;cursor:pointer;border-bottom:2px solid transparent;color:var(--ink2)}.dtabs button[aria-selected=true]{border-bottom-color:var(--accent);color:var(--accent);font-weight:600}
+.db{padding:16px 18px;overflow:auto;flex:1}.md h1,.md h2,.md h3,.md h4{font-size:14px;margin:16px 0 6px}.md blockquote{margin:8px 0;padding:6px 12px;border-left:3px solid var(--accent);background:var(--sunk);border-radius:0 6px 6px 0}.md table{font-size:13px}.md code{font:12px ui-monospace,Menlo,monospace;background:var(--sunk);padding:1px 4px;border-radius:4px}.md p{margin:6px 0}
+.actions{display:flex;gap:8px;flex-wrap:wrap;padding:12px 18px;border-top:1px solid var(--line);background:var(--sunk)}
+.btn{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:6px;border:1px solid var(--line);background:var(--panel);cursor:pointer;font-weight:600;font-size:13px}.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--panel)}
+textarea.edit{width:100%;min-height:340px;border:1px solid var(--line);border-radius:6px;background:var(--bg);padding:10px;font:13px/1.5 ui-monospace,Menlo,monospace}
+input.edit{width:100%;height:36px;border:1px solid var(--line);border-radius:6px;background:var(--bg);padding:0 10px;margin:0 0 8px}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:4px 12px;font-size:13px}.kv dt{color:var(--muted)}.kv dd{margin:0}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:10px 16px;border-radius:8px;z-index:30;font-size:13px}
+.how ol{padding-left:20px}.how li{margin:0 0 10px}.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0 16px}.flow span{background:var(--sunk);border-radius:6px;padding:4px 8px;font-size:12px}.flow b{color:var(--muted);font-weight:400}
+.empty{padding:24px;text-align:center;color:var(--muted)}
+@media (max-width:900px){.layout{grid-template-columns:1fr}nav.side{display:flex;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:8px}nav.side button{width:auto;white-space:nowrap}.cols{grid-template-columns:1fr}.search{min-width:0;width:100%}main{padding:16px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1 id="client"></h1><span class="pill stage" id="stage"></span><span class="pill" id="mode"></span>
+  <input class="search" id="q" type="search" placeholder="Search cards, ids, quotes…" aria-label="Search cards">
+</header>
+<div class="layout">
+  <nav class="side" aria-label="Board views" id="nav"></nav>
+  <main id="view" tabindex="-1"></main>
+</div>
+<aside class="drawer" id="drawer" hidden aria-modal="false" aria-labelledby="dtitle"></aside>
+<script>
+const DATA = /*__DATA__*/null;
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const byId = Object.fromEntries(DATA.cards.map((c) => [c.id, c]));
+const STATUS = { draft: 'Draft', review: 'In review', final: 'Signed', superseded: 'Superseded' };
+const CHAIN = ['CTX', 'DAT', 'FND', 'INS', 'JOB', 'PRB', 'HMW', 'OPP', 'BRF', 'DIR', 'SCR', 'STA', 'TKT', 'MET'];
+const VIEWS = [['overview', 'Overview'], ['cards', 'Cards'], ['chain', 'Evidence chain'], ['decisions', 'Decisions'], ['inbox', 'Inbox'], ['design', 'Design system'], ['quality', 'Quality'], ['how', 'How this board works']];
+let live = false;
+let view = 'overview';
+const filt = { type: new Set(), status: new Set(), flag: new Set() };
+
+function md(src) {
+  const lines = String(src || '').split('\n');
+  let out = '', list = null, table = [];
+  const inline = (t) => esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\b([A-Z]{3}-\d{3})\b/g, (m) => byId[m] ? `<button class="linkbtn" data-open="${m}">${m}</button>` : m);
+  const flushTable = () => { if (!table.length) return; const rows = table.filter((r) => !/^\|\s*-/.test(r)).map((r) => r.replace(/^\||\|$/g, '').split('|').map((x) => x.trim())); out += `<table><tr>${rows[0].map((h) => `<th>${inline(h)}</th>`).join('')}</tr>${rows.slice(1).map((r) => `<tr>${r.map((d) => `<td>${inline(d)}</td>`).join('')}</tr>`).join('')}</table>`; table = []; };
+  for (const l of lines) {
+    if (/^\|/.test(l)) { table.push(l); continue; } else flushTable();
+    if (/^\s*[-*] /.test(l) || /^\s*\d+\. /.test(l)) { if (!list) { list = /^\s*\d/.test(l) ? 'ol' : 'ul'; out += `<${list}>`; } out += `<li>${inline(l.replace(/^\s*([-*]|\d+\.)\s+/, ''))}</li>`; continue; }
+    if (list) { out += `</${list}>`; list = null; }
+    if (/^#{1,4} /.test(l)) out += `<h4>${inline(l.replace(/^#+ /, ''))}</h4>`;
+    else if (/^> /.test(l)) out += `<blockquote>${inline(l.slice(2))}</blockquote>`;
+    else if (/^<!--/.test(l)) continue;
+    else if (l.trim()) out += `<p>${inline(l)}</p>`;
+  }
+  flushTable(); if (list) out += `</${list}>`;
+  return out;
+}
+
+function cardBtn(c, extra = '') {
+  const tags = [`<span class="tag ${c.status}">${STATUS[c.status] || c.status}</span>`]
+    .concat(c.meta.confidence ? [`<span class="tag">${esc(c.meta.confidence)} confidence</span>`] : [])
+    .concat(c.flags.map((f) => `<span class="tag ${f.k}" title="${esc(f.t)}">${f.k === 'ai' ? 'Claude drafted' : f.k}</span>`))
+    .concat(c.problems.some((p) => p.level === 'block') ? ['<span class="tag block">needs work</span>'] : []);
+  return `<button class="card ${c.status} ${extra}" data-open="${c.id}"><span class="id">${c.id} · ${esc(c.typeName)} · v${c.version}</span><span class="t">${esc(c.title)}</span>${tags.join('')}</button>`;
+}
+
+function matches(c) {
+  const q = $('#q').value.trim().toLowerCase();
+  if (q && !(`${c.id} ${c.title} ${c.body}`.toLowerCase().includes(q))) return false;
+  if (filt.type.size && !filt.type.has(c.type)) return false;
+  if (filt.status.size && !filt.status.has(c.status)) return false;
+  if (filt.flag.has('needs-signature') && !(c.status !== 'final' && c.status !== 'superseded')) return false;
+  if (filt.flag.has('problems') && !c.problems.some((p) => p.level === 'block')) return false;
+  if (filt.flag.has('stale') && !c.flags.some((f) => f.k === 'stale' || f.k === 'writeback')) return false;
+  if (filt.flag.has('claude') && !c.flags.some((f) => f.k === 'ai')) return false;
+  return true;
+}
+
+const views = {
+  overview() {
+    const g = DATA.gates.map((x) => {
+      const done = x.rows.filter((r) => r.ok).length;
+      return `<section class="panel gate"><h3><span>${x.label}${x.stage === DATA.stage ? ' · now' : ''}</span><span class="small ${x.passed ? '' : 'muted'}">${x.passed ? 'Passed' : `${done} of ${x.rows.length}`}</span></h3>
+        <div class="bar"><i style="width:${Math.round(100 * done / Math.max(1, x.rows.length))}%"></i></div>
+        ${x.passed ? `<p class="small muted">Passed by ${esc(x.passed.by)} · ${esc(String(x.passed.at || '').slice(0, 10))}</p>` : ''}
+        <ul class="rows">${x.rows.map((r) => `<li><span class="${r.ok ? 'y' : 'x'}">${r.ok ? '✓' : '✗'}</span><span>${esc(r.item)}</span></li>`).join('')}</ul></section>`;
+    }).join('');
+    const counts = DATA.stages.map((s) => [s, DATA.cards.filter((c) => c.stage === s).length]);
+    const recent = DATA.cards.flatMap((c) => c.events.map((e) => ({ ...e, c }))).sort((a, b) => b.at.localeCompare(a.at)).slice(0, 12);
+    return `<h2>Where the project stands</h2><div class="grid4">${g}</div>
+      <h3>What the project is set up for</h3><div class="panel"><dl class="kv">${Object.entries(DATA.switches).filter(([, v]) => v).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl></div>
+      <h3>Cards per stage</h3><div class="grid4">${counts.map(([s, n]) => `<div class="panel"><b>${n}</b> <span class="muted">${s}</span></div>`).join('')}</div>
+      <h3>Latest activity</h3><table><tr><th>When (UTC)</th><th>What</th><th>Card</th></tr>${recent.map((e) => `<tr><td class="small">${esc(e.at)}</td><td>${esc(e.action)}${e.detail ? ': ' + esc(e.detail) : ''}</td><td><button class="linkbtn" data-open="${e.c.id}">${e.c.id}</button> ${esc(e.c.title)}</td></tr>`).join('') || '<tr><td colspan="3" class="muted">Nothing yet.</td></tr>'}</table>`;
+  },
+  cards() {
+    const types = [...new Set(DATA.cards.map((c) => c.type))];
+    const chips = (set, items, label) => items.map(([k, v]) => `<button class="chipbtn" data-f="${label}" data-v="${k}" aria-pressed="${set.has(k)}">${esc(v)}</button>`).join('');
+    const f = `<div class="filters" role="group" aria-label="Filter by type">${chips(filt.type, types.map((t) => [t, (DATA.types[t] || {}).name || t]), 'type')}</div>
+      <div class="filters" role="group" aria-label="Filter by status and flags">${chips(filt.status, Object.entries(STATUS), 'status')}${chips(filt.flag, [['needs-signature', 'Not signed yet'], ['problems', 'Needs work'], ['stale', 'Stale or flagged'], ['claude', 'Claude drafted']], 'flag')}</div>`;
+    const cols = DATA.stages.map((s) => {
+      const cs = DATA.cards.filter((c) => c.stage === s && matches(c));
+      const groups = [...new Set(cs.map((c) => c.type))].map((t) => { const g = cs.filter((c) => c.type === t); return `<div class="group"><div class="gh"><span>${esc((DATA.types[t] || {}).name || t)}</span><span>${g.length}</span></div>${g.map((c) => cardBtn(c)).join('')}</div>`; }).join('');
+      return `<section class="col"><h3>${esc(DATA.gates.find((x) => x.stage === s).label)} · ${cs.length}</h3>${groups || '<p class="muted small">Nothing here.</p>'}</section>`;
+    }).join('');
+    return `<h2>All cards</h2>${f}<div class="cols">${cols}</div>`;
+  },
+  chain() {
+    const sel = window.__chainSel;
+    const related = new Set();
+    if (sel) { const up = (id) => { if (related.has(id) || !byId[id]) return; related.add(id); byId[id].links.filter((l) => !['affects', 'contradicts', 'supersedes'].includes(l.kind)).forEach((l) => up(l.id)); }; const down = (id) => { byId[id].inbound.forEach((x) => { if (!related.has(x.id) && !['affects', 'contradicts'].includes(x.kind)) { related.add(x.id); down(x.id); } }); }; up(sel); down(sel); }
+    const lanes = CHAIN.map((t) => { const cs = DATA.cards.filter((c) => c.type === t && c.status !== 'superseded' && matches(c)); if (!cs.length) return ''; return `<div class="lane"><h3>${esc((DATA.types[t] || {}).name || t)} · ${cs.length}</h3>${cs.map((c) => cardBtn(c, sel ? (related.has(c.id) ? 'on' : 'dim') : '').replace('data-open', 'data-chain')).join('')}</div>`; }).join('');
+    return `<h2>Evidence chain</h2><p class="muted">Every card cites the cards it rests on. Pick a card to light up what it rests on and everything that rests on it. Pick it again to open it.${sel ? ` <button class="linkbtn" data-chain-clear>Clear</button>` : ''}</p><div class="chain">${lanes || '<p class="empty">No cards yet.</p>'}</div>`;
+  },
+  decisions() {
+    const d = DATA.cards.filter((c) => c.type === 'DEC' && matches(c));
+    return `<h2>Decisions</h2><p class="muted">One file each. An accepted Decision is never edited: a new one supersedes it, and the cards it affects are flagged.</p><table><tr><th>Decision</th><th>Outcome</th><th>Approver</th><th>Status</th><th>Affects</th></tr>${d.map((c) => `<tr><td><button class="linkbtn" data-open="${c.id}">${c.id}</button> ${esc(c.title)}</td><td>${esc(c.meta.outcome || '')}</td><td>${esc(c.meta.approver || '')}</td><td><span class="tag ${c.status}">${STATUS[c.status] || c.status}</span></td><td>${c.links.filter((l) => l.kind === 'affects').map((l) => `<button class="linkbtn" data-open="${l.id}">${l.id}</button>`).join(' ')}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">No decisions yet.</td></tr>'}</table>`;
+  },
+  inbox() {
+    const t = { REQ: 'Client requests', IDE: 'Ideas and solutions from the client', CON: 'Conflicts between sources', ASM: 'Assumptions', HYP: 'Hypotheses' };
+    return `<h2>Inbox</h2><p class="muted">Things that arrived from outside the research, waiting for a person to place them.</p>${Object.entries(t).map(([k, label]) => { const cs = DATA.cards.filter((c) => c.type === k && c.status !== 'superseded' && matches(c)); return cs.length ? `<h3>${label} · ${cs.length}</h3>${cs.map((c) => cardBtn(c)).join('')}` : ''; }).join('') || '<p class="empty">Inbox empty.</p>'}`;
+  },
+  design() {
+    const ds = DATA.ds;
+    if (!ds) return `<h2>Design system</h2><p class="empty">No design system set up yet. Claude runs the design-system workflow (koru ds catalog).</p>`;
+    return `<h2>${esc(ds.system)} ${esc(ds.version)}</h2>
+      <p>${ds.approved ? (ds.approved.current ? `<span class="tag final">Approved by ${esc(ds.approved.by)}</span>` : '<span class="tag block">Changed since approval</span>') : '<span class="tag warn">Not approved yet</span>'} <span class="tag">${ds.additions} tokens added by Koru</span> <span class="tag">${ds.newComponents.length} new components</span> <a href="${esc(ds.gallery)}" class="small">Open the gallery</a></p>
+      ${ds.blocks.map((b) => `<p class="tag block">${esc(b)}</p>`).join('')}${ds.warns.map((b) => `<p class="small" style="color:var(--warn)">! ${esc(b)}</p>`).join('')}
+      <h3>Contrast (WCAG AA)</h3><table><tr><th>Use</th><th>Pair</th><th>Ratio</th></tr>${ds.contrast.map((c) => `<tr><td>${esc(c.use)}</td><td class="small">${esc(c.fg)} on ${esc(c.bg)}</td><td><span class="tag ${c.ok ? 'final' : /^client markup/.test(c.use) ? 'warn' : 'block'}">${c.ratio}:1</span></td></tr>`).join('')}</table>
+      <h3>Components deliverables may use</h3><table><tr><th>Component</th><th>Status</th><th>Asked for by</th></tr>${ds.components.map((c) => `<tr><td>${esc(c.name)}</td><td>${c.status === 'exists' ? 'in the system' : esc(c.status) + ' · contribute back'}</td><td>${c.spec ? (byId[c.spec] ? `<button class="linkbtn" data-open="${c.spec}">${c.spec}</button>` : esc(c.spec)) : ''}</td></tr>`).join('')}</table>`;
+  },
+  quality() {
+    const revs = DATA.cards.filter((c) => c.type === 'REV');
+    return `<h2>Quality</h2><h3>Browser audits of prototypes</h3><table><tr><th>Prototype</th><th>When</th><th>States</th><th>Blocking</th><th>Warnings</th></tr>${DATA.audits.map((a) => `<tr><td>${esc(a.file)}</td><td class="small">${esc(String(a.at).slice(0, 16))}</td><td>${a.states}</td><td><span class="tag ${a.blocks ? 'block' : 'final'}">${a.blocks}</span></td><td>${a.warns}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">No audits yet (koru audit).</td></tr>'}</table>
+      <h3>Checker reviews</h3><table><tr><th>Review</th><th>Gate</th><th>Checker</th><th>Status</th></tr>${revs.map((r) => `<tr><td><button class="linkbtn" data-open="${r.id}">${r.id}</button></td><td>${esc(r.meta.gate)}</td><td>${esc(r.meta.checker)}</td><td><span class="tag ${r.status}">${STATUS[r.status] || r.status}</span></td></tr>`).join('') || '<tr><td colspan="4" class="muted">No reviews yet.</td></tr>'}</table>
+      <h3>Health</h3><div class="grid4">${Object.entries(DATA.health || {}).map(([k, v]) => `<div class="panel"><div class="small muted">${esc(k.replace(/_/g, ' '))}</div><b>${esc(v)}</b></div>`).join('')}</div>`;
+  },
+  how() {
+    return `<div class="how"><h2>How this board works</h2>
+      <p>The board is a picture of the project's files. Nothing is typed into the board itself, so it cannot drift from the work.</p>
+      <ol>
+        <li><b>Every piece of work is a card.</b> A card is one Markdown file in <code>koru/cards/</code>: a header with its id, type, status and links, then its text. Claude or a person creates one with <code>koru new TYPE "title"</code>.</li>
+        <li><b>Cards cite cards.</b> A Finding cites the Data it came from; an Insight cites Findings; a Screen cites the Direction it implements; a Ticket cites a Screen, a JTBD and a Metric. The Evidence chain view draws these links.</li>
+        <li><b>Claude drafts, people sign.</b> Claude may draft and edit any draft card. Only a person signs (<code>! koru sign</code>), passes a gate or writes an Insight. Signed cards change only by a new version, and accepted Decisions only by a new Decision.</li>
+        <li><b>The rules run on every write.</b> Hooks check each card as it is saved: quotes match their transcripts word for word, links point at real cards, Tickets meet the Definition of Ready, deliverables use only the design system.</li>
+        <li><b>The board is rebuilt from the files</b> with <code>koru index</code> (Claude runs it after changes). With <code>koru board --serve</code> it runs on your computer and you can edit draft cards here; signing still happens in Claude Code, by a person.</li>
+      </ol>
+      <h3>The chain, left to right</h3><div class="flow">${CHAIN.map((t) => `<span>${esc((DATA.types[t] || {}).name || t)}</span>`).join('<b>→</b>')}</div>
+      <h3>Labels</h3><p><span class="tag">Draft</span> being written · <span class="tag review">In review</span> waiting for its signer · <span class="tag final">Signed</span> signed by a person · <span class="tag stale">stale</span> a source changed after this card was signed · <span class="tag writeback">writeback</span> a Decision affects this card · <span class="tag assumption">assumption</span> rests on no evidence yet · <span class="tag ai">Claude drafted</span> Claude wrote or edited it · <span class="tag block">needs work</span> it fails a rule and cannot be signed</p></div>`;
+  },
+};
+
+function render() {
+  $('#nav').innerHTML = VIEWS.map(([k, l]) => { const n = k === 'cards' ? DATA.cards.length : k === 'decisions' ? DATA.cards.filter((c) => c.type === 'DEC').length : k === 'inbox' ? DATA.cards.filter((c) => ['REQ', 'IDE', 'CON', 'ASM', 'HYP'].includes(c.type) && c.status !== 'superseded').length : ''; return `<button data-view="${k}" ${k === view ? 'aria-current="page"' : ''}><span>${l}</span><span class="n">${n}</span></button>`; }).join('');
+  $('#view').innerHTML = views[view]();
+}
+
+let dtab = 'content';
+let editing = false;
+function openCard(id) {
+  const c = byId[id];
+  if (!c) return;
+  window.__open = id;
+  const d = $('#drawer');
+  const up = c.links.map((l) => `<li><span class="tag">${esc(l.kind)}</span> <button class="linkbtn" data-open="${l.id}">${l.id}</button> ${esc(byId[l.id] ? byId[l.id].title : '(missing card)')}${l.pin ? ` <span class="small muted">pinned v${l.pin}</span>` : ''}<div class="small muted">${esc(l.why)}</div></li>`).join('');
+  const down = c.inbound.map((x) => `<li><span class="tag">${esc(x.kind)}</span> <button class="linkbtn" data-open="${x.id}">${x.id}</button> ${esc(byId[x.id].title)}</li>`).join('');
+  const hist = c.history.map((h) => `<tr><td class="small">${esc(h.at)}</td><td>v${h.version}</td><td>${esc(h.by)}</td></tr>`).join('');
+  const ev = c.events.map((e) => `<tr><td class="small">${esc(e.at)}</td><td>${esc(e.action)}${e.detail ? ': ' + esc(e.detail) : ''}</td></tr>`).join('');
+  const tabs = {
+    content: () => editing ? `<label class="small muted" for="et">Title</label><input class="edit" id="et" value="${esc(c.title)}"><label class="small muted" for="eb">Text (Markdown)</label><textarea class="edit" id="eb">${esc(c.body)}</textarea><p class="small muted">Saved through the same checks as Claude's edits. Status, signatures and versions cannot be changed here.</p>` : `<div class="md">${md(c.body) || '<p class="muted">No text yet.</p>'}</div>`,
+    links: () => `<h3>Rests on</h3><ul class="rows">${up || '<li class="muted">Nothing: this card is labelled an assumption.</li>'}</ul><h3>Cited by</h3><ul class="rows">${down || '<li class="muted">No card cites this yet.</li>'}</ul>`,
+    history: () => `<h3>How this card got here</h3><table><tr><th>When (UTC)</th><th>What happened</th></tr>${ev || '<tr><td colspan="2" class="muted">No events logged.</td></tr>'}</table><h3>Saved versions</h3><table><tr><th>When</th><th>Version</th><th>Saved by</th></tr>${hist || '<tr><td colspan="3" class="muted">No earlier versions.</td></tr>'}</table><p class="small muted">File: ${esc(c.file)}</p>`,
+    checks: () => `<ul class="rows">${c.problems.map((p) => `<li><span class="tag ${p.level}">${p.level === 'block' ? 'must fix' : 'check'}</span> ${esc(p.msg)}</li>`).join('') || '<li class="muted">No problems. This card can be signed.</li>'}</ul>`,
+    fields: () => `<dl class="kv">${Object.entries(c.meta).map(([k, v]) => `<dt>${esc(k.replace(/_/g, ' '))}</dt><dd>${esc(Array.isArray(v) ? v.join(', ') : v)}</dd>`).join('')}</dl>`,
+  };
+  const signLine = `! koru sign ${c.id} --name "Your Name"`;
+  const actions = [];
+  if (live && c.status !== 'final' && c.status !== 'superseded') actions.push(editing ? '<button class="btn primary" data-act="save">Save</button><button class="btn" data-act="cancel">Cancel</button>' : '<button class="btn primary" data-act="edit">Edit this draft</button>');
+  if (live && c.status === 'final' && c.type !== 'DEC') actions.push(window.__revising ? '<input class="edit" id="why" aria-label="What changes in the new version" placeholder="What changes in the new version?" style="margin:0;flex:1"><button class="btn primary" data-act="revise-go">Start version ' + (c.version + 1) + '</button>' : '<button class="btn" data-act="revise">Start a new version</button>');
+  if (c.status !== 'final' && c.status !== 'superseded') actions.push(`<button class="btn" data-copy="${esc(signLine)}">Copy the sign command</button>`);
+  actions.push(`<button class="btn" data-copy="${esc(c.file)}">Copy file path</button>`);
+  d.innerHTML = `<div class="dh"><div class="row"><span class="pill">${c.id} · ${esc(c.typeName)}</span><span class="tag ${c.status}">${STATUS[c.status] || c.status}</span><span class="small muted">v${c.version}${c.meta.signed_by ? ' · signed by ' + esc(c.meta.signed_by) : c.status === 'superseded' ? '' : ' · not signed yet'}</span><button class="close" data-act="close" aria-label="Close">✕</button></div><h2 id="dtitle">${esc(c.title)}</h2>${c.flags.map((f) => `<span class="tag ${f.k}">${esc(f.t)}</span>`).join('')}</div>
+    <div class="dtabs" role="tablist">${[['content', 'Content'], ['links', `Links (${c.links.length + c.inbound.length})`], ['history', 'History'], ['checks', `Checks (${c.problems.length})`], ['fields', 'Fields']].map(([k, l]) => `<button role="tab" data-dtab="${k}" aria-selected="${k === dtab}">${l}</button>`).join('')}</div>
+    <div class="db">${tabs[dtab]()}</div><div class="actions">${actions.join('')}</div>`;
+  d.hidden = false;
+  $('.close', d).focus();
+}
+
+function toast(t) { const el = document.createElement('div'); el.className = 'toast'; el.setAttribute('role', 'status'); el.textContent = t; document.body.append(el); setTimeout(() => el.remove(), 3200); }
+async function api(url, body) { const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }); const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || r.statusText); return j; }
+
+document.addEventListener('click', async (e) => {
+  const t = e.target.closest('button,a');
+  if (!t) return;
+  if (t.dataset.view) { view = t.dataset.view; render(); $('#view').focus(); return; }
+  if (t.dataset.open) { dtab = 'content'; editing = false; window.__revising = false; openCard(t.dataset.open); return; }
+  if (t.dataset.chain) { if (window.__chainSel === t.dataset.chain) { openCard(t.dataset.chain); } else { window.__chainSel = t.dataset.chain; render(); } return; }
+  if ('chainClear' in t.dataset) { window.__chainSel = null; render(); return; }
+  if (t.dataset.f) { const s = filt[t.dataset.f]; s.has(t.dataset.v) ? s.delete(t.dataset.v) : s.add(t.dataset.v); render(); return; }
+  if (t.dataset.dtab) { dtab = t.dataset.dtab; openCard(window.__open); return; }
+  if (t.dataset.copy) { try { await navigator.clipboard.writeText(t.dataset.copy); toast('Copied. Paste it into Claude Code.'); } catch (err) { toast(t.dataset.copy); } return; }
+  const act = t.dataset.act;
+  if (act === 'close') { $('#drawer').hidden = true; editing = false; return; }
+  if (act === 'edit') { editing = true; dtab = 'content'; openCard(window.__open); return; }
+  if (act === 'cancel') { editing = false; openCard(window.__open); return; }
+  if (act === 'save') { try { await api('/api/save', { id: window.__open, title: $('#et').value, body: $('#eb').value }); toast('Saved. The board is refreshing.'); setTimeout(() => location.reload(), 600); } catch (err) { toast(err.message); } return; }
+  if (act === 'revise') { window.__revising = true; openCard(window.__open); $('#why').focus(); return; }
+  if (act === 'revise-go') { const reason = $('#why').value.trim(); if (!reason) { toast('Say what changes first.'); return; } try { await api('/api/revise', { id: window.__open, reason }); location.reload(); } catch (err) { toast(err.message); } }
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#drawer').hidden) { $('#drawer').hidden = true; editing = false; } });
+$('#q').addEventListener('input', () => { if (view === 'overview' || view === 'how' || view === 'design' || view === 'quality') view = 'cards'; render(); });
+
+$('#client').textContent = DATA.client;
+$('#stage').textContent = 'Now: ' + DATA.stage;
+$('#mode').textContent = 'Read-only · built ' + DATA.generated.slice(0, 16).replace('T', ' ') + ' UTC';
+$('#mode').className = 'pill static';
+render();
+if (location.protocol.startsWith('http')) fetch('/api/ping').then((r) => r.ok && r.json()).then((j) => { if (j && j.koru) { live = true; $('#mode').textContent = 'Live on your computer: drafts can be edited'; $('#mode').className = 'pill live'; } }).catch(() => {});
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "koru-audit-tools",
+  "private": true,
+  "description": "Optional tools for koru audit (Harden). Install once: npm --prefix <plugin>/tools install && npx --prefix <plugin>/tools playwright install chromium",
+  "dependencies": {
+    "axe-core": "4.10.3",
+    "playwright": "1.63.0"
+  }
+}

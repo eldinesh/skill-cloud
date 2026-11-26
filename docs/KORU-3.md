@@ -98,6 +98,15 @@ koru/
 
 Each project picks one or more by the kind of work: a standalone HTML prototype, Figma frames, full front-end code with tickets. All render from the same Screen and State cards. Client shares go out as password-protected pages: `koru share` encrypts the file, records which card versions it shows, and, when `KORU_SHARE_URL` and `KORU_SHARE_TOKEN` are set, posts it to Koru's hosted service and prints the link. The service must accept a POST of the HTML and answer `{"url": "…"}`.
 
+## Design system, quality and build (alpha.2)
+
+- `koru ds`: one design system per project. Extend the client's own (`ds extend --css …`), adopt one of ten open-source systems exactly (`ds catalog`, `ds adopt <id>`: shadcn/ui, Material 3, Carbon, Fluent 2, Primer, Ant Design, Spectrum, GOV.UK, USWDS, NHS.UK), or build one from `koru-neutral`. Tokens (W3C DTCG) are the only place values live; `components.json` is the only list of components. A person approves it (`! koru ds approve`); any change needs a new approval.
+- The design-system hook lints every write to `koru/deliverables/` and `frontend_dir`: raw colours, off-scale sizes, Tailwind's own palette and arbitrary values, text contrast under AA, bare controls, components outside the manifest, other UI libraries, images without alt, clickable divs, native dialogs.
+- `koru audit`: opens each prototype in a real browser in every declared state at four screen sizes and runs axe-core (WCAG 2.2 A/AA), keyboard order and focus, target size and overflow checks. Needs `npm --prefix tools install && npx --prefix tools playwright install chromium` once.
+- `koru scaffold`: the front-end foundation from the design system and the cards (react-tailwind, react-library): tokens, a ui layer with stories and axe tests per state, features per Screen with data contracts and state test ids, ESLint/Stylelint/TypeScript rules that keep features on the system.
+- `koru board --serve`: the board on your computer; draft cards can be edited in the browser through the same checks. Signing stays in Claude Code.
+- `koru discard ID`: remove a draft made by mistake (never signed, nothing cites it).
+
 ## Not built yet
 
 - **Koru's hosted service itself.** The plugin side is done (encryption, share log, publishing call); the service that stores the pages and serves the links is a separate build.

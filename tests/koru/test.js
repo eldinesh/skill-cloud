@@ -163,12 +163,12 @@ t('Problem, HMW and Brief chain', () => {
   koru(['new', 'HMW', 'How might we let adjusters trust and correct assignment in one step', '--link', 'reframes PRB-001: trust gap']);
   koru(['new', 'BRF', 'Trusted claim assignment']);
   fill('BRF-001', { Problem: 'PRB-001', Outcome: 'Right first time assignment', Scope: 'Assignment review flow' });
-  has(koru(['sign', 'PRB-001', '--name', 'Dee', '--role', 'engagement lead'], true), 'Sign these first, in this order');
+  has(koru(['sign', 'PRB-001', '--name', 'Avery', '--role', 'engagement lead'], true), 'Sign these first, in this order');
   koru(['sign', 'JOB-001', '--name', 'Sam', '--role', 'research owner']);
-  koru(['sign', 'PRB-001', '--name', 'Dee', '--role', 'engagement lead']);
+  koru(['sign', 'PRB-001', '--name', 'Avery', '--role', 'engagement lead']);
   koru(['sign', 'HMW-001', '--name', 'Lee', '--role', 'design lead']);
   has(koru(['sign', 'BRF-001', '--cosign', '--name', 'Pat'], true), 'not final yet');
-  koru(['sign', 'BRF-001', '--name', 'Dee', '--role', 'engagement lead']);
+  koru(['sign', 'BRF-001', '--name', 'Avery', '--role', 'engagement lead']);
   koru(['sign', 'BRF-001', '--cosign', '--name', 'Pat']);
 });
 t('an open Conflict blocks the Frame gate', () => {
@@ -192,12 +192,64 @@ t('the gate needs a checker review newer than the last change', () => {
   fs.writeFileSync(ctxFile, ctxText);
 });
 t('Claude cannot pass a gate; a signer can', () => {
-  eq(decision(guard('PreToolUse', { tool_name: 'Bash', tool_input: { command: 'koru gate frame --pass --name Dee --role "engagement lead"' } })), 'deny');
+  eq(decision(guard('PreToolUse', { tool_name: 'Bash', tool_input: { command: 'koru gate frame --pass --name Avery --role "engagement lead"' } })), 'deny');
   has(koru(['gate', 'frame'], true), '✗ Review signed by engagement lead, research owner');
-  koru(['sign', 'REV-001', '--name', 'Dee', '--role', 'engagement lead']);
+  koru(['sign', 'REV-001', '--name', 'Avery', '--role', 'engagement lead']);
   koru(['sign', 'REV-001', '--name', 'Sam', '--role', 'research owner']);
   has(koru(['gate', 'frame']), 'Ready to pass');
-  has(koru(['gate', 'frame', '--pass', '--name', 'Dee', '--role', 'engagement lead']), 'Frame gate passed');
+  has(koru(['gate', 'frame', '--pass', '--name', 'Avery', '--role', 'engagement lead']), 'Frame gate passed');
+});
+
+console.log('\nDesign system');
+const DS = require(path.join(REPO, 'lib', 'ds.js'));
+const write = (rel, content) => decision(guard('PreToolUse', { tool_name: 'Write', tool_input: { file_path: path.join(dir, rel), content } }));
+const CLEAN = (body) => `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Queue</title></head><body class="k-root"><main style="padding: var(--space-6)">${body}</main></body></html>`;
+t('a deliverable is refused until a design system exists (hook)', () => eq(write('koru/deliverables/q/index.html', CLEAN('<h1>Queue</h1>')), 'deny'));
+t('the catalogue lists the seed and ten open-source systems', () => { const out = koru(['ds', 'catalog']); for (const id of ['koru-neutral', 'shadcn', 'material', 'carbon', 'fluent', 'primer', 'antd', 'spectrum', 'govuk', 'uswds', 'nhsuk']) has(out, id); });
+t('adopting koru-neutral gives AA-checked tokens and a component manifest', () => {
+  koru(['ds', 'adopt', 'koru-neutral']);
+  const out = koru(['ds', 'check']);
+  has(out, 'body text'); has(out, 'Not approved yet');
+  if (/✗\s+\d/.test(out)) throw new Error(`a seed contrast pair fails:\n${out}`);
+});
+t('Claude cannot approve the design system; a person can', () => {
+  eq(decision(guard('PreToolUse', { tool_name: 'Bash', tool_input: { command: 'koru ds approve --name Lee' } })), 'deny');
+  has(koru(['ds', 'approve', '--name', 'Lee', '--role', 'design lead']), 'Approved');
+});
+t('the hook refuses raw colours, off-scale sizes, bare controls and unknown components', () => {
+  const bad = CLEAN('<div style="color:#333;padding:13px"><button>Go</button><div data-ds="Carousel"></div></div>');
+  const r = guard('PreToolUse', { tool_name: 'Write', tool_input: { file_path: path.join(dir, 'koru/deliverables/q/index.html'), content: DS.inlineInto(dir, bad) } });
+  const why = r.hookSpecificOutput.permissionDecisionReason;
+  has(why, 'raw-colour'); has(why, 'off-scale'); has(why, 'bare-control'); has(why, 'unknown-component');
+});
+t('a prototype built from tokens and system components is allowed', () => {
+  const good = DS.inlineInto(dir, CLEAN('<h1>Queue</h1><div data-ds="Card" class="k-card"><button data-ds="Button" class="k-btn k-btn--primary">Pick next claim</button></div>'));
+  eq(write('koru/deliverables/q/index.html', good), 'allow');
+  fs.mkdirSync(path.join(dir, 'koru/deliverables/q'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'koru/deliverables/q/index.html'), good);
+  has(koru(['ds', 'lint']), '0 blocking');
+});
+t('old problems do not block a fix, new ones do', () => {
+  const f = path.join(dir, 'koru/deliverables/q/index.html');
+  const withOld = fs.readFileSync(f, 'utf8').replace('<h1>Queue</h1>', '<h1 style="color:#222">Queue</h1>');
+  fs.writeFileSync(f, withOld);
+  eq(decision(guard('PreToolUse', { tool_name: 'Edit', tool_input: { file_path: f, old_string: 'Pick next claim', new_string: 'Pick the next claim' } })), 'allow');
+  eq(decision(guard('PreToolUse', { tool_name: 'Edit', tool_input: { file_path: f, old_string: 'Pick next claim', new_string: 'Pick <span style="color:#f00">next</span> claim' } })), 'deny');
+  fs.writeFileSync(f, withOld.replace('<h1 style="color:#222">Queue</h1>', '<h1>Queue</h1>'));
+});
+t('a missing component needs the card that asks for it; a snowflake needs a Decision', () => {
+  has(koru(['ds', 'component', 'add', 'ReasonChip'], true), 'needs the card');
+  has(koru(['ds', 'component', 'add', 'ReasonChip', '--status', 'snowflake', '--spec', 'SCR-001'], true), 'needs the Decision');
+});
+t("extending a client system catches its own contrast failures and fills gaps as additions", () => {
+  const c = fs.mkdtempSync(path.join(os.tmpdir(), 'koru-ds-'));
+  spawnSync('node', [KORU, 'init', '--client', 'Client'], { cwd: c });
+  fs.writeFileSync(path.join(c, 'tokens.css'), ':root{--brand-500:#2F80ED;--brand-600:#1F6FD9;--brand-700:#1858AD;--brand-50:#EEF5FE;--ink-900:#1A2433;--ink-700:#3D4A5C;--ink-500:#6B7789;--ink-300:#B6BFCC;--ink-100:#EEF1F5;--danger-500:#D64545;--danger-50:#FDEDED;}');
+  fs.writeFileSync(path.join(c, 'components.md'), '<button class="bg-brand-500 text-white px-4 py-2">Submit</button>');
+  const out = spawnSync('node', [KORU, 'ds', 'extend', '--css', 'tokens.css', '--components-doc', 'components.md', '--name', 'Client UI', '--version', '1.0.0', '--components', 'Button,Card', '--tailwind'], { cwd: c, encoding: 'utf8' }).stdout;
+  has(out, 'text-white on bg-brand-500 is 3.87:1'); has(out, 'color.brand.600 passes'); has(out, 'danger.700 added'); has(out, 'success.700 added');
+  const lint = DS.lintText(c, path.join(c, 'koru/deliverables/x.html'), '<button data-ds="Button" class="bg-brand-500 text-white">Go</button>');
+  if (!lint.some((x) => x.rule === 'contrast')) throw new Error('the lint did not refuse white on brand-500');
 });
 
 console.log('\nExplore');
@@ -214,11 +266,11 @@ t('thresholds must be saved before results', () => {
 });
 t('a Decision has one Approver and factors before options', () => {
   koru(['decide', 'new', 'Which direction goes forward', '--link', 'cites DIR-001: chosen']);
-  fill('DEC-001', { Question: 'Which direction?', Factors: 'Trust, effort, fit', Options: '| A | high | |', Outcome: 'DIR-001' }, { approver: 'Dee, Lee' });
+  fill('DEC-001', { Question: 'Which direction?', Factors: 'Trust, effort, fit', Options: '| A | high | |', Outcome: 'DIR-001' }, { approver: 'Avery, Lee' });
   has(koru(['check', 'DEC-001'], true), 'exactly one Approver');
-  fill('DEC-001', {}, { approver: 'Dee', outcome: 'Go with the explainable queue', client_commitment: 'Pat committed at Playback Zero 2026-11-26' });
+  fill('DEC-001', {}, { approver: 'Avery', outcome: 'Go with the explainable queue', client_commitment: 'Pat committed at Playback Zero 2026-11-26' });
   has(koru(['sign', 'DEC-001', '--name', 'Lee', '--role', 'design lead'], true), 'Only the Approver');
-  koru(['sign', 'DEC-001', '--name', 'Dee']);
+  koru(['sign', 'DEC-001', '--name', 'Avery']);
   fs.writeFileSync(path.join(dir, 'f2.md'), '1. [DIR-001] Prototype lacks the wrong-suggestion case — fixed\n');
   koru(['review', 'explore', '--checker', 'direction-checker', '--file', 'f2.md']);
   koru(['sign', 'REV-002', '--name', 'Lee', '--role', 'design lead']);
@@ -229,7 +281,7 @@ t('an accepted Decision cannot be edited (hook)', () => eq(claudeEdit('DEC-001',
 
 console.log('\nHarden');
 t('unclassified elements and blank state cells block the gate', () => {
-  koru(['new', 'SCR', 'Assignment review', '--link', 'implements DIR-001: chosen', '--field', 'flow_step=1', '--field', 'ds_version=acme-ds@4.1']);
+  koru(['new', 'SCR', 'Assignment review', '--link', 'implements DIR-001: chosen', '--field', 'flow_step=1', '--field', 'ds_version=1.0.0']);
   fill('SCR-001', { Elements: '| Element | Class | Note |\n| --- | --- | --- |\n| Queue table | use | |\n| Reason chip | |  |' });
   koru(['new', 'STA', 'Assignment review · adjuster · empty', '--field', 'screen=SCR-001', '--field', 'role=adjuster', '--field', 'state=first-use empty']);
   koru(['new', 'STA', 'Assignment review · adjuster · error', '--field', 'screen=SCR-001', '--field', 'role=adjuster', '--field', 'state=page error', '--field', 'resolution=n/a']);
@@ -240,7 +292,7 @@ t('unclassified elements and blank state cells block the gate', () => {
   fill('STA-002', {}, { resolution: 'n/a: the review page has no page-level load' });
   koru(['new', 'MET', 'Reassignment rate', '--field', 'level=core', '--field', 'threshold=under 5% of claims reassigned']);
   fill('MET-001', { 'Feedback loop': 'Weekly reassignment log review.' });
-  koru(['sign', 'MET-001', '--name', 'Dee', '--role', 'engagement lead']);
+  koru(['sign', 'MET-001', '--name', 'Avery', '--role', 'engagement lead']);
   koru(['sign', 'SCR-001', 'STA-001', 'STA-002', '--name', 'Lee', '--role', 'design lead']);
   fs.writeFileSync(path.join(dir, 'f3.md'), '1. [STA-002] n/a reason is thin — accepted risk\n');
   koru(['review', 'harden', '--checker', 'harden-checker', '--file', 'f3.md']);
@@ -250,6 +302,14 @@ t('the Harden review needs all three signers', () => {
   has(koru(['sign', 'REV-003', '--name', 'Eng', '--role', 'engineer']), 'Still needed');
   koru(['sign', 'REV-003', '--name', 'Rob', '--role', 'rulebook owner']);
   has(koru(['sign', 'REV-003', '--name', 'Lee', '--role', 'design lead']), 'Final');
+  const tools = fs.existsSync(path.join(REPO, 'tools', 'node_modules', 'axe-core'));
+  if (tools) has(koru(['audit', '--quick']), '0 blocking');
+  else {
+    // Without a browser installed, record the audit the way koru audit would (the gate still checks the file hash).
+    const html = fs.readFileSync(path.join(dir, 'koru/deliverables/q/index.html'), 'utf8');
+    fs.appendFileSync(path.join(dir, 'koru/state/audits.jsonl'), JSON.stringify({ file: 'koru/deliverables/q/index.html', at: new Date().toISOString(), hash: require('crypto').createHash('sha256').update(html).digest('hex').slice(0, 16), blocks: 0, warns: 0, states: 1 }) + '\n');
+    console.log('      (browser tools not installed: audit recorded without running; npm --prefix tools install)');
+  }
   koru(['gate', 'harden', '--pass', '--name', 'Lee', '--role', 'design lead']);
 });
 
@@ -297,9 +357,9 @@ t('revising the flagged Screen makes its Ticket stale once re-signed', () => {
 });
 
 t('a design-system version bump flags pinned Screens', () => {
-  fs.writeFileSync(path.join(dir, 'koru/design-system.md'), '---\nversion: acme-ds@4.2\n---\n# DS\n');
-  has(koru(['check', 'SCR-001'], true), 'now acme-ds@4.2');
-  fs.writeFileSync(path.join(dir, 'koru/design-system.md'), '---\nversion: acme-ds@4.1\n---\n# DS\n');
+  fs.writeFileSync(path.join(dir, 'koru/design-system.md'), '---\nversion: 1.1.0\n---\n# DS\n');
+  has(koru(['check', 'SCR-001'], true), 'now 1.1.0');
+  fs.writeFileSync(path.join(dir, 'koru/design-system.md'), '---\nversion: 1.0.0\n---\n# DS\n');
 });
 
 console.log('\nBoard, sharing and provenance');

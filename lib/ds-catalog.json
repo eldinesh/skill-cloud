@@ -1,0 +1,590 @@
+{
+  "_about": "Design systems Koru can adopt exactly. Versions are pinned; check npm before a new engagement and bump on purpose (a version bump flags pinned Screens). Licences checked on npm 2026-11-26. Brand assets (logos, crests, restricted fonts) are never part of the adoption: the licence covers the code, not the brand.",
+  "systems": {
+    "koru-neutral": {
+      "name": "Koru neutral",
+      "licence": "Koru internal",
+      "use_when": "Explore prototypes judged on behaviour before paint, or a client with no system who has not chosen one yet. Includes the AI patterns (suggestion, confidence, explanation, undo) most libraries lack.",
+      "stack": [
+        "html",
+        "tailwind",
+        "react"
+      ],
+      "prototype": {
+        "mode": "inline",
+        "css": [
+          "koru-neutral.css"
+        ]
+      },
+      "frontend": {
+        "packages": [],
+        "notes": "Tokens build to CSS variables and a Tailwind preset; components are built in the project's ui layer from the recipes in koru-neutral.css."
+      },
+      "match": {
+        "data": true
+      },
+      "components": [
+        "Button",
+        "IconButton",
+        "TextField",
+        "Select",
+        "Checkbox",
+        "Radio",
+        "Switch",
+        "SearchField",
+        "Table",
+        "Badge",
+        "Alert",
+        "Toast",
+        "Dialog",
+        "Tabs",
+        "Card",
+        "Avatar",
+        "Timeline",
+        "Skeleton",
+        "EmptyState",
+        "AISuggestion",
+        "Confidence",
+        "Explanation",
+        "UndoBar"
+      ],
+      "restrictions": ""
+    },
+    "shadcn": {
+      "name": "shadcn/ui",
+      "licence": "MIT",
+      "home": "https://ui.shadcn.com",
+      "use_when": "React and Tailwind teams who want to own the component code. Built on Radix primitives, so keyboard and ARIA behaviour come for free.",
+      "stack": [
+        "react",
+        "tailwind"
+      ],
+      "prototype": {
+        "mode": "bundle",
+        "notes": "Vite + React + vite-plugin-singlefile builds one standalone HTML file with the real components."
+      },
+      "frontend": {
+        "packages": [
+          "tailwindcss",
+          "class-variance-authority",
+          "@radix-ui/react-slot",
+          "lucide-react"
+        ],
+        "init": "npx shadcn@latest init",
+        "add": "npx shadcn@latest add button input select checkbox table badge dialog tabs card sonner",
+        "imports": [
+          "@/components/ui/"
+        ],
+        "tokens": "CSS variables in the global stylesheet (--background, --foreground, --primary, --primary-foreground, --muted, --border, --ring, --destructive \u2026)"
+      },
+      "match": {
+        "data": true,
+        "dataSlot": true
+      },
+      "components": [
+        "Button",
+        "Input",
+        "Select",
+        "Checkbox",
+        "RadioGroup",
+        "Switch",
+        "Table",
+        "Badge",
+        "Alert",
+        "Sonner (toast)",
+        "Dialog",
+        "AlertDialog",
+        "Tabs",
+        "Card",
+        "Avatar",
+        "Command (search)",
+        "Popover",
+        "Tooltip",
+        "Skeleton",
+        "Sheet"
+      ],
+      "restrictions": ""
+    },
+    "material": {
+      "name": "Material Design 3",
+      "licence": "Apache-2.0 (@material/web) \u00b7 MIT (@mui/material)",
+      "home": "https://m3.material.io",
+      "use_when": "Consumer-feeling products, Android-adjacent clients, teams that want a documented, widely known system.",
+      "stack": [
+        "html",
+        "web components",
+        "react"
+      ],
+      "prototype": {
+        "mode": "cdn",
+        "js_module": [
+          "https://cdn.jsdelivr.net/npm/@material/web@2.5.0/all.js/+esm"
+        ],
+        "notes": "Material Web is in maintenance mode; fine for prototypes, use MUI for React builds."
+      },
+      "frontend": {
+        "packages": [
+          "@mui/material@9.6.0",
+          "@emotion/react",
+          "@emotion/styled"
+        ],
+        "imports": [
+          "@mui/material"
+        ],
+        "tokens": "createTheme() palette, typography, spacing, shape"
+      },
+      "match": {
+        "tagPrefixes": [
+          "md-"
+        ],
+        "data": true
+      },
+      "components": [
+        "md-filled-button",
+        "md-outlined-button",
+        "md-text-button",
+        "md-icon-button",
+        "md-outlined-text-field",
+        "md-outlined-select",
+        "md-checkbox",
+        "md-radio",
+        "md-switch",
+        "md-chip-set",
+        "md-dialog",
+        "md-tabs",
+        "md-list",
+        "md-menu",
+        "md-linear-progress"
+      ],
+      "restrictions": "No Google product logos or Google Sans."
+    },
+    "carbon": {
+      "name": "IBM Carbon",
+      "licence": "Apache-2.0",
+      "home": "https://carbondesignsystem.com",
+      "use_when": "Dense enterprise and data-heavy products; strong data table, accessibility and theming (white, g10, g90, g100).",
+      "stack": [
+        "html",
+        "react",
+        "web components"
+      ],
+      "prototype": {
+        "mode": "cdn",
+        "css": [
+          "https://cdn.jsdelivr.net/npm/@carbon/styles@1.120.0/css/styles.min.css"
+        ],
+        "notes": "Class markup (cds--btn, cds--text-input, cds--data-table) styled by the official stylesheet."
+      },
+      "frontend": {
+        "packages": [
+          "@carbon/react@1.121.0",
+          "@carbon/styles@1.120.0"
+        ],
+        "imports": [
+          "@carbon/react",
+          "@carbon/icons-react"
+        ],
+        "tokens": "Carbon themes and tokens via @carbon/styles (Sass) or CSS custom properties --cds-*"
+      },
+      "match": {
+        "classPrefixes": [
+          "cds--"
+        ],
+        "tagPrefixes": [
+          "cds-"
+        ],
+        "data": true
+      },
+      "components": [
+        "Button",
+        "TextInput",
+        "Select",
+        "Checkbox",
+        "RadioButton",
+        "Toggle",
+        "Search",
+        "DataTable",
+        "Tag",
+        "InlineNotification",
+        "ToastNotification",
+        "Modal",
+        "Tabs",
+        "Tile",
+        "ProgressIndicator",
+        "Loading",
+        "SkeletonText"
+      ],
+      "restrictions": "IBM Plex is OFL and fine to use; no IBM logo."
+    },
+    "fluent": {
+      "name": "Microsoft Fluent 2",
+      "licence": "MIT",
+      "home": "https://fluent2.microsoft.design",
+      "use_when": "Products that live next to Microsoft 365 or Teams, enterprise admin tools.",
+      "stack": [
+        "react",
+        "web components"
+      ],
+      "prototype": {
+        "mode": "bundle",
+        "notes": "Vite + React + vite-plugin-singlefile with @fluentui/react-components."
+      },
+      "frontend": {
+        "packages": [
+          "@fluentui/react-components@9.75.3"
+        ],
+        "imports": [
+          "@fluentui/react-components",
+          "@fluentui/react-icons"
+        ],
+        "tokens": "FluentProvider theme (webLightTheme) and tokens.* in makeStyles"
+      },
+      "match": {
+        "tagPrefixes": [
+          "fluent-"
+        ],
+        "data": true
+      },
+      "components": [
+        "Button",
+        "Input",
+        "Dropdown",
+        "Checkbox",
+        "RadioGroup",
+        "Switch",
+        "SearchBox",
+        "Table / DataGrid",
+        "Badge",
+        "MessageBar",
+        "Toast",
+        "Dialog",
+        "TabList",
+        "Card",
+        "Avatar",
+        "Spinner",
+        "Skeleton"
+      ],
+      "restrictions": "Segoe UI is licensed with Windows; fall back to the system font stack on other platforms. No Microsoft logos."
+    },
+    "primer": {
+      "name": "GitHub Primer",
+      "licence": "MIT",
+      "home": "https://primer.style",
+      "use_when": "Developer tools, technical and settings-heavy products.",
+      "stack": [
+        "html",
+        "react"
+      ],
+      "prototype": {
+        "mode": "cdn",
+        "css": [
+          "https://cdn.jsdelivr.net/npm/@primer/primitives@11.10.0/dist/css/functional/themes/light.css",
+          "https://cdn.jsdelivr.net/npm/@primer/css@22.3.3/dist/primer.css"
+        ]
+      },
+      "frontend": {
+        "packages": [
+          "@primer/react@38.47.0",
+          "@primer/primitives@11.10.0"
+        ],
+        "imports": [
+          "@primer/react",
+          "@primer/octicons-react"
+        ],
+        "tokens": "@primer/primitives CSS variables (--fgColor-*, --bgColor-*, --borderColor-*, --base-size-*)"
+      },
+      "match": {
+        "classPrefixes": [
+          "btn",
+          "form-",
+          "Box",
+          "Label",
+          "State",
+          "flash",
+          "Subhead",
+          "UnderlineNav",
+          "Counter",
+          "blankslate",
+          "TimelineItem",
+          "Overlay"
+        ],
+        "data": true
+      },
+      "components": [
+        "Button (btn)",
+        "TextInput (form-control)",
+        "Select (form-select)",
+        "Checkbox",
+        "Radio",
+        "ToggleSwitch",
+        "Label",
+        "State",
+        "Flash",
+        "Dialog (Overlay)",
+        "UnderlineNav",
+        "Box",
+        "Avatar",
+        "Timeline",
+        "Blankslate",
+        "Spinner"
+      ],
+      "restrictions": "No GitHub logos or Mona Sans branding."
+    },
+    "antd": {
+      "name": "Ant Design",
+      "licence": "MIT",
+      "home": "https://ant.design",
+      "use_when": "Back-office and admin products with many forms and tables; very complete component set.",
+      "stack": [
+        "react"
+      ],
+      "prototype": {
+        "mode": "bundle",
+        "notes": "Vite + React + vite-plugin-singlefile with antd."
+      },
+      "frontend": {
+        "packages": [
+          "antd@6.7.2"
+        ],
+        "imports": [
+          "antd",
+          "@ant-design/icons"
+        ],
+        "tokens": "ConfigProvider theme.token (colorPrimary, borderRadius, fontSize \u2026) and component tokens"
+      },
+      "match": {
+        "classPrefixes": [
+          "ant-"
+        ],
+        "data": true
+      },
+      "components": [
+        "Button",
+        "Input",
+        "Select",
+        "Checkbox",
+        "Radio",
+        "Switch",
+        "AutoComplete",
+        "Table",
+        "Tag",
+        "Badge",
+        "Alert",
+        "message / notification",
+        "Modal",
+        "Tabs",
+        "Card",
+        "Avatar",
+        "Timeline",
+        "Skeleton",
+        "Empty"
+      ],
+      "restrictions": ""
+    },
+    "spectrum": {
+      "name": "Adobe Spectrum",
+      "licence": "Apache-2.0",
+      "home": "https://spectrum.adobe.com",
+      "use_when": "Creative and media tools, accessibility-critical React apps (React Aria underneath).",
+      "stack": [
+        "react",
+        "web components"
+      ],
+      "prototype": {
+        "mode": "cdn",
+        "js_module": [
+          "https://cdn.jsdelivr.net/npm/@spectrum-web-components/bundle@1.12.6/elements.js/+esm"
+        ],
+        "notes": "Wrap the page in <sp-theme system=\"spectrum\" color=\"light\" scale=\"medium\">."
+      },
+      "frontend": {
+        "packages": [
+          "@adobe/react-spectrum@3.47.7"
+        ],
+        "imports": [
+          "@adobe/react-spectrum",
+          "@react-spectrum/"
+        ],
+        "tokens": "Provider theme={defaultTheme}; Spectrum tokens as --spectrum-* variables"
+      },
+      "match": {
+        "tagPrefixes": [
+          "sp-"
+        ],
+        "data": true
+      },
+      "components": [
+        "sp-button",
+        "sp-action-button",
+        "sp-textfield",
+        "sp-picker",
+        "sp-checkbox",
+        "sp-radio",
+        "sp-switch",
+        "sp-search",
+        "sp-table",
+        "sp-badge",
+        "sp-toast",
+        "sp-dialog",
+        "sp-tabs",
+        "sp-card",
+        "sp-avatar",
+        "sp-progress-circle"
+      ],
+      "restrictions": "Adobe Clean is not licensed for outside use; Spectrum falls back to Source Sans. No Adobe logos."
+    },
+    "govuk": {
+      "name": "GOV.UK Design System",
+      "licence": "MIT",
+      "home": "https://design-system.service.gov.uk",
+      "use_when": "Public-service and form-heavy transactional flows; the most researched form patterns available.",
+      "stack": [
+        "html",
+        "nunjucks"
+      ],
+      "prototype": {
+        "mode": "cdn",
+        "css": [
+          "https://cdn.jsdelivr.net/npm/govuk-frontend@6.6.0/dist/govuk/govuk-frontend.min.css"
+        ],
+        "js_module": [
+          "https://cdn.jsdelivr.net/npm/govuk-frontend@6.6.0/dist/govuk/govuk-frontend.min.js"
+        ],
+        "init": "import { initAll } from '\u2026/govuk-frontend.min.js'; initAll(); add class govuk-template--rendered / govuk-frontend-supported to body"
+      },
+      "frontend": {
+        "packages": [
+          "govuk-frontend@6.6.0"
+        ],
+        "imports": [
+          "govuk-frontend"
+        ],
+        "tokens": "Sass settings ($govuk-brand-colour \u2026) and govuk- classes"
+      },
+      "match": {
+        "classPrefixes": [
+          "govuk-"
+        ],
+        "data": true
+      },
+      "components": [
+        "govuk-button",
+        "govuk-input",
+        "govuk-select",
+        "govuk-checkboxes",
+        "govuk-radios",
+        "govuk-table",
+        "govuk-tag",
+        "govuk-notification-banner",
+        "govuk-error-summary",
+        "govuk-summary-list",
+        "govuk-tabs",
+        "govuk-details",
+        "govuk-panel",
+        "govuk-task-list"
+      ],
+      "restrictions": "Outside GOV.UK services: no crown, no GOV.UK logotype, no GDS Transport font (the stylesheet falls back to Arial). Use the patterns, not the brand."
+    },
+    "uswds": {
+      "name": "U.S. Web Design System",
+      "licence": "Public domain (CC0 outside the U.S.); bundled fonts under OFL",
+      "home": "https://designsystem.digital.gov",
+      "use_when": "Public-sector and accessibility-first services; strong forms, tables and process lists.",
+      "stack": [
+        "html"
+      ],
+      "prototype": {
+        "mode": "cdn",
+        "css": [
+          "https://cdn.jsdelivr.net/npm/@uswds/uswds@3.14.0/dist/css/uswds.min.css"
+        ],
+        "js": [
+          "https://cdn.jsdelivr.net/npm/@uswds/uswds@3.14.0/dist/js/uswds.min.js"
+        ]
+      },
+      "frontend": {
+        "packages": [
+          "@uswds/uswds@3.14.0"
+        ],
+        "imports": [
+          "@uswds/uswds"
+        ],
+        "tokens": "USWDS design tokens via Sass settings (theme colour, spacing units, type scale)"
+      },
+      "match": {
+        "classPrefixes": [
+          "usa-"
+        ],
+        "data": true
+      },
+      "components": [
+        "usa-button",
+        "usa-input",
+        "usa-select",
+        "usa-checkbox",
+        "usa-radio",
+        "usa-combo-box",
+        "usa-table",
+        "usa-tag",
+        "usa-alert",
+        "usa-modal",
+        "usa-card",
+        "usa-step-indicator",
+        "usa-process-list",
+        "usa-summary-box"
+      ],
+      "restrictions": "The official U.S. government banner (usa-banner) and seals are only for .gov and .mil sites."
+    },
+    "nhsuk": {
+      "name": "NHS.UK frontend",
+      "licence": "MIT",
+      "home": "https://service-manual.nhs.uk/design-system",
+      "use_when": "Health services: patient and clinician flows, with patterns researched in health settings.",
+      "stack": [
+        "html",
+        "nunjucks"
+      ],
+      "prototype": {
+        "mode": "cdn",
+        "css": [
+          "https://cdn.jsdelivr.net/npm/nhsuk-frontend@10.7.2/dist/nhsuk/nhsuk-frontend.min.css"
+        ],
+        "js_module": [
+          "https://cdn.jsdelivr.net/npm/nhsuk-frontend@10.7.2/dist/nhsuk/nhsuk-frontend.min.js"
+        ]
+      },
+      "frontend": {
+        "packages": [
+          "nhsuk-frontend@10.7.2"
+        ],
+        "imports": [
+          "nhsuk-frontend"
+        ],
+        "tokens": "Sass settings and nhsuk- classes"
+      },
+      "match": {
+        "classPrefixes": [
+          "nhsuk-"
+        ],
+        "data": true
+      },
+      "components": [
+        "nhsuk-button",
+        "nhsuk-input",
+        "nhsuk-select",
+        "nhsuk-checkboxes",
+        "nhsuk-radios",
+        "nhsuk-table",
+        "nhsuk-tag",
+        "nhsuk-warning-callout",
+        "nhsuk-error-summary",
+        "nhsuk-summary-list",
+        "nhsuk-tabs",
+        "nhsuk-card",
+        "nhsuk-action-link",
+        "nhsuk-contents-list"
+      ],
+      "restrictions": "Outside NHS services: no NHS logo and no Frutiger font. Use the patterns, not the brand."
+    }
+  }
+}

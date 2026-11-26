@@ -87,7 +87,7 @@ Desk research and a competitive scan of 3 to 5 products. Every claim becomes a D
 - One DAT card per session: `koru new DAT "Interview P01" --field file=raw/<file> --field participant=P01 …`.
 - You never run or replace a session. If someone asks for synthetic users, the output is a Hypothesis card (`koru new HYP`), which can be tested but never cited.
 
-**Design discovery.** Product deep dive, engineering input, and the **design-system audit**: coverage, quality, Figma-to-code sync, governance. Write the result to `koru/design-system.md` (with a `version:`) and propose the `design_system` switch value (mature, partial, figma only, code only, brand only, none). The audit sets the switch, not a yes/no question.
+**Design discovery.** Product deep dive, engineering input, and the **design-system audit**: coverage, quality, Figma-to-code sync, governance. Write the result to `koru/design-system.md` (with a `version:`) and propose the `design_system` switch value (mature, partial, figma only, code only, brand only, none). The audit sets the switch, not a yes/no question. Then run `koru-design-system` to set the system up (extend theirs, adopt an open-source one, or build one); `koru ds status` shows where it stands. Nothing is prototyped before it exists.
 
 ## F4. Interpretation
 

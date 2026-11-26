@@ -44,7 +44,7 @@ Whatever the mix, every form renders from the same SCR and STA cards: screen ids
 ## Standalone HTML prototype
 
 - One file: `koru/deliverables/<direction-or-flow>/index.html`, with styles, scripts, data and icons inline. It must open by double-click with no server and no network.
-- Tokens first: CSS custom properties named after the client's tokens (or neutral Koru tokens in Explore), never raw hex values in components.
+- Tokens first: run `koru ds inline <file>` so the page carries the project's token block and component kit (or the open-source system's own CSS). Styles use only `var(--…)`; components carry `data-ds="Name"`. The hook refuses anything else; `koru ds lint` shows why.
 - A small **review bar** (top or bottom, collapsible) lists every Screen and every State from the cards, so a reviewer can jump to "SCR-002 · team lead · zero results" without hunting.
 - Hard cases from the DIR card are switchable states, not separate files.
 - Realistic, synthetic data at enterprise scale (1 row and 10,000 rows). Never real client or participant data.

@@ -1,0 +1,80 @@
+{
+  "$description": "Koru neutral seed system (DTCG format). Behaviour before paint: quiet greys, one accessible accent, status colours, an 4-px spacing scale and a short type scale. Every pair used for text meets WCAG 2.2 AA.",
+  "color": {
+    "surface": { "$type": "color", "$value": "#FFFFFF" },
+    "canvas": { "$type": "color", "$value": "#F5F6F8" },
+    "ink": {
+      "900": { "$type": "color", "$value": "#1B2230" },
+      "700": { "$type": "color", "$value": "#3B4556" },
+      "500": { "$type": "color", "$value": "#5B6577" },
+      "300": { "$type": "color", "$value": "#C3C9D3" },
+      "100": { "$type": "color", "$value": "#E7EAEF" }
+    },
+    "accent": {
+      "50": { "$type": "color", "$value": "#EAF1FC" },
+      "600": { "$type": "color", "$value": "#1F5FBF" },
+      "700": { "$type": "color", "$value": "#184C99" }
+    },
+    "on-accent": { "$type": "color", "$value": "#FFFFFF" },
+    "success": { "50": { "$type": "color", "$value": "#E8F5EC" }, "700": { "$type": "color", "$value": "#1E6B3A" } },
+    "warning": { "50": { "$type": "color", "$value": "#FDF3E1" }, "700": { "$type": "color", "$value": "#8A5300" } },
+    "danger": { "50": { "$type": "color", "$value": "#FCEBEB" }, "700": { "$type": "color", "$value": "#B3261E" } },
+    "ai": { "50": { "$type": "color", "$value": "#F1EDFC" }, "700": { "$type": "color", "$value": "#5B3FB8" } },
+    "focus": { "$type": "color", "$value": "#1F5FBF" }
+  },
+  "space": {
+    "0": { "$type": "dimension", "$value": "0px" },
+    "1": { "$type": "dimension", "$value": "4px" },
+    "2": { "$type": "dimension", "$value": "8px" },
+    "3": { "$type": "dimension", "$value": "12px" },
+    "4": { "$type": "dimension", "$value": "16px" },
+    "5": { "$type": "dimension", "$value": "20px" },
+    "6": { "$type": "dimension", "$value": "24px" },
+    "8": { "$type": "dimension", "$value": "32px" },
+    "10": { "$type": "dimension", "$value": "40px" },
+    "12": { "$type": "dimension", "$value": "48px" }
+  },
+  "font": {
+    "family": { "base": { "$type": "fontFamily", "$value": "system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif" } },
+    "size": {
+      "xs": { "$type": "dimension", "$value": "12px" },
+      "sm": { "$type": "dimension", "$value": "14px" },
+      "md": { "$type": "dimension", "$value": "16px" },
+      "lg": { "$type": "dimension", "$value": "18px" },
+      "xl": { "$type": "dimension", "$value": "22px" },
+      "2xl": { "$type": "dimension", "$value": "28px" }
+    },
+    "weight": { "regular": { "$type": "fontWeight", "$value": 400 }, "semibold": { "$type": "fontWeight", "$value": 600 } },
+    "line": { "tight": { "$type": "number", "$value": 1.25 }, "body": { "$type": "number", "$value": 1.5 } }
+  },
+  "radius": {
+    "sm": { "$type": "dimension", "$value": "4px" },
+    "md": { "$type": "dimension", "$value": "8px" },
+    "full": { "$type": "dimension", "$value": "999px" }
+  },
+  "size": {
+    "target": { "$type": "dimension", "$value": "44px" },
+    "control": { "$type": "dimension", "$value": "40px" }
+  },
+  "shadow": {
+    "1": { "$type": "shadow", "$value": "0 1px 2px rgba(27,34,48,.08)" },
+    "3": { "$type": "shadow", "$value": "0 8px 24px rgba(27,34,48,.16)" }
+  },
+  "$extensions": {
+    "koru": {
+      "pairs": [
+        ["color.ink.900", "color.surface", "body text"],
+        ["color.ink.700", "color.surface", "secondary text"],
+        ["color.ink.500", "color.surface", "helper text"],
+        ["color.ink.500", "color.canvas", "helper text on canvas"],
+        ["color.on-accent", "color.accent.600", "primary button"],
+        ["color.accent.700", "color.accent.50", "selected item"],
+        ["color.success.700", "color.success.50", "success badge"],
+        ["color.warning.700", "color.warning.50", "warning badge"],
+        ["color.danger.700", "color.danger.50", "danger badge"],
+        ["color.ai.700", "color.ai.50", "AI suggestion"],
+        ["color.danger.700", "color.surface", "error text"]
+      ]
+    }
+  }
+}

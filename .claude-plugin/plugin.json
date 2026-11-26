@@ -1,6 +1,6 @@
 {
   "name": "koru",
-  "version": "3.0.0-alpha.1",
+  "version": "3.0.0-alpha.2",
   "description": "Koru 3.0: one evidence chain from kick-off call to shipped ticket. Stage skills for Frame, Explore, Harden and Ship on top of the SkillCloud research and design skills, four independent checkers, hooks that enforce the never-break rules, and a project graph with a plain visual board.",
   "author": {
     "name": "Koru Design Ops"

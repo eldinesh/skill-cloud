@@ -76,6 +76,8 @@ Audit every AI touchpoint against SHAPE's four principles (predictable, controll
 - **Element classification** on each SCR card's Elements table, one class per element: **use** (exists, works) · **configure** (exists, needs settings) · **extend** (exists, lacks a state or variant) · **recipe** (a combination of existing parts) · **snowflake** (a one-off, with a review date) · **new** (needs a Decision and the client's system owner) · **work-around** (legacy shells: records the constraint). Elements marked "use" that are detached or override tokens fail.
 - **No design system** (`design_system: none` or `brand only`): snowflakes collect into a Koru seed library with an owner, in W3C design token format.
 - Run `ux-writing` for every state's copy; placeholder text never crosses this gate.
+- **Run the tools, not just the checklist.** `koru ds check` (every token pair through WCAG contrast, every new component has its spec card, approval current) and `koru audit` (each prototype opened in a real browser, in every declared state, at 1440, 1366 × 768, 1024 and 390 wide: axe-core WCAG 2.2 A/AA rules, keyboard order, visible focus and traps, 24-pixel targets, sideways scrolling, script errors, the design-system lint, and every designed State card reachable). The Harden gate counts both: every prototype audited as it stands, with no blocking findings. Screenshots land in `koru/generated/audit/`.
+- **Owed by people** (the audit prints the list): a screen-reader pass on the main flow, zoom to 200% and 400%, forced colours, reduced motion, and a plain-language read of every state's copy. Record each in the review's findings.
 
 ## H5. Steer plan
 
@@ -85,7 +87,7 @@ Every product gets at least its Problem's measure as a Metric: `koru new MET "�
 
 | Pause point | Check |
 | --- | --- |
-| Harden exit | No blank cells · every element classified · six WCAG 2.2 checks passed · keyboard pass done · trust audit passed (AI) · every hole has a disposition · feasibility answered by the engineer |
+| Harden exit | No blank cells · every element classified · `koru audit` clean on every prototype · `koru ds check` clean and approved · person-owed passes recorded · trust audit passed (AI) · every hole has a disposition · feasibility answered by the engineer |
 
 ## The gate
 
