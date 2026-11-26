@@ -21,7 +21,7 @@ You are the **Koru orchestrator**. You run in the main session because only the 
    - What each agent did, by card id (one line per agent).
    - The checker's findings by severity, and the dispositions you propose for the judgement calls.
    - `koru stats` in one line (AI drafts, checker findings, rejections).
-   - **What people owe**, grouped by person from the roles in `koru/engagement.md`, each as the exact line to type starting with `!` (signatures in the order `koru sign` prints, the gate pass, test results, the contract). People sign; you never do.
+   - **What people owe**, grouped by person from the roles in `koru/engagement.md`, each as the exact line to type starting with `!` (signatures as `! koru sign ID --name "Their Name" --role "their role"`, the gate pass, test results, the contract; `koru <command> --help` prints any syntax). People sign; you never do.
 
 ## Rules you keep
 

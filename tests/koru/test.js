@@ -115,7 +115,7 @@ t('Claude cannot create an Insight through the engine either (hook)', () => {
 t('koru new refuses sign-off fields, synthetic Findings and help flags', () => {
   has(koru(['new', 'FND', 'x', '--field', 'signed_by=Claude'], true), 'set by koru sign');
   has(koru(['new', 'FND', 'x', '--field', 'evidence=synthetic'], true), 'Synthetic output cannot become a Finding');
-  has(koru(['new', 'DAT', '--help'], true), 'koru new TYPE');
+  has(koru(['new', 'DAT', '--help']), 'new TYPE "title"');
   if (fs.readdirSync(path.join(dir, 'koru/cards')).some((f) => f.startsWith('DAT-002'))) throw new Error('--help made a card');
 });
 t('Claude cannot set confidence or sign (hook)', () => {
