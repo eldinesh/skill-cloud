@@ -11,7 +11,7 @@ Version control for everything a project produces, a visual lifecycle, and sideq
   - **Board:** cards open a detail drawer.
   - **History:** the lifecycle tree from day one to today, grouped by day and stage, with decisions drawn as forks. Each event shows when, who, what, how and the files changed, with a copy-ready restore request. It has filters and search, keeps your place across auto-refreshes, and has keyboard shortcuts (1 and 2, Esc).
 - **Pane:** a History section with the latest events, and a button to open the board page. After each turn the pane saves a checkpoint and re-renders the page.
-- **Sidequest comes with SkillCloud** (a plugin dependency). Big Ship builds run through its plan, run and land loop, with our lane check, checker H6 and the Ship gate on the result.
+- **Sidequest, built in when present.** With sidequest 7.x installed and enabled, big Ship builds run through its plan, run and land loop, with our lane check, checker H6 and the Ship gate on the result. It's a soft link, not a hard dependency: a hard dependency stopped SkillCloud loading whenever sidequest was disabled (0.14.0), and that's fixed in 0.14.1.
 - Docs: installing in the desktop app (+ → Plugins → Add marketplace).
 
 ## 0.13.0 — 2026-11-26

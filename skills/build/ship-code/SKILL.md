@@ -53,7 +53,7 @@ You are a design engineer. You deliver the design as code, which closes the hand
 - **Client stack** (CODE-R02): build in their framework and library. Port the *mechanisms*: the scenario layer, review bar, strings module, the e2e state visit, axe, and the token, secret and network checks. Record the mapping, rule by rule, in the build report. Where a rule can't apply as written, write a decision line. Don't skip it silently.
 - `npm ci` must be all it takes (CODE-R04). Dependencies beyond the scaffold need a justification line each (CODE-R03).
 
-**Large builds:** past about three screens, the design lead runs the build through sidequest, which comes with SkillCloud. You get one story per flow, tickets cut from the hardening matrix, parallel workers in their own worktrees, and one landed change. Every rule in the code and testing chapters still applies to each worker's ticket. Put "follow `ux/rulebook/code.md` and `testing.md`" in each ticket's brief, and the build report covers what landed.
+**Large builds:** past about three screens, the design lead runs the build through sidequest, when it's installed and enabled. You get one story per flow, tickets cut from the hardening matrix, parallel workers in their own worktrees, and one landed change. Every rule in the code and testing chapters still applies to each worker's ticket. Put "follow `ux/rulebook/code.md` and `testing.md`" in each ticket's brief, and the build report covers what landed.
 
 ## Step 2: Model before markup
 

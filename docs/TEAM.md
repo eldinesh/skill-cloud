@@ -116,4 +116,4 @@ Without the plugin, `./setup --agents` installs the same skills and agents from 
 
 - **Claude Code**: full team mode.
 - **Cowork, claude.ai, or no agents**: `/design-lead` runs inline. It works each role itself, from the same agent files, in lane, and runs the checker as a separate cold pass. Gate packets say the check wasn't independent.
-- **sidequest comes with it.** SkillCloud depends on sidequest 7.x and installs it alongside. The design lead hands big Ship builds to sidequest's plan, run and land loop: parallel workers in their own worktrees, one landed change, with our lane check, checker and Ship gate on the result. Sidequest leaves the `sc-*` agents on the models `/design-lead` gives them.
+- **sidequest, built in when present.** With sidequest 7.x installed and enabled, the design lead hands big Ship builds to sidequest's plan, run and land loop: parallel workers in their own worktrees, one landed change, with our lane check, checker and Ship gate on the result. Sidequest leaves the `sc-*` agents on the models `/design-lead` gives them. Without it, nothing breaks: the engineer builds in one job.

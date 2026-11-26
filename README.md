@@ -7,12 +7,13 @@ Internal skill system for UX work. One repo, versioned, curated — research and
 **As a Claude Code plugin (recommended):** skills, the 8 agents, the team guard hooks and the `/board`, `/signoff` and `/decide` commands, all in one install:
 
 ```
-/plugin marketplace add Eigenwise/eigenwise-toolshed   # once: SkillCloud brings sidequest along from here
+/plugin marketplace add Eigenwise/eigenwise-toolshed   # optional: sidequest runs big Ship builds
+/plugin install sidequest@eigenwise-toolshed
 /plugin marketplace add eldinesh/skill-cloud            # private repo: uses your GitHub access
 /plugin install skillcloud@skill-cloud
 ```
 
-In the desktop app, where `/plugin` doesn't run: click **+** next to the prompt box, then **Plugins**, then **Add marketplace** for each of the two above, then add **skillcloud**. Or run the same lines once from Terminal with `claude plugin …`. The desktop app reads the same install.
+In the desktop app, where `/plugin` doesn't run: click **+** next to the prompt box, then **Plugins**, then **Add marketplace** for each marketplace above, then add **skillcloud** (and **sidequest**). Or run the same lines once from Terminal with `claude plugin …`. The desktop app reads the same install.
 
 Then open (or create) a folder for the project, start Claude Code in it, and run `/skillcloud:start`. It sets everything up from whatever material is in the folder and proposes the first plan.
 
