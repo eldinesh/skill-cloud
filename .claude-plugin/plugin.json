@@ -1,0 +1,27 @@
+{
+  "name": "skillcloud",
+  "version": "0.12.0",
+  "description": "A design team made of agents, with Claude at its core and people in charge. /design-lead runs a project through Frame, Explore, Harden and Ship: it plans each stage as tickets on a local board, routes each job to a specialist agent, has an independent checker and real tools challenge every handoff, and stops at every gate for a named person to sign off. Claude never signs.",
+  "author": {
+    "name": "SkillCloud maintainers"
+  },
+  "repository": "https://github.com/eldinesh/skill-cloud",
+  "license": "UNLICENSED",
+  "keywords": [
+    "ux",
+    "design",
+    "research",
+    "agents",
+    "design-ops",
+    "delivery",
+    "rulebook",
+    "board"
+  ],
+  "skills": [
+    "./skills/core/",
+    "./skills/research/",
+    "./skills/design/",
+    "./skills/build/",
+    "./skills/ai/"
+  ]
+}

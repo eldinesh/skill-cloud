@@ -91,10 +91,17 @@ Every stage works whether the client has a design system or not: **library in co
 
 ## Install and surfaces
 
-```bash
-cd ~/.claude/skills/skill-cloud && ./setup --agents     # links the 8 agents into ~/.claude/agents
+```
+/plugin marketplace add eldinesh/skill-cloud     # or a local checkout: /plugin marketplace add ~/Developer/SkillCloud
+/plugin install skillcloud@skill-cloud
 ```
 
+The plugin brings the skills, the 8 agents (named `skillcloud:sc-<role>`), the `/board`, `/signoff` and `/decide` commands, and two hooks:
+- **SessionStart** wires `~/.skillcloud/repo` to the plugin, so every skill finds its tools. In a project folder it prints what waits on people and what's ready.
+- **Team guard** (before any file write by a `sc-*` agent): refuses a sign-off (`status: final`, `signed_off_by:`) and any write outside the agent's lane. "Claude never signs" and "each agent produces only its own kind of work" are enforced, not just asked for. The main session, recording a person's typed sign-off, is never blocked.
+
+Without the plugin, `./setup --agents` installs the same skills and agents from a clone (no hooks; lanes are then checked after each job only).
+
 - **Claude Code**: full team mode.
-- **Cowork, claude.ai, or no agents installed**: `/design-lead` runs inline. It works each role itself, from the same agent files, in lane, and runs the checker as a separate cold pass. Gate packets say the check wasn't independent.
-- **sidequest 3.x installed**: its hook refuses agent launches it didn't dispatch, so `sc-*` agents are blocked. Update sidequest to 7.x, which lets other agent types run on their own models, or use inline mode.
+- **Cowork, claude.ai, or no agents**: `/design-lead` runs inline. It works each role itself, from the same agent files, in lane, and runs the checker as a separate cold pass. Gate packets say the check wasn't independent.
+- **sidequest 3.x installed alongside**: its hook refuses agent launches it didn't dispatch. Disable it in projects where you run the team, or update it to 7.x.

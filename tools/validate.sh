@@ -68,13 +68,13 @@ for a in "$REPO_ROOT"/agents/sc-*.md; do
   if [ "$an" = "sc-checker" ]; then
     grep -q 'handoffs.md' "$a" || fail "agents/$an" "checker must read the handoff protocols"
   else
-    grep -q '_common.md' "$a" || fail "agents/$an" "must start from the shared routine (agents/_common.md)"
+    grep -q 'agent-routine.md' "$a" || fail "agents/$an" "must start from the shared routine (skills/core/design-lead/resources/agent-routine.md)"
     grep -q 'Never' "$a" || fail "agents/$an" "missing a Never section"
     grep -q 'return packet' "$a" || fail "agents/$an" "must end with the return packet"
   fi
 done
-grep -q 'project-context.md' "$REPO_ROOT/agents/_common.md" || fail "agents/_common.md" "must read ux/project-context.md"
-grep -q 'engagement-guardrails' "$REPO_ROOT/agents/_common.md" || fail "agents/_common.md" "must run the engagement-guardrails gate"
+grep -q 'project-context.md' "$REPO_ROOT/skills/core/design-lead/resources/agent-routine.md" || fail "skills/core/design-lead/resources/agent-routine.md" "must read ux/project-context.md"
+grep -q 'engagement-guardrails' "$REPO_ROOT/skills/core/design-lead/resources/agent-routine.md" || fail "skills/core/design-lead/resources/agent-routine.md" "must run the engagement-guardrails gate"
 
 # --- lanes: every role in lanes.txt is an agent (or the design lead) --------
 LANES="$REPO_ROOT/skills/core/design-lead/resources/lanes.txt"
@@ -97,6 +97,13 @@ for c in "$REPO_ROOT"/skills/core/project-rulebook/resources/chapters/*.md; do
   grep -qE "\*\*${pfx}-R[0-9]{2}\*\*" "$c" || fail "rulebook/$cn" "no rules with prefix $pfx-Rnn"
   grep -qE "\*\*${pfx}-C[0-9]{2}\*\*" "$c" || fail "rulebook/$cn" "no checks with prefix $pfx-Cnn"
 done
+
+# --- plugin manifest ---------------------------------------------------------
+PV=$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$REPO_ROOT/.claude-plugin/plugin.json" 2>/dev/null | head -1)
+[ "$PV" = "$(cat "$REPO_ROOT/VERSION")" ] || fail ".claude-plugin/plugin.json" "version '$PV' != VERSION"
+MV=$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$REPO_ROOT/.claude-plugin/marketplace.json" 2>/dev/null | head -1)
+[ "$MV" = "$PV" ] || fail ".claude-plugin/marketplace.json" "plugin version '$MV' != plugin.json '$PV'"
+[ ! -e "$REPO_ROOT/agents/_common.md" ] || fail "agents/" "non-agent files in agents/ load as agents in the plugin"
 
 # --- tool self-tests (fixture project with planted defects) ------------------
 if [ -x "$REPO_ROOT/tests/team/run.sh" ]; then

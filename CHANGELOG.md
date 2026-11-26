@@ -2,6 +2,16 @@
 
 All notable changes to SkillCloud. Maintainers: bump `VERSION` and add an entry here in the same commit — the self-update prompt reads this file to show "what's new".
 
+## 0.12.0 — 2026-11-26
+
+SkillCloud is a Claude Code plugin.
+
+- **Install:** `/plugin marketplace add eldinesh/skill-cloud` then `/plugin install skillcloud@skill-cloud`. Skills, the 8 design-team agents, hooks and commands in one install. Clone + `./setup` still works for surfaces without plugins.
+- **Team guard hook:** a team agent can't write a sign-off (`status: final`, `signed_off_by:`) or a file outside its lane. The write is refused at the tool call, with the reason.
+- **Session hook:** wires the tools to the plugin and, in a project, shows what waits on people and what's ready to run.
+- **Commands:** `/board` (summary + live board page), `/signoff`, `/decide`.
+- **User guide** for the plugin: what it is, how a project runs, how to sign off.
+
 ## 0.11.0 — 2026-11-26
 
 SkillCloud becomes a design team made of agents, with Claude at its core and people in charge.

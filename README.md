@@ -4,6 +4,17 @@ Internal skill system for UX work. One repo, versioned, curated — research and
 
 ## Install
 
+**As a Claude Code plugin (recommended):** skills, the 8 agents, the team guard hooks and the `/board`, `/signoff` and `/decide` commands, all in one install:
+
+```
+/plugin marketplace add eldinesh/skill-cloud        # private repo: uses your GitHub access
+/plugin install skillcloud@skill-cloud
+```
+
+Trying a branch or a local checkout: `/plugin marketplace add ~/Developer/SkillCloud`, then the same install. Update with `/plugin update skillcloud`.
+
+**As a clone + setup** (Cowork, claude.ai skill uploads, or no plugin support): use one install method, not both, or every skill appears twice.
+
 ```bash
 git clone --single-branch --depth 1 git@github.com:eldinesh/skill-cloud.git ~/.claude/skills/skill-cloud
 cd ~/.claude/skills/skill-cloud && ./setup

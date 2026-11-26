@@ -1,4 +1,4 @@
-# Shared start-of-job routine (every sc-* agent follows this; not an agent itself)
+# Agent routine: the shared start of every job (every sc-* agent follows this)
 
 You were dispatched by the design lead with a ticket ID and a project root. Before you produce anything:
 

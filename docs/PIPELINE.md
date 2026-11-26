@@ -192,7 +192,7 @@ That's what turns isolated intelligence into a streamlined system.
 A design-team agent is a Claude Code subagent definition that **runs skills**. It doesn't replace them. Every agent:
 
 1. Has frontmatter `name: sc-<role>` (matching the file), a `description` that says it's dispatched by `/design-lead`, and a `tools:` list fitted to its lane. Omit `tools:` only when the role needs connector tools (the designer, for Figma).
-2. Starts every job with the shared routine in `agents/_common.md`: the ticket, `ux/project-context.md`, the engagement-guardrails gate, the team charter, final inputs, only the skills and chapters that apply.
+2. Starts every job with the shared routine in `skills/core/design-lead/resources/agent-routine.md`: the ticket, `ux/project-context.md`, the engagement-guardrails gate, the team charter, final inputs, only the skills and chapters that apply.
 3. Lists its jobs → skills → output paths. Those paths must match its lane in `skills/core/design-lead/resources/lanes.txt`.
 4. Carries craft standards for the role, the exact self-check commands it runs before returning, and a **Never** list.
 5. Ends with the return packet from the team charter, and nothing after it.

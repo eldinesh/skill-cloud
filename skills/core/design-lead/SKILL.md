@@ -21,7 +21,9 @@ _UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 
 [ -f "ux/project-context.md" ] && echo "PROJECT_CONTEXT: present" || echo "PROJECT_CONTEXT: missing"
 _SC="${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-check"
 [ -x "$_SC" ] && "$_SC" status 2>/dev/null | head -80 || ls -R ux 2>/dev/null | head -60 || echo "UX_FOLDER: none"
-ls "${HOME}/.claude/agents"/sc-*.md >/dev/null 2>&1 && echo "TEAM_AGENTS: installed" || echo "TEAM_AGENTS: missing"
+if ls "${HOME}/.claude/agents"/sc-*.md >/dev/null 2>&1; then echo "TEAM_AGENTS: installed (setup)"
+elif readlink "${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo" 2>/dev/null | grep -q '/.claude/plugins/'; then echo "TEAM_AGENTS: installed (plugin)"
+else echo "TEAM_AGENTS: missing"; fi
 _SB="${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-board"
 [ -d ux/team/board ] && [ -x "$_SB" ] && "$_SB" summary 2>/dev/null || echo "BOARD: none"
 ls -d "$HOME"/.claude/plugins/cache/eigenwise-toolshed/sidequest/3.* >/dev/null 2>&1 && echo "SIDEQUEST: 3.x present (its Agent hook blocks custom agents; 7.x does not)" || true
@@ -31,7 +33,7 @@ ls -d "$HOME"/.claude/plugins/cache/eigenwise-toolshed/sidequest/3.* >/dev/null 
 - If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `~/.skillcloud/repo/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
 - If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `~/.skillcloud/repo/CHANGELOG.md` in 3–5 bullets. Then continue.
 - If `PROJECT_CONTEXT: missing`: this is step zero. Run the **engagement-guardrails** setup first: read `~/.skillcloud/repo/skills/core/engagement-guardrails/SKILL.md` and follow "Setting up a project".
-- If `TEAM_AGENTS: missing`: run in **inline mode** (Step 4b) and say so in one line. `./setup --agents` installs the team.
+- If `TEAM_AGENTS: missing`: run in **inline mode** (Step 4b) and say so in one line. Installing the plugin (`/plugin install skillcloud@skill-cloud`) or `./setup --agents` adds the team.
 - If `SIDEQUEST: 3.x present` and the plugin is enabled, its PreToolUse hook denies agent launches that didn't come from its own dispatch, so `sc-*` dispatches will be refused. Say so once. The fix is updating sidequest to 7.x, which keeps other agent types' own models. Until then, run in inline mode. Never try to bypass another plugin's hook.
 
 # Design Lead
@@ -162,7 +164,7 @@ Run the frontier (`skillcloud-board frontier`). For each ticket on it:
 
 1. **Input gate.** Every path in `inputs:` must be `final`. If one isn't, set the ticket `needs-you` with a For-you question to the gate owner (sign it, or record an override, delivery-system §7). Don't dispatch on hope.
 2. **Start.** Set `status: doing`, fill `route:` from `ux/team/routing.txt` or `resources/routing.txt`, append to the Log, and touch the lane marker: `touch ux/team/.dispatch-<id>`.
-3. **Dispatch.** Use the Agent tool with `subagent_type: sc-<role>`, `model` and `effort` from the route. The prompt is: `<ticket id> · project root <abs path> · read and work ux/team/board/<id>.md`, plus any send-back findings file for round 2. Paste nothing else. The agent reads the ticket, its skill and its chapters itself.
+3. **Dispatch.** Use the Agent tool with the role's agent: `sc-<role>` when installed with setup, or the plugin's namespaced name (`skillcloud:sc-<role>`) when installed as a plugin. Use the exact name the Agent tool lists. Set `model` and `effort` from the route. The prompt is: `<ticket id> · project root <abs path> · read and work ux/team/board/<id>.md`, plus any send-back findings file for round 2. Paste nothing else. The agent reads the ticket, its skill and its chapters itself.
 4. **Return.** On the return packet, append a two-line summary to the ticket's Log. Then run `skillcloud-check lanes <role> ux/team/.dispatch-<id>` and `skillcloud-check trace` on each produced file. A lane breach fails the job. Revert nothing yourself. Send it back with the breach listed.
 5. **Challenge.** Set `status: review`. Dispatch `sc-checker` (checker route) with: the protocol ID, the input paths and the produced paths, and nothing else (charter Art. 5.1). Its report lands in `ux/team/checks/<id>-C.md`. Write `check:` and `verdict:` on the ticket.
 6. **Route the verdict.**

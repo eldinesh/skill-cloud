@@ -1,0 +1,14 @@
+{
+  "name": "skill-cloud",
+  "owner": { "name": "SkillCloud maintainers" },
+  "description": "Internal design-ops plugins.",
+  "plugins": [
+    {
+      "name": "skillcloud",
+      "source": "./",
+      "description": "A design team made of agents, with Claude at its core and people in charge: Frame, Explore, Harden, Ship with named sign-offs.",
+      "version": "0.12.0",
+      "category": "productivity"
+    }
+  ]
+}
