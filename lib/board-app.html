@@ -198,11 +198,11 @@ const views = {
     return `<div class="how"><h2>How this board works</h2>
       <p>The board is a picture of the project's files. Nothing is typed into the board itself, so it cannot drift from the work.</p>
       <ol>
-        <li><b>Every piece of work is a card.</b> A card is one Markdown file in <code>koru/cards/</code>: a header with its id, type, status and links, then its text. Claude or a person creates one with <code>koru new TYPE "title"</code>.</li>
+        <li><b>Every piece of work is a card.</b> A card is one Markdown file in <code>koru/cards/</code>: a header with its id, type, status and links, then its text. Agents create most cards; you can ask Claude for one in plain words.</li>
         <li><b>Cards cite cards.</b> A Finding cites the Data it came from; an Insight cites Findings; a Screen cites the Direction it implements; a Ticket cites a Screen, a JTBD and a Metric. The Evidence chain view draws these links.</li>
-        <li><b>Claude drafts, people sign.</b> Claude may draft and edit any draft card. Only a person signs (<code>! koru sign</code>), passes a gate or writes an Insight. Signed cards change only by a new version, and accepted Decisions only by a new Decision.</li>
+        <li><b>Claude drafts, people sign.</b> Claude may draft and edit any draft card. Only a person signs, passes a gate or writes an Insight: Claude asks them with options and acts only on their choice. Signed cards change only by a new version, and accepted Decisions only by a new Decision.</li>
         <li><b>The rules run on every write.</b> Hooks check each card as it is saved: quotes match their transcripts word for word, links point at real cards, Tickets meet the Definition of Ready, deliverables use only the design system.</li>
-        <li><b>The board is rebuilt from the files</b> with <code>koru index</code> (Claude runs it after changes). With <code>koru board --serve</code> it runs on your computer and you can edit draft cards here; signing still happens in Claude Code, by a person.</li>
+        <li><b>The board is rebuilt from the files</b> with <code>koru index</code> (Claude runs it after changes). With <code>koru board --serve</code> it runs on your computer and you can edit draft cards here; signing still happens in Claude, by a person's choice.</li>
       </ol>
       <h3>The chain, left to right</h3><div class="flow">${CHAIN.map((t) => `<span>${esc((DATA.types[t] || {}).name || t)}</span>`).join('<b>→</b>')}</div>
       <h3>Labels</h3><p><span class="tag">Draft</span> being written · <span class="tag review">In review</span> waiting for its signer · <span class="tag final">Signed</span> signed by a person · <span class="tag stale">stale</span> a source changed after this card was signed · <span class="tag writeback">writeback</span> a Decision affects this card · <span class="tag assumption">assumption</span> rests on no evidence yet · <span class="tag ai">Claude drafted</span> Claude wrote or edited it · <span class="tag block">needs work</span> it fails a rule and cannot be signed</p></div>`;
@@ -232,11 +232,11 @@ function openCard(id) {
     checks: () => `<ul class="rows">${c.problems.map((p) => `<li><span class="tag ${p.level}">${p.level === 'block' ? 'must fix' : 'check'}</span> ${esc(p.msg)}</li>`).join('') || '<li class="muted">No problems. This card can be signed.</li>'}</ul>`,
     fields: () => `<dl class="kv">${Object.entries(c.meta).map(([k, v]) => `<dt>${esc(k.replace(/_/g, ' '))}</dt><dd>${esc(Array.isArray(v) ? v.join(', ') : v)}</dd>`).join('')}</dl>`,
   };
-  const signLine = `! koru sign ${c.id} --name "Your Name"`;
+  const signLine = `Walk me through signing ${c.id}`;
   const actions = [];
   if (live && c.status !== 'final' && c.status !== 'superseded') actions.push(editing ? '<button class="btn primary" data-act="save">Save</button><button class="btn" data-act="cancel">Cancel</button>' : '<button class="btn primary" data-act="edit">Edit this draft</button>');
   if (live && c.status === 'final' && c.type !== 'DEC') actions.push(window.__revising ? '<input class="edit" id="why" aria-label="What changes in the new version" placeholder="What changes in the new version?" style="margin:0;flex:1"><button class="btn primary" data-act="revise-go">Start version ' + (c.version + 1) + '</button>' : '<button class="btn" data-act="revise">Start a new version</button>');
-  if (c.status !== 'final' && c.status !== 'superseded') actions.push(`<button class="btn" data-copy="${esc(signLine)}">Copy the sign command</button>`);
+  if (c.status !== 'final' && c.status !== 'superseded') actions.push(`<button class="btn" data-copy="${esc(signLine)}">Copy a message for Claude to sign it</button>`);
   actions.push(`<button class="btn" data-copy="${esc(c.file)}">Copy file path</button>`);
   d.innerHTML = `<div class="dh"><div class="row"><span class="pill">${c.id} · ${esc(c.typeName)}</span><span class="tag ${c.status}">${STATUS[c.status] || c.status}</span><span class="small muted">v${c.version}${c.meta.signed_by ? ' · signed by ' + esc(c.meta.signed_by) : c.status === 'superseded' ? '' : ' · not signed yet'}</span><button class="close" data-act="close" aria-label="Close">✕</button></div><h2 id="dtitle">${esc(c.title)}</h2>${c.flags.map((f) => `<span class="tag ${f.k}">${esc(f.t)}</span>`).join('')}</div>
     <div class="dtabs" role="tablist">${[['content', 'Content'], ['links', `Links (${c.links.length + c.inbound.length})`], ['history', 'History'], ['checks', `Checks (${c.problems.length})`], ['fields', 'Fields']].map(([k, l]) => `<button role="tab" data-dtab="${k}" aria-selected="${k === dtab}">${l}</button>`).join('')}</div>

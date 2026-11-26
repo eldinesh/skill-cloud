@@ -107,7 +107,7 @@ Before you show any idea, ask each designer to write a **seed** alone: a rough s
 
 ## The gate
 
-Run the **direction-checker** agent on the DIR and SCR cards and the prototypes; record with `koru review explore --checker direction-checker --file <findings.md>`; people give dispositions; `koru gate explore`; a signer types `! koru gate explore --pass --name "…" --role "design lead"`.
+Run the **direction-checker** agent on the DIR and SCR cards and the prototypes; record with `koru review explore --checker direction-checker --file <findings.md>`; people give dispositions; `koru gate explore`; ask the design lead "Pass the explore gate?" with options and run `koru gate explore --pass --name "…" --role "design lead"` on yes.
 
 ## What the hooks will stop
 

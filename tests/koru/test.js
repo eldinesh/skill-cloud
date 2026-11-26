@@ -16,7 +16,7 @@ let pass = 0;
 let fail = 0;
 
 function koru(args, expectFail) {
-  const r = spawnSync('node', [KORU, ...args], { cwd: dir, encoding: 'utf8', env: { ...process.env, KORU_ROOT: '' } });
+  const r = spawnSync('node', [KORU, ...args], { cwd: dir, encoding: 'utf8', env: { ...process.env, KORU_ROOT: '', CLAUDECODE: '' } });
   const out = (r.stdout || '') + (r.stderr || '');
   if (!expectFail && r.status !== 0) throw new Error(`koru ${args.join(' ')} failed:\n${out}`);
   if (expectFail && r.status === 0) throw new Error(`koru ${args.join(' ')} should have failed:\n${out}`);
@@ -111,6 +111,47 @@ t('Claude cannot write an Insight (hook)', () => {
 });
 t('Claude cannot create an Insight through the engine either (hook)', () => {
   eq(decision(guard('PreToolUse', { tool_name: 'Bash', tool_input: { command: 'koru new INS "Adjusters distrust routing"' } })), 'deny');
+});
+t('a person decides by picking an option, then Claude runs the person-only command for them', () => {
+  const sess = { session_id: 'S-choice' };
+  const sign = { tool_name: 'Bash', tool_input: { command: 'koru sign CTX-001 --name "Ana Ruiz" --role "engagement lead"' }, ...sess };
+  eq(decision(guard('PreToolUse', sign)), 'deny', 'no decision yet');
+  has(guard('PreToolUse', sign).hookSpecificOutput.permissionDecisionReason, 'AskUserQuestion');
+  // The person answers "Not yet": still refused.
+  guard('PostToolUse', { tool_name: 'AskUserQuestion', tool_use_id: 'q1', tool_input: { questions: [{ question: 'Sign CTX-001 as Ana Ruiz?', header: 'Sign', options: [{ label: 'Sign it' }, { label: 'Not yet' }] }] }, tool_response: 'User has answered your questions: "Sign CTX-001 as Ana Ruiz?"="Not yet". You can now continue.', ...sess });
+  eq(decision(guard('PreToolUse', sign)), 'deny', 'a no is a no');
+  // A yes from another session does not count.
+  guard('PostToolUse', { tool_name: 'AskUserQuestion', tool_use_id: 'q2', tool_input: { questions: [{ question: 'Sign CTX-001 as Ana Ruiz?', header: 'Sign', options: [{ label: 'Sign it' }, { label: 'Not yet' }] }] }, tool_response: { answers: { 'Sign CTX-001 as Ana Ruiz?': 'Sign it' } }, session_id: 'S-other' });
+  eq(decision(guard('PreToolUse', sign)), 'deny', 'decisions are per session');
+  guard('PostToolUse', { tool_name: 'AskUserQuestion', tool_use_id: 'q3', tool_input: { questions: [{ question: 'Sign CTX-001 as Ana Ruiz?', header: 'Sign', options: [{ label: 'Sign it' }, { label: 'Not yet' }] }] }, tool_response: { answers: { 'Sign CTX-001 as Ana Ruiz?': 'Sign it' } }, ...sess });
+  eq(decision(guard('PreToolUse', sign)), 'allow', 'the click lets Claude run it');
+  // The engine checks it too, inside a Claude Code shell: once, and only for what the hook let through.
+  const CS = require(path.join(REPO, 'lib', 'consent.js'));
+  process.env.CLAUDECODE = '1';
+  try {
+    eq(CS.cliAllowed(dir, ['sign', 'CTX-001', '--name', 'Ana Ruiz', '--role', 'engagement lead']), true);
+    eq(CS.cliAllowed(dir, ['sign', 'CTX-001', '--name', 'Ana Ruiz', '--role', 'engagement lead']), false, 'one click, one run');
+    eq(CS.cliAllowed(dir, ['result', 'TST-009', '--passed', '3', '--of', '5']), false, 'a call the hook never saw (for example through a variable) is refused');
+    eq(CS.cliAllowed(dir, ['new', 'FND', 'x']), true, 'ordinary commands are untouched');
+  } finally { process.env.CLAUDECODE = ''; }
+  eq(decision(guard('PreToolUse', { tool_name: 'Bash', tool_input: { command: 'koru result TST-001 --passed 1 --of 2; koru result TST-002 --passed 1 --of 2' }, ...sess })), 'deny', 'one decision per command');
+  eq(decision(guard('PreToolUse', { tool_name: 'Bash', tool_input: { command: 'CLAUDECODE= koru gate frame --pass' }, ...sess })), 'deny', 'the check cannot be switched off');
+  eq(decision(guard('PreToolUse', sign)), 'deny', 'once only');
+  eq(decision(guard('PreToolUse', { ...sign, agent_type: 'koru:strategist' })), 'deny', 'never for an agent');
+  // A different card is not covered by that click; a typed chat message counts.
+  const gate = { tool_name: 'Bash', tool_input: { command: 'koru gate frame --pass --name "Ana Ruiz" --role "engagement lead"' }, ...sess };
+  eq(decision(guard('PreToolUse', gate)), 'deny');
+  guard('UserPromptSubmit', { prompt: 'Yes, pass the frame gate.', ...sess });
+  eq(decision(guard('PreToolUse', gate)), 'allow');
+  // Two questions in one call read together: the contract's tier and data class.
+  const contract = { tool_name: 'Bash', tool_input: { command: 'koru contract --tier internal --data-class confidential --processor Anthropic' }, ...sess };
+  guard('PostToolUse', { tool_name: 'AskUserQuestion', tool_use_id: 'q4', tool_input: { questions: [{ question: 'What may AI do with this client\'s material?', header: 'AI use', options: [{ label: 'Internal' }, { label: 'Full' }] }, { question: 'How sensitive is the data?', header: 'Data', options: [{ label: 'Confidential' }, { label: 'Personal' }] }] }, tool_response: { answers: { 'What may AI do with this client\'s material?': 'Internal', 'How sensitive is the data?': 'Confidential' } }, ...sess });
+  eq(decision(guard('PreToolUse', contract)), 'allow');
+  // An Insight in the person's own words, or the reading they picked.
+  const ins = { tool_name: 'Bash', tool_input: { command: 'koru new INS "Adjusters reroute claims because the queue hides urgency"' }, ...sess };
+  eq(decision(guard('PreToolUse', ins)), 'deny');
+  guard('PostToolUse', { tool_name: 'AskUserQuestion', tool_use_id: 'q5', tool_input: { questions: [{ question: 'Which reading is yours?', header: 'Insight', options: [{ label: 'Reading A', description: 'Adjusters reroute claims because the queue hides urgency' }, { label: 'Reading B', description: 'Adjusters distrust the routing rules' }] }] }, tool_response: { answers: { 'Which reading is yours?': 'Reading A' } }, ...sess });
+  eq(decision(guard('PreToolUse', ins)), 'allow');
 });
 t('koru new refuses sign-off fields, synthetic Findings and help flags', () => {
   has(koru(['new', 'FND', 'x', '--field', 'signed_by=Claude'], true), 'set by koru sign');
@@ -481,7 +522,7 @@ t('outside a Koru project the hooks stay out of the way', () => {
 
 console.log('\nTeam, rigour and the loops back in');
 const koruAs = (email, args, expectFail) => {
-  const r = spawnSync('node', [KORU, ...args], { cwd: dir, encoding: 'utf8', env: { ...process.env, KORU_ROOT: '', KORU_SIGNER_EMAIL: email } });
+  const r = spawnSync('node', [KORU, ...args], { cwd: dir, encoding: 'utf8', env: { ...process.env, KORU_ROOT: '', CLAUDECODE: '', KORU_SIGNER_EMAIL: email } });
   const out = (r.stdout || '') + (r.stderr || '');
   if (!expectFail && r.status !== 0) throw new Error(`koru ${args.join(' ')} failed:\n${out}`);
   if (expectFail && r.status === 0) throw new Error(`koru ${args.join(' ')} should have failed:\n${out}`);

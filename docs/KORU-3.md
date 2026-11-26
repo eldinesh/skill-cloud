@@ -41,29 +41,38 @@ If you also installed SkillCloud the old way (`./setup`), the research and desig
 
 ## First run
 
-In the project folder, in Claude Code:
+Open the project folder in the Claude desktop app (Code) and type `/koru:start`. That is the only command anyone needs to remember.
 
-1. `/koru:start` writes the engagement pack in `koru/`, asks the seven switches and creates the Context card.
-2. A person sets the contract from the client's paperwork: `! koru contract --tier full --data-class personal --processor Anthropic`. Until then Claude cannot read research data, create Data cards or write to the client's Figma or Jira.
-3. `/koru:where` any time for the recap and the next step. Claude also gives it at the start of every session.
+- **In a new folder** it walks you through setup in a few rounds of questions you answer by clicking: what kind of project, what the client gets, the design system, how careful the gates are, who is on the team, and what the client's contract allows AI to do. It opens the folders you need to drop files into, codes participant names in transcripts automatically, and offers to start the agents.
+- **In a project already set up** it greets you, says where things stand in two lines, and offers what you can do next: let the agents carry on, go through what is waiting for you (signatures, test results, checker findings, one at a time), open the boards, or add something from the client.
+
+Claude runs every command itself. You never type one.
+
+## How a person decides (desktop-first)
+
+Signing, setting the contract, rating an Insight's confidence, recording a test result, answering a checker's finding, passing a gate and sharing with the client stay people's decisions. In the desktop app they are a question with options: "Sign BRF-001 as Lena Park (design lead)?" with **Sign it** and **Not yet**. When you pick yes, Claude runs the command.
+
+The hooks make this safe. They record the option a person picked (and the person's own chat messages), and a person-only command goes through only when a fresh answer from that session names what the command does (the card ids, the stage, the contract values) and says yes. Each answer is used once. An agent can never use one, and a "Not yet" is never read as yes. An Insight's claim must be words the person wrote or the reading they picked. The log records each decision with the question and the answer.
+
+Power users can still run any `koru` command in a terminal.
 
 ## Commands
 
 | Command | Does |
 | --- | --- |
-| `/koru:start` | Engagement pack, switches, appetite, rigour and people (with their git emails), git hooks, health check |
-| `/koru:run [stage]` | The orchestrator: dispatches agents step by step until only people's steps are left, runs the checker, then hands over the `!` commands grouped by person |
+| `/koru:start` | Start here: guided setup with options in a new folder; in a project, where it stands and what you can do next |
+| `/koru:run [stage]` | The orchestrator: dispatches agents step by step until only people's steps are left, runs the checker, then asks the person at the keyboard about their decisions and says what others owe |
 | `/koru:run watch` | Watch mode: waits for tickets people put up next on the live board and runs them as they arrive |
 | `/koru:where` | Catch-up: what changed, what is open, the next step |
 | `/koru:join` | Joining view for someone new |
 | `/koru:note` | Logs an ad hoc client request as a card and sorts it |
 | `/koru:decide` | Opens a Decision with an impact preview |
 | `/koru:gate` | Shows the stage's exit contract, runs its checker, records the review |
-| `/koru:share` | Teach-back, checker, then the line a person types to send a protected link |
+| `/koru:share` | Teach-back, checker, then asks whether to send the protected link |
 | `/koru:ship` | Definition of Ready, tickets, handoff, Jira |
-| `/koru:board` | Opens the board; with `koru board --serve`, the live agent board at `/live` |
+| `/koru:board` | Starts the boards on your computer and gives the links: the live agent board and the cards board |
 
-**Person-only commands** (the hooks stop Claude from running them; a person types them with `!` in Claude Code or in any terminal):
+**Person-only commands** run only after the person picks yes (or types them in a terminal):
 `koru sign` · `koru gate <stage> --pass` · `koru contract` · `koru share` · `koru pseudonymise` · `koru clear-flag` · `koru result` · `koru caught` · `koru ds approve`.
 
 The full engine is `koru help`: cards, tests and decisions, gates, moments, the workflow (`next`, `plan`, `skills`, `pack`), the evidence loops (`result`, `playback import`, `compare`, `matrix`, `caught`, `stats`, `eval`), the team (`verify`, `ids`, `git-setup`) and the design system.
@@ -131,7 +140,7 @@ Each project picks one or more by the kind of work: a standalone HTML prototype,
 
 ## Design system, quality and build (alpha.2)
 
-- `koru ds`: one design system per project. Extend the client's own (`ds extend --css …`), adopt one of ten open-source systems exactly (`ds catalog`, `ds adopt <id>`: shadcn/ui, Material 3, Carbon, Fluent 2, Primer, Ant Design, Spectrum, GOV.UK, USWDS, NHS.UK), or build one from `koru-neutral`. Tokens (W3C DTCG) are the only place values live; `components.json` is the only list of components. A person approves it (`! koru ds approve`); any change needs a new approval.
+- `koru ds`: one design system per project. Extend the client's own (`ds extend --css …`), adopt one of ten open-source systems exactly (`ds catalog`, `ds adopt <id>`: shadcn/ui, Material 3, Carbon, Fluent 2, Primer, Ant Design, Spectrum, GOV.UK, USWDS, NHS.UK), or build one from `koru-neutral`. Tokens (W3C DTCG) are the only place values live; `components.json` is the only list of components. The design lead approves it when Claude asks; any change needs a new approval.
 - The design-system hook lints every write to `koru/deliverables/` and `frontend_dir`: raw colours, off-scale sizes, Tailwind's own palette and arbitrary values, text contrast under AA, bare controls, components outside the manifest, other UI libraries, images without alt, clickable divs, native dialogs.
 - `koru audit`: opens each prototype in a real browser in every declared state at four screen sizes and runs axe-core (WCAG 2.2 A/AA), keyboard order and focus, target size and overflow checks. Needs `npm --prefix tools install && npx --prefix tools playwright install chromium` once.
 - `koru scaffold`: the front-end foundation from the design system and the cards (react-tailwind, react-library): tokens, a ui layer with stories and axe tests per state, features per Screen with data contracts and state test ids, ESLint/Stylelint/TypeScript rules that keep features on the system.
@@ -142,10 +151,10 @@ Each project picks one or more by the kind of work: a standalone HTML prototype,
 
 Every playbook step is a ticket, so the team sees the work the way they see a sprint board: what waits, what an agent can take, what is up next, which agents are working right now, what a person owes, and what is done.
 
-- **Open it.** Type `! koru board --serve`, then open http://127.0.0.1:4321/live (the cards board is at `/`). `koru index` also writes a snapshot to `koru/generated/live.html`.
+- **Open it.** Choose **Open the boards** from `/koru:start`, or run `/koru:board`. Claude starts it on your computer and gives the link: http://127.0.0.1:4321/live (the cards board is at `/`). `koru index` also writes a snapshot to `koru/generated/live.html`.
 - **Tickets come from the planner.** A step that splits into packages (one per interview, one per Direction, one per inbox file) becomes one ticket per package once agents can take it, so you see four researchers on four interviews. Steps of a later stage wait in the first column until the gate passes.
 - **"Working" is real.** The hooks see the orchestrator start each agent (the work order's first line names the step and package) and see it report back, so the ticket moves to Agents working and back without anyone typing anything. The ticket shows how long the agent has run and the cards it has written so far, from the provenance each write leaves.
-- **Put a ticket up next.** Press **Run next** on a ready ticket (or `koru queue F5 --package "P03"`). `/koru:run` dispatches queued tickets before anything else; `/koru:run watch` waits for them and runs each one as it arrives. Person steps cannot be queued: the ticket shows who owes it and the exact `!` line.
+- **Put a ticket up next.** Press **Run next** on a ready ticket (or `koru queue F5 --package "P03"`). `/koru:run` dispatches queued tickets before anything else; `/koru:run watch` waits for them and runs each one as it arrives. Person steps cannot be queued: the ticket shows who owes it, what they decide, and a message to paste into Claude to be walked through it.
 - **The work order is one click away.** Open any ticket to read what the agent will be told: skills, card types it may write, inputs and the done test.
 - **The activity feed** lists queued tickets, agent starts and reports, and every card write with the agent that made it.
 

@@ -91,4 +91,4 @@ Every product gets at least its Problem's measure as a Metric: `koru new MET "�
 
 ## The gate
 
-Run the **harden-checker** agent; it enumerates the matrix and lists gaps, never fills them. Record with `koru review harden --checker harden-checker --file <findings.md>`. Each finding gets fixed, accepted risk, or deferred to a ticket. Small fixes travel to Ship as recorded dispositions, not loose notes. The review needs three signatures: the engineer, the rulebook owner and the design lead each type `! koru sign REV-… --name "…" --role "…"`. Then `! koru gate harden --pass …`.
+Run the **harden-checker** agent; it enumerates the matrix and lists gaps, never fills them. Record with `koru review harden --checker harden-checker --file <findings.md>`. Each finding gets fixed, accepted risk, or deferred to a ticket. Small fixes travel to Ship as recorded dispositions, not loose notes. The review needs three signatures: the engineer, the rulebook owner and the design lead each choose to sign when Koru asks them (you run `koru sign REV-… --name "…" --role "…"` after each yes). Then ask the design lead to pass the gate and run `koru gate harden --pass …` on yes.

@@ -100,4 +100,4 @@ One Ticket per user story: `koru new TKT "<Verb object>" --link "implements SCR-
 
 ## The gate
 
-Run the **spec-checker** agent: it reads only the tickets and the deliverable and lists every question an engineer would still ask, plus every orphan. Record with `koru review ship --checker spec-checker --file <findings.md>`; dispositions; `koru gate ship`; the engineer types `! koru gate ship --pass --name "…" --role "engineer"`.
+Run the **spec-checker** agent: it reads only the tickets and the deliverable and lists every question an engineer would still ask, plus every orphan. Record with `koru review ship --checker spec-checker --file <findings.md>`; dispositions; `koru gate ship`; ask the engineer "Pass the ship gate?" with options and run `koru gate ship --pass --name "…" --role "engineer"` on yes.

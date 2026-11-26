@@ -78,11 +78,11 @@ Kinds: supports · contradicts · cites · reframes · serves · implements · t
 
 ## Status and change
 
-- **draft → review → final.** Move a card to `review` when it is ready for its signer. Only the signer makes it final: `! koru sign ID --name "…" --role "…"`.
+- **draft → review → final.** Move a card to `review` when it is ready for its signer. Only the signer makes it final: ask them "Sign ID as Name (role)?" with options, and run `koru sign ID --name "…" --role "…"` when they pick yes.
 - **A signed card is never edited.** `koru revise ID --reason "…"` opens the next version as a draft; the owner re-signs. Cards pinned to the old version then show **stale** until their owners accept (revise), reject or note the change.
 - **Decisions are superseded, never edited.** `koru decide new "…" --link "supersedes DEC-002: why"`. Signing it marks the old one superseded.
 - **Impact before acceptance.** `koru decide impact DEC-…` lists what a decision would flag, two hops out, and marks anything touching accessibility, safety or the contract.
-- **Writeback.** A signed Decision flags the cards it `affects` (one hop). The next hop is flagged when an owner accepts. Clearing a flag without a change needs a reason (`! koru clear-flag ID --decision DEC-… --reason "…"`).
+- **Writeback.** A signed Decision flags the cards it `affects` (one hop). The next hop is flagged when an owner accepts. Clearing a flag without a change needs the owner's choice and reason: ask them, then run `koru clear-flag ID --decision DEC-… --reason "…"`.
 - **Thresholds before results.** `koru threshold DIR-…` then `koru result DIR-… "…"`.
 - Every change you make is saved as a version and stamped (who, when, which session, which sources).
 

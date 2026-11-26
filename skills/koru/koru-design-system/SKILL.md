@@ -85,7 +85,7 @@ Start from `koru ds adopt koru-neutral` (a complete, AA-checked token set and a 
 2. **Space, type, radius, size.** Keep a 4-pixel base unless the brand says otherwise. Type: at most six sizes; body 16px for content-heavy apps and 14px for dense enterprise tables, decided once in a Decision. Targets at least 24px (WCAG 2.5.8), 44px for touch.
 3. **Pairs.** List every foreground and background pair the components use in `tokens.json` → `$extensions.koru.pairs`. `koru ds check` must show every pair passing.
 4. **Components.** Keep the kit's components and change only tokens. Add a component only for a Screen that needs it (`koru ds component add … --spec SCR-…`), with its states listed (default, hover, focus, active, disabled, loading, error, and empty where it holds data).
-5. **Gallery and governance.** `build/gallery.html` shows every token and component. The design lead reviews it with the client and then types `! koru ds approve --name … --role "design lead"`. Any later change to tokens or components needs a new approval; the gates check this.
+5. **Gallery and governance.** `build/gallery.html` shows every token and component. The design lead reviews it with the client. Open the gallery for them, then ask "Approve <system> as it stands?" with options, and run `koru ds approve --name … --role "design lead"` when they pick yes. Any later change to tokens or components needs a new approval; the gates check this.
 
 ## Using it in prototypes
 
@@ -100,7 +100,7 @@ Start from `koru ds adopt koru-neutral` (a complete, AA-checked token set and a 
 ## People own
 
 - The path (A, B or C) and any switch of system later (a Decision).
-- Approval of the system (`! koru ds approve`), and of every "new" component with the client's system owner.
+- Approval of the system (the design lead's choice; you run `koru ds approve` after they pick yes), and of every "new" component with the client's system owner.
 - Brand choices (the brand hue, body size, density).
 
 ## Coach points

@@ -108,13 +108,13 @@ async function drawer(key, keep) {
   const t = DATA.tickets.find((x) => x.key === key); const d = $('#drawer');
   if (!t) { d.classList.remove('on'); openKey = null; return; }
   openKey = key;
-  const cmd = t.kind === 'person' ? (t.ask || '') : `koru next --order ${t.step}${t.package ? ` --package "${t.package}"` : ''}`;
+  const cmd = t.kind === 'person' ? `Walk me through ${t.step}: ${t.title}` : `koru next --order ${t.step}${t.package ? ` --package "${t.package}"` : ''}`;
   const body = `<button class="btn x" data-close>Close</button><div class="hd small mono">${esc(t.step)} · ${esc(t.stage)}</div><h2 id="dh">${esc(t.title)}</h2>
   <dl class="kv"><dt>Who</dt><dd><span class="who" style="--who:${color(t)}"><span class="dot"></span>${esc(t.kind === 'person' ? (t.people || []).join(', ') || t.role : t.label)}</span></dd>
   <dt>Status</dt><dd>${esc((DATA.columns.find((c) => c[0] === t.column) || [])[1] || t.column)}${t.startedAt ? ` · started ${ago(t.startedAt)} ago` : ''}</dd>
   ${t.skills && t.skills.length ? `<dt>Skills</dt><dd>${esc(t.skills.join(', '))}</dd>` : ''}${t.writes && t.writes.length ? `<dt>Writes</dt><dd>${esc(t.writes.join(', '))}</dd>` : ''}
   ${t.progress ? `<dt>Where it stands</dt><dd>${esc(t.progress)}</dd>` : ''}${t.wrote && t.wrote.length ? `<dt>Wrote so far</dt><dd class="mono">${esc(t.wrote.join(', '))}</dd>` : ''}${t.note ? `<dt>Package</dt><dd>${esc(t.note)}</dd>` : ''}</dl>
-  ${cmd ? `<h3 class="small">${t.kind === 'person' ? 'What to type in Claude Code' : 'Work order'}</h3><pre id="wo">${esc(t.kind === 'person' ? cmd : (live ? 'Loading…' : cmd))}</pre><button class="btn" data-copy="${esc(cmd)}">Copy</button>` : ''}`;
+  ${t.kind === 'person' ? `<h3 class="small">What you decide</h3><p>${esc(t.ask || '')}</p><p class="small">In Claude, choose <b>Go through what's waiting for you</b> from /koru:start, or paste this message:</p><pre id="wo">${esc(cmd)}</pre><button class="btn" data-copy="${esc(cmd)}">Copy message</button>` : `<h3 class="small">Work order</h3><pre id="wo">${esc(live ? 'Loading…' : cmd)}</pre><button class="btn" data-copy="${esc(cmd)}">Copy</button>`}`;
   if (!keep || !d.classList.contains('on')) { d.innerHTML = body; d.classList.add('on'); }
   if (live && t.kind !== 'person' && !keep) { try { const r = await fetch(`/api/order?step=${encodeURIComponent(t.step)}&package=${encodeURIComponent(t.package || '')}`); $('#wo').textContent = await r.text(); } catch (e) { /* keep the command */ } }
 }

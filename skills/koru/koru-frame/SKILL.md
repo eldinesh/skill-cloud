@@ -24,7 +24,7 @@ koru where --brief 2>/dev/null || echo "NO_KORU_PROJECT"
 ```
 
 - If `NO_KORU_PROJECT`: run `/koru:start` first. Nothing is generated before the engagement pack and the contract exist.
-- If the recap says the contract is not set: tell the person which line to type (`! koru contract …`). Research data stays closed to you until they do; you can still do desk research and the Context card.
+- If the recap says the contract is not set: ask the person what the client's paperwork allows, as options (see `/koru:start`, step 8), and run `koru contract` with their answer. Research data stays closed to you until they do; you can still do desk research and the Context card.
 
 ## Contract
 - **Consumes:** `koru/engagement.md` (switches and contract, always), `koru/client.md`, the client brief and call notes, pseudonymised transcripts in `koru/raw/`, `ux/project-context.md` when the project also uses SkillCloud (domain and data rules, see `engagement-guardrails`)
@@ -83,7 +83,7 @@ Desk research and a competitive scan of 3 to 5 products. Every claim becomes a D
 **Research discovery (people lead).**
 - Write the plan with `research-plan` and the guide with `interview-guide` (story-based JTBD questions, no leading questions). The person reviews the guide.
 - Before fieldwork, check consent: it must cover use, storage, sharing and the named AI processor. No consent record, no Data card: the hook refuses it.
-- Transcripts arrive as originals in `koru/raw/originals/` (never readable by you). A person runs `! koru pseudonymise koru/raw/originals/<file> --map koru/private/names.csv`; you work only from the copy in `koru/raw/`.
+- Transcripts arrive as originals in `koru/raw/originals/` (never readable by you). Open that folder for the person (`koru open originals`) so they can drop files in, ask them to confirm, then on their yes run `koru pseudonymise --all`: it codes every speaker as P01, P02… without you seeing a name. You work only from the copy in `koru/raw/`.
 - One DAT card per session: `koru new DAT "Interview P01" --field file=raw/<file> --field participant=P01 …`.
 - You never run or replace a session. If someone asks for synthetic users, the output is a Hypothesis card (`koru new HYP`), which can be tested but never cited.
 
@@ -101,7 +101,7 @@ Desk research and a competitive scan of 3 to 5 products. Every claim becomes a D
 4. **Conflicts.** When sources disagree, `koru new CON "…"` with each position, its source and evidence type. Weigh by the kind of question: observed behaviour for user needs, say-so for business wants, the engineer for feasibility, the market lowest. Two sources agreeing out of three never settles it; the odd one out is often the insight. A Conflict ends resolved, taken to the client, or carried into Explore as a bet. No open Conflict may sit under a final Brief.
 5. **Confidence is rated by a person and checked by numbers.** `koru check INS-…` shows the signals: distinct participants, segments, methods, contradicting links, behaviour vs self-report. Flag mismatches ("High on one participant"). A weak Insight is narrowed by scale, frequency or impact, not thrown away. An Insight feeding an irreversible decision needs two methods or a second analyst.
 6. **The path.** JTBD with forces (`jobs-to-be-done`, card JOB) → Problem in Who / What / Wow form (at most three, plus a Foundation Problem for legacy debt: `--field kind=foundation`) → HMW (title starts "How might we", links `reframes PRB-…`) → Opportunities (`kind: ux` or `ai`; for AI, run `sense-shape-steer` SENSE and write the AI Opportunity Statement).
-7. **Brief.** `koru new BRF "…"`: problem, outcome, scope, out of scope, constraints. The engagement lead signs it; the client sponsor co-signs (`! koru sign BRF-001 --cosign --name "…"`).
+7. **Brief.** `koru new BRF "…"`: problem, outcome, scope, out of scope, constraints. The engagement lead signs it; the client sponsor co-signs (Koru asks them when they open the project; you run `koru sign BRF-001 --cosign --name "…"` on their yes).
 
 ## Pause-point checklists (killer items)
 
@@ -115,7 +115,7 @@ Desk research and a competitive scan of 3 to 5 products. Every claim becomes a D
 
 1. Run the **research-checker** agent on the Frame cards. Save its numbered findings to a file and record them: `koru review frame --checker research-checker --file <findings.md>`.
 2. The person gives each finding a disposition in the REV card: fixed · accepted risk · deferred TKT-000 or deferred to explore, harden or ship · rejected: why (the checker was wrong).
-3. `koru gate frame` shows the exit contract. When every line is ✓, a signer types `! koru gate frame --pass --name "…" --role "engagement lead"`.
+3. `koru gate frame` shows the exit contract. When every line is ✓, ask the engagement lead "Pass the frame gate?" with options and run `koru gate frame --pass --name "…" --role "engagement lead"` on yes.
 
 ## What the hooks will stop (and what to say)
 

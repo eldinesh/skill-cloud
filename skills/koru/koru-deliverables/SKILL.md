@@ -67,13 +67,13 @@ Whatever the mix, every form renders from the same SCR and STA cards: screen ids
 
 ## Sharing: password-protected links, never files
 
-Sharing leaves Koru, so a person does it. Prepare everything, then hand them the line to type.
+Sharing leaves Koru, so it is a person's decision. Prepare everything, then ask them, naming the file and the client; run the share when they pick yes.
 
 1. **Teach-back.** Ask the sender to state the deliverable's key claim and its evidence in one or two sentences. If it is weak, ask one Socratic question; do not block.
 2. **Checker.** Run the stage's checker on what is being shared and record it (`koru review <stage> …`).
 3. **Refresh.** `koru index` rebuilds the client page from signed cards only, with the AI-use note drawn from the provenance stamps.
 4. **The person shares:**
-   - `! koru share koru/deliverables/<name>/index.html --to "<client>" --teachback "<their sentence>" --publish`
-   - or the whole client page: `! koru share client --to "<client>" --publish`
+   - ask "Share <name> with <client> as a protected link?" with options, naming the file; on yes run `koru share koru/deliverables/<name>/index.html --to "<client>" --teachback "<their sentence>" --publish`
+   - or the whole client page: `koru share client --to "<client>" --publish`, after the same question
 
 `koru share` wraps the file in a page that only opens with the password (AES-256 in the browser; the password never leaves the viewer's machine), records which card versions it showed, and, when Koru's hosted service is configured (`KORU_SHARE_URL`, `KORU_SHARE_TOKEN`), publishes it and prints the link. Without the service it writes the protected file for the person to upload. Remind them to send the password separately from the link.

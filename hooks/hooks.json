@@ -1,19 +1,62 @@
 {
-  "description": "Koru Tier 1 rules: human sign-off, consent before AI sees research, exact quotes, provenance, supersede-never-edit, client limits on Figma and Jira, Definition of Ready before tickets, thresholds before results.",
+  "description": "Koru Tier 1 rules: human sign-off, consent before AI sees research, exact quotes, provenance, supersede-never-edit, client limits on Figma and Jira, Definition of Ready before tickets, thresholds before results; a person decides by picking an option and Claude runs the command for them.",
   "hooks": {
     "SessionStart": [
-      { "hooks": [ { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/lib/guard.js\" SessionStart", "timeout": 20 } ] }
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/lib/guard.js\" SessionStart",
+            "timeout": 20
+          }
+        ]
+      }
     ],
     "PreToolUse": [
-      { "matcher": "Write|Edit|MultiEdit|NotebookEdit|Read|NotebookRead|Grep|Glob|Bash|Agent|Task|mcp__.*",
-        "hooks": [ { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/lib/guard.js\" PreToolUse", "timeout": 20 } ] }
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Read|NotebookRead|Grep|Glob|Bash|Agent|Task|mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/lib/guard.js\" PreToolUse",
+            "timeout": 20
+          }
+        ]
+      }
     ],
     "PostToolUse": [
-      { "matcher": "Write|Edit|MultiEdit|Agent|Task",
-        "hooks": [ { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/lib/guard.js\" PostToolUse", "timeout": 20 } ] }
+      {
+        "matcher": "Write|Edit|MultiEdit|Agent|Task|AskUserQuestion",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/lib/guard.js\" PostToolUse",
+            "timeout": 20
+          }
+        ]
+      }
     ],
     "SubagentStop": [
-      { "hooks": [ { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/lib/guard.js\" SubagentStop", "timeout": 10 } ] }
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/lib/guard.js\" SubagentStop",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/lib/guard.js\" UserPromptSubmit",
+            "timeout": 10
+          }
+        ]
+      }
     ]
   }
 }
