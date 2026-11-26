@@ -2,6 +2,18 @@
 
 All notable changes to SkillCloud. Maintainers: bump `VERSION` and add an entry here in the same commit — the self-update prompt reads this file to show "what's new".
 
+## 0.13.0 — 2026-11-26
+
+The board is a live pane beside the chat, with controls.
+
+- **Board pane** (opens by itself in a SkillCloud project; `/skillcloud-board` reopens it):
+  - **Waits on you** first. A gate gets a sign-off form: your name, an optional note, then Sign off, Sign with conditions or Send back. A question gets an answer field. Fieldwork gets Mark done. A ticket stranded by a dropped blocker gets Drop it too, I'll supply the input, or Keep the blocker.
+  - **Proposed plan:** each ticket toggles between run and decline. One button runs the approved ones, and a partial yes first shows what declining strands. Then Running, Being checked, Ready (with what each waits on), Done and Dropped. Any ticket expands to its What, Done when, blockers and latest log lines.
+- **Band** above the prompt: what waits on you, proposed, running, being checked and ready, plus a Board button.
+- Every control sends your own words to the session as your message, and the design lead records them. The pane writes no ticket and signs nothing. Claude never signs.
+- Works in the terminal and the desktop app (Claude Code 2.1.325 or later). Older builds keep the HTML board page.
+- Scaffold unit tests are named `*.unit.ts`.
+
 ## 0.12.3 — 2026-11-26
 
 - `skillcloud-board` and `skillcloud-check` work in folders with spaces in their names. The self-tests now run in such a folder.

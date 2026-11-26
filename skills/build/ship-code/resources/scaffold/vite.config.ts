@@ -15,5 +15,5 @@ const csp: Plugin = {
 export default defineConfig({
   plugins: [react(), csp],
   build: { sourcemap: true, reportCompressedSize: true },
-  test: { include: ['src/**/*.test.ts'], environment: 'node' },
+  test: { include: ['src/**/*.unit.ts'], environment: 'node' },
 });

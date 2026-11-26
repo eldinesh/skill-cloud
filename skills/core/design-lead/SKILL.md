@@ -78,7 +78,7 @@ $SB waiting        # hitl tickets and needs-you, each with its question
 $SB html           # renders ux/team/board.html: Waits on you · Doing · Ready · Being checked · Next · Done, by stage
 ```
 
-Open `ux/team/board.html` in a browser. It reloads itself every few seconds while it's open, so it stays live while the team works. It never leaves the machine. Offer to open it the first time a plan is approved. People can edit ticket files by hand, for example to drop a ticket, change its order or answer a For-you question. Read the board before every move, and never overwrite a person's edit.
+The plugin's **board pane** opens beside the chat in a SkillCloud project (and `/skillcloud-board` opens it). It shows what waits on people with controls: approve or decline proposed tickets, sign off or send back at a gate with the person's name, answer questions, mark fieldwork done. Every control sends the person's words to this session as their message. Treat them exactly as typed. Without the pane (older Claude Code), open `ux/team/board.html` in a browser. It reloads itself every few seconds while it's open, so it stays live while the team works. It never leaves the machine. Offer to open it the first time a plan is approved. People can edit ticket files by hand, for example to drop a ticket, change its order or answer a For-you question. Read the board before every move, and never overwrite a person's edit.
 
 ## Step 1: Place the project
 
@@ -215,7 +215,7 @@ When a stage's jobs are done and checked:
 
 ## Step 6: Record a sign-off (SIGN)
 
-Only from text the person typed, in one of the forms in the gate packet. Then:
+Only from text the person typed, in one of the forms in the gate packet, or sent from the board pane, which sends the person's own words, for example `sign off G-frame-1 (Research owner signs the pack) as Ben Ito`. A sign-off that names a gate covers every artifact that gate's tickets produced. Then:
 
 1. Append to `ux/decisions-log.md` (create it from `resources/decisions-log-template.md`): date, the decision exactly as given, the name and role, and the alternative considered (ask in one line if it isn't obvious).
 2. In each signed artifact's header: `status: final`, `signed_off_by: <name> (<role>)`, `signed_off: <date>`, plus `conditions:` if any. Change nothing else in the file.
