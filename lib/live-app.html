@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>__TITLE__</title>
+<style>
+:root{--bg:#f5f6f8;--panel:#fff;--sunk:#eef1f4;--ink:#1b2230;--ink2:#3b4556;--muted:#5b6577;--line:#e2e6eb;--accent:#1f5fbf;--accent-bg:#eaf1fc;--ok:#1e6b3a;--ok-bg:#e8f5ec;--warn:#8a5300;--warn-bg:#fdf3e1;--bad:#b3261e;--ai:#5b3fb8;--ai-bg:#f1edfc;--shadow:0 10px 28px rgba(27,34,48,.16);--r:10px;
+--a-researcher:#0f766e;--a-synthesiser:#7c3aed;--a-architect:#b45309;--a-strategist:#1d4ed8;--a-designer:#be185d;--a-quality:#15803d;--a-engineer:#475569;--a-checker:#9f1239;--a-person:#8a5300}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f1419;--panel:#171e26;--sunk:#1d2630;--ink:#e6ebf1;--ink2:#c3ccd7;--muted:#97a3b1;--line:#2a3541;--accent:#7fb0ff;--accent-bg:#1a2b45;--ok:#6cc58d;--ok-bg:#16301f;--warn:#e9b061;--warn-bg:#33270f;--bad:#f2867e;--ai:#b9a6ff;--ai-bg:#261e44;--shadow:0 10px 28px rgba(0,0,0,.5);
+--a-researcher:#5eead4;--a-synthesiser:#c4b5fd;--a-architect:#fbbf24;--a-strategist:#93c5fd;--a-designer:#f9a8d4;--a-quality:#86efac;--a-engineer:#cbd5e1;--a-checker:#fda4af;--a-person:#e9b061}}
+:root[data-theme=dark]{--bg:#0f1419;--panel:#171e26;--sunk:#1d2630;--ink:#e6ebf1;--ink2:#c3ccd7;--muted:#97a3b1;--line:#2a3541;--accent:#7fb0ff;--accent-bg:#1a2b45;--ok:#6cc58d;--ok-bg:#16301f;--warn:#e9b061;--warn-bg:#33270f;--ai:#b9a6ff;--ai-bg:#261e44}
+*{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button{font:inherit;color:inherit}:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.top{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line);padding:12px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.top h1{font-size:17px;margin:0;font-weight:650}.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600;background:var(--sunk);color:var(--ink2)}
+.pill.stage{background:var(--accent-bg);color:var(--accent)}.pill.live{background:var(--ok-bg);color:var(--ok)}.pill.live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ok);animation:pulse 1.6s infinite}
+.top .sp{flex:1}.top a{color:var(--accent);font-size:13px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}.chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:4px 12px;cursor:pointer;font-size:12px;min-height:28px}.chip[aria-pressed=true]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:0;min-height:calc(100vh - 58px)}
+.boardx{overflow-x:auto;padding:16px 20px 40px}
+.cols{display:grid;grid-template-columns:repeat(6,minmax(188px,1fr));gap:10px;min-width:1178px;align-items:start}
+.col{background:var(--sunk);border-radius:var(--r);padding:10px;min-height:120px}
+.col h2{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);margin:2px 4px 10px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.col h2 .n{flex:none;background:var(--panel);border-radius:999px;padding:0 8px;color:var(--muted)}
+.col.working{background:var(--ai-bg)}.col.people{background:var(--warn-bg)}
+.t{display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 10px 9px 12px;margin:0 0 8px;cursor:pointer;position:relative;box-shadow:0 1px 0 rgba(0,0,0,.03)}
+.t:hover{border-color:var(--accent)}.t::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:3px;background:var(--who,var(--line))}
+.t .hd{display:flex;gap:6px;align-items:center;font-size:11px;color:var(--muted)}.t .id{font:600 11px ui-monospace,Menlo,monospace;color:var(--ink2)}
+.t .ti{display:block;margin:3px 0 6px;font-weight:550;color:var(--ink);background:none;border:0;padding:0;text-align:left;cursor:pointer}.t .ti:hover{color:var(--accent);text-decoration:underline}.t .pk{display:block;font:11px ui-monospace,Menlo,monospace;color:var(--muted);margin:-3px 0 6px;word-break:break-all}
+.who{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink2)}.dot{width:9px;height:9px;border-radius:50%;background:var(--who,var(--muted));flex:none}
+.t .pr{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.t.working .dot{animation:pulse 1.4s infinite}.t .wk{display:block;font-size:12px;color:var(--ai);margin-top:6px}
+.t .acts{display:flex;gap:6px;margin-top:8px}.btn{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;min-height:28px}.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.t.done{opacity:.72}.t.backlog{opacity:.8}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--who,var(--ok)) 55%,transparent)}70%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 0 transparent}}
+aside{border-left:1px solid var(--line);background:var(--panel);padding:16px;overflow:auto;max-height:calc(100vh - 58px);position:sticky;top:58px}
+aside h3{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);margin:4px 0 8px}
+.ag{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px}.ag .st{margin-left:auto;font-size:12px;color:var(--muted)}.ag.on .st{color:var(--ai);font-weight:600}
+.feed{list-style:none;margin:0;padding:0;font-size:12.5px}.feed li{display:grid;grid-template-columns:14px 1fr;gap:6px;padding:6px 0;border-top:1px solid var(--line)}.feed .tm{color:var(--muted);font-size:11px}
+.feed b{font-weight:600}.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.ppl{font-size:13px;margin:0 0 14px}.ppl div{display:flex;justify-content:space-between;padding:4px 0}
+.drawer{position:fixed;inset:0 0 0 auto;width:min(520px,100vw);background:var(--panel);box-shadow:var(--shadow);z-index:20;padding:20px;overflow:auto;transform:translateX(100%);transition:transform .18s}.drawer.on{transform:none}
+.drawer h2{margin:6px 0 4px;font-size:18px}.drawer .x{position:absolute;right:14px;top:12px}.drawer pre{white-space:pre-wrap;background:var(--sunk);border-radius:8px;padding:12px;font-size:12px;max-height:50vh;overflow:auto}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:4px 10px;font-size:13px;margin:12px 0}.kv dt{color:var(--muted)}.kv dd{margin:0}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:8px 14px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .2s;z-index:30}.toast.on{opacity:1}
+.empty{font-size:12px;color:var(--muted);padding:6px 4px}
+@media (max-width:900px){.wrap{grid-template-columns:1fr}aside{position:static;max-height:none;border-left:0;border-top:1px solid var(--line)}.top{padding:10px 16px}.boardx{padding:12px 16px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1 id="client"></h1><span class="pill stage" id="stage"></span><span class="pill" id="mode">Snapshot</span>
+  <div class="chips" role="group" aria-label="Stage" id="stages"></div>
+  <span class="sp"></span><a href="board.html">Cards and evidence board</a>
+</header>
+<div class="wrap">
+  <div class="boardx"><div class="cols" id="cols"></div></div>
+  <aside aria-label="Team and activity">
+    <h3>Agents</h3><div id="agents"></div>
+    <h3 style="margin-top:16px">People owe</h3><div class="ppl" id="ppl"></div>
+    <h3>Activity</h3><ul class="feed" id="feed"></ul>
+  </aside>
+</div>
+<div class="drawer" id="drawer" role="dialog" aria-modal="false" aria-labelledby="dh"></div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+let DATA = /*__DATA__*/null;
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+let live = false; let stage = null; let openKey = null;
+const color = (t) => t.kind === 'person' ? 'var(--a-person)' : t.kind === 'checker' ? 'var(--a-checker)' : `var(--a-${t.agent},var(--muted))`;
+const agentColor = (k, checker) => checker ? 'var(--a-checker)' : `var(--a-${k},var(--muted))`;
+const ago = (iso) => { if (!iso) return ''; const s = Math.max(0, (Date.now() - Date.parse(iso)) / 1000); return s < 60 ? `${Math.round(s)}s` : s < 3600 ? `${Math.round(s / 60)}m` : s < 86400 ? `${Math.round(s / 3600)}h` : `${Math.round(s / 86400)}d`; };
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); setTimeout(() => t.classList.remove('on'), 2400); }
+
+function ticket(t) {
+  const who = t.kind === 'person' ? `<span class="who"><span class="dot"></span>${esc((t.people || []).join(', ') || t.role)}</span>`
+    : `<span class="who"><span class="dot"></span>${esc(t.label)}${t.kind === 'checker' ? ' · independent' : ''}</span>`;
+  let extra = '';
+  if (t.column === 'working') extra = `<span class="wk">Working ${ago(t.startedAt)}${t.wrote && t.wrote.length ? ` · wrote ${esc(t.wrote.slice(0, 5).join(', '))}${t.wrote.length > 5 ? ` +${t.wrote.length - 5}` : ''}` : ''}</span>`;
+  if (t.column === 'queued') extra = `<span class="wk">Queued${t.queuedBy ? ` by ${esc(t.queuedBy)}` : ''}; /koru:run takes it next</span>`;
+  let acts = '';
+  if (live && t.column === 'ready') acts = `<span class="acts"><button class="btn pri" data-q="${esc(t.step)}" data-p="${esc(t.package || '')}">Run next</button></span>`;
+  if (live && t.column === 'queued') acts = `<span class="acts"><button class="btn" data-uq="${esc(t.step)}" data-p="${esc(t.package || '')}">Unqueue</button></span>`;
+  return `<article class="t ${t.column}" style="--who:${color(t)}" data-k="${esc(t.key)}"><span class="hd"><span class="id">${esc(t.step)}</span><span>${esc(t.stage)}</span>${t.optional ? '<span>optional</span>' : ''}</span><button class="ti" data-k="${esc(t.key)}">${esc(t.title)}</button>${t.package ? `<span class="pk">${esc(t.package)}</span>` : t.packages > 1 ? `<span class="pk">${t.packages} packages, run in parallel</span>` : ''}${who}${t.progress && t.column !== 'done' ? `<span class="pr">${esc(t.progress)}</span>` : ''}${extra}${acts}</article>`;
+}
+
+function render() {
+  if (!DATA) return;
+  stage = stage || DATA.stage;
+  $('#client').textContent = DATA.client;
+  $('#stage').textContent = `Now: ${DATA.stage[0].toUpperCase() + DATA.stage.slice(1)} · ${DATA.rigour}`;
+  $('#stages').innerHTML = ['all', 'frame', 'explore', 'harden', 'ship'].map((s) => `<button class="chip" aria-pressed="${s === stage}" data-s="${s}">${s === 'all' ? 'All stages' : s[0].toUpperCase() + s.slice(1)}</button>`).join('');
+  const ts = DATA.tickets.filter((t) => stage === 'all' || t.stage === stage || t.column === 'working' || t.column === 'queued');
+  $('#cols').innerHTML = DATA.columns.map(([k, l]) => { const list = ts.filter((t) => t.column === k); return `<section class="col ${k}" aria-label="${esc(l)}"><h2><span>${esc(l)}</span><span class="n">${list.length}</span></h2>${list.map(ticket).join('') || '<div class="empty">Nothing here.</div>'}</section>`; }).join('');
+  // "F2 ×3, F3" rather than three long package names.
+  const workingOn = (keys) => Object.entries(keys.reduce((m, k) => { const st = k.split(' · ')[0]; m[st] = (m[st] || 0) + 1; return m; }, {})).map(([st, n]) => (n > 1 ? `${st} ×${n}` : st)).join(', ');
+  $('#agents').innerHTML = DATA.agents.map((a) => `<div class="ag ${a.working.length ? 'on' : ''}" style="--who:${agentColor(a.key, a.checker)}"><span class="dot"></span>${esc(a.label)}<span class="st">${a.working.length ? `working: ${esc(workingOn(a.working))}` : 'idle'}</span></div>`).join('');
+  const owe = {}; for (const t of DATA.tickets.filter((x) => x.column === 'people')) for (const n of (t.people.length ? t.people : [t.role])) (owe[n] = owe[n] || []).push(t.step);
+  $('#ppl').innerHTML = Object.entries(owe).map(([n, s]) => `<div><span>${esc(n)}</span><span class="mono">${esc(s.join(', '))}</span></div>`).join('') || '<div class="muted">Nobody: the agents have the next move.</div>';
+  $('#feed').innerHTML = DATA.feed.slice(0, 40).map((e) => { const c = e.kind === 'write' ? agentColor(e.agent, /checker/.test(e.agent)) : 'var(--muted)'; const what = e.kind === 'write' ? `<b>${esc(e.agent === 'main' ? 'Orchestrator' : e.agent)}</b> wrote <span class="mono">${esc(e.id)}</span> ${esc(e.title)}` : e.kind === 'start' ? `<b>${esc(e.agent)}</b> picked up <span class="mono">${esc(e.step)}</span>` : e.kind === 'finish' ? `<b>${esc(e.agent)}</b> ${esc(e.outcome || 'finished')} <span class="mono">${esc(e.step)}</span>` : `<b>${esc(e.by || 'Someone')}</b> queued <span class="mono">${esc(e.step)}</span>`; return `<li style="--who:${c}"><span class="dot" style="margin-top:5px"></span><span>${what}<br><span class="tm">${ago(e.at)} ago</span></span></li>`; }).join('') || '<li><span></span><span class="muted">No activity yet. Start with /koru:run in Claude Code.</span></li>';
+  if (openKey) drawer(openKey, true);
+}
+
+async function drawer(key, keep) {
+  const t = DATA.tickets.find((x) => x.key === key); const d = $('#drawer');
+  if (!t) { d.classList.remove('on'); openKey = null; return; }
+  openKey = key;
+  const cmd = t.kind === 'person' ? (t.ask || '') : `koru next --order ${t.step}${t.package ? ` --package "${t.package}"` : ''}`;
+  const body = `<button class="btn x" data-close>Close</button><div class="hd small mono">${esc(t.step)} · ${esc(t.stage)}</div><h2 id="dh">${esc(t.title)}</h2>
+  <dl class="kv"><dt>Who</dt><dd><span class="who" style="--who:${color(t)}"><span class="dot"></span>${esc(t.kind === 'person' ? (t.people || []).join(', ') || t.role : t.label)}</span></dd>
+  <dt>Status</dt><dd>${esc((DATA.columns.find((c) => c[0] === t.column) || [])[1] || t.column)}${t.startedAt ? ` · started ${ago(t.startedAt)} ago` : ''}</dd>
+  ${t.skills && t.skills.length ? `<dt>Skills</dt><dd>${esc(t.skills.join(', '))}</dd>` : ''}${t.writes && t.writes.length ? `<dt>Writes</dt><dd>${esc(t.writes.join(', '))}</dd>` : ''}
+  ${t.progress ? `<dt>Where it stands</dt><dd>${esc(t.progress)}</dd>` : ''}${t.wrote && t.wrote.length ? `<dt>Wrote so far</dt><dd class="mono">${esc(t.wrote.join(', '))}</dd>` : ''}${t.note ? `<dt>Package</dt><dd>${esc(t.note)}</dd>` : ''}</dl>
+  ${cmd ? `<h3 class="small">${t.kind === 'person' ? 'What to type in Claude Code' : 'Work order'}</h3><pre id="wo">${esc(t.kind === 'person' ? cmd : (live ? 'Loading…' : cmd))}</pre><button class="btn" data-copy="${esc(cmd)}">Copy</button>` : ''}`;
+  if (!keep || !d.classList.contains('on')) { d.innerHTML = body; d.classList.add('on'); }
+  if (live && t.kind !== 'person' && !keep) { try { const r = await fetch(`/api/order?step=${encodeURIComponent(t.step)}&package=${encodeURIComponent(t.package || '')}`); $('#wo').textContent = await r.text(); } catch (e) { /* keep the command */ } }
+}
+
+document.addEventListener('click', async (e) => {
+  const q = e.target.closest('[data-q]'); const uq = e.target.closest('[data-uq]');
+  if (q || uq) { e.stopPropagation(); const el = q || uq; try { const r = await fetch(q ? '/api/queue' : '/api/unqueue', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ step: el.dataset.q || el.dataset.uq, package: el.dataset.p }) }); const j = await r.json(); if (!r.ok) throw new Error(j.error); toast(q ? `${j.key} is up next. /koru:run picks it up.` : 'Unqueued.'); poll(); } catch (err) { toast(err.message); } return; }
+  const s = e.target.closest('[data-s]'); if (s) { stage = s.dataset.s; render(); return; }
+  const c = e.target.closest('[data-copy]'); if (c) { try { await navigator.clipboard.writeText(c.dataset.copy); toast('Copied.'); } catch (err) { toast('Select the text and copy it.'); } return; }
+  if (e.target.closest('[data-close]')) { $('#drawer').classList.remove('on'); openKey = null; return; }
+  const t = e.target.closest('.t'); if (t) drawer(t.dataset.k);
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { $('#drawer').classList.remove('on'); openKey = null; } });
+
+async function poll() { try { const r = await fetch('/api/live', { cache: 'no-store' }); if (r.ok) { DATA = await r.json(); render(); } } catch (e) { /* offline: keep the last view */ } }
+render();
+if (location.protocol.startsWith('http')) fetch('/api/ping').then((r) => r.ok && r.json()).then((j) => { if (j && j.koru) { live = true; const m = $('#mode'); m.textContent = 'Live'; m.className = 'pill live'; render(); setInterval(poll, 2500); } }).catch(() => {});
+</script>
+</body>
+</html>

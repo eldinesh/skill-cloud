@@ -8,6 +8,8 @@ You run the Koru playbook. The `koru` command is on the shell path (if not: `nod
 
 Run `koru index --open` (or `koru index` and give the path `koru/generated/board.html`).
 
+For the **live agent board** (every playbook step as a ticket, agents working on them right now, Run next), tell them to type `! koru board --serve` and open http://127.0.0.1:4321/live. To have queued tickets picked up as they arrive, they run `/koru:run watch` in Claude Code.
+
 If the person wants to edit cards in the browser, tell them to type `! koru board --serve` (it runs on their computer at http://127.0.0.1:4321 until they stop it). Draft cards can be edited there through the same checks as your edits; signing and gates stay in Claude Code.
 
 The board has: an overview of each gate's exit list, all cards by stage and type with filters and search, the evidence chain (pick a card to light up what it rests on and what rests on it), decisions, the inbox, the design system (contrast, components, approval), quality (browser audits, checker reviews, health) and a plain explanation of how the board is made. Clicking any card opens its content, links both ways, history and checks.

@@ -53,6 +53,7 @@ In the project folder, in Claude Code:
 | --- | --- |
 | `/koru:start` | Engagement pack, switches, appetite, rigour and people (with their git emails), git hooks, health check |
 | `/koru:run [stage]` | The orchestrator: dispatches agents step by step until only people's steps are left, runs the checker, then hands over the `!` commands grouped by person |
+| `/koru:run watch` | Watch mode: waits for tickets people put up next on the live board and runs them as they arrive |
 | `/koru:where` | Catch-up: what changed, what is open, the next step |
 | `/koru:join` | Joining view for someone new |
 | `/koru:note` | Logs an ad hoc client request as a card and sorts it |
@@ -60,7 +61,7 @@ In the project folder, in Claude Code:
 | `/koru:gate` | Shows the stage's exit contract, runs its checker, records the review |
 | `/koru:share` | Teach-back, checker, then the line a person types to send a protected link |
 | `/koru:ship` | Definition of Ready, tickets, handoff, Jira |
-| `/koru:board` | Opens the board |
+| `/koru:board` | Opens the board; with `koru board --serve`, the live agent board at `/live` |
 
 **Person-only commands** (the hooks stop Claude from running them; a person types them with `!` in Claude Code or in any terminal):
 `koru sign` · `koru gate <stage> --pass` · `koru contract` · `koru share` · `koru pseudonymise` · `koru clear-flag` · `koru result` · `koru caught` · `koru ds approve`.
@@ -136,6 +137,17 @@ Each project picks one or more by the kind of work: a standalone HTML prototype,
 - `koru scaffold`: the front-end foundation from the design system and the cards (react-tailwind, react-library): tokens, a ui layer with stories and axe tests per state, features per Screen with data contracts and state test ids, ESLint/Stylelint/TypeScript rules that keep features on the system.
 - `koru board --serve`: the board on your computer; draft cards can be edited in the browser through the same checks. Signing stays in Claude Code.
 - `koru discard ID`: remove a draft made by mistake (never signed, nothing cites it).
+
+## The live agent board (alpha.3)
+
+Every playbook step is a ticket, so the team sees the work the way they see a sprint board: what waits, what an agent can take, what is up next, which agents are working right now, what a person owes, and what is done.
+
+- **Open it.** Type `! koru board --serve`, then open http://127.0.0.1:4321/live (the cards board is at `/`). `koru index` also writes a snapshot to `koru/generated/live.html`.
+- **Tickets come from the planner.** A step that splits into packages (one per interview, one per Direction, one per inbox file) becomes one ticket per package once agents can take it, so you see four researchers on four interviews. Steps of a later stage wait in the first column until the gate passes.
+- **"Working" is real.** The hooks see the orchestrator start each agent (the work order's first line names the step and package) and see it report back, so the ticket moves to Agents working and back without anyone typing anything. The ticket shows how long the agent has run and the cards it has written so far, from the provenance each write leaves.
+- **Put a ticket up next.** Press **Run next** on a ready ticket (or `koru queue F5 --package "P03"`). `/koru:run` dispatches queued tickets before anything else; `/koru:run watch` waits for them and runs each one as it arrives. Person steps cannot be queued: the ticket shows who owes it and the exact `!` line.
+- **The work order is one click away.** Open any ticket to read what the agent will be told: skills, card types it may write, inputs and the done test.
+- **The activity feed** lists queued tickets, agent starts and reports, and every card write with the agent that made it.
 
 ## Team, evidence loops and AI accuracy (alpha.3)
 

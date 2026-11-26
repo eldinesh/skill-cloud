@@ -5,12 +5,15 @@
       { "hooks": [ { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/lib/guard.js\" SessionStart", "timeout": 20 } ] }
     ],
     "PreToolUse": [
-      { "matcher": "Write|Edit|MultiEdit|NotebookEdit|Read|NotebookRead|Grep|Glob|Bash|mcp__.*",
+      { "matcher": "Write|Edit|MultiEdit|NotebookEdit|Read|NotebookRead|Grep|Glob|Bash|Agent|Task|mcp__.*",
         "hooks": [ { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/lib/guard.js\" PreToolUse", "timeout": 20 } ] }
     ],
     "PostToolUse": [
-      { "matcher": "Write|Edit|MultiEdit",
+      { "matcher": "Write|Edit|MultiEdit|Agent|Task",
         "hooks": [ { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/lib/guard.js\" PostToolUse", "timeout": 20 } ] }
+    ],
+    "SubagentStop": [
+      { "hooks": [ { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/lib/guard.js\" SubagentStop", "timeout": 10 } ] }
     ]
   }
 }

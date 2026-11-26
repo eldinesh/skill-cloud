@@ -581,6 +581,35 @@ t('the skills are woven from one map and the doctor proves the hooks fire', () =
   has(koru(['skills', 'persona']), 'writes SEG'.replace('writes SEG', 'Writes:** `SEG`'));
 });
 
+t('the live board folds agent runs, queues a ticket and follows it from up next to working to done', () => {
+  const L = require(path.join(REPO, 'lib', 'live.js'));
+  eq(JSON.stringify(L.workOrderOf('WORK ORDER E3 [DIR-001] · Screens · from the system')), JSON.stringify({ step: 'E3', package: 'DIR-001' }));
+  eq(L.workOrderOf('no order here').step, '');
+  const t0 = new Date(Date.now() - 60000).toISOString();
+  const f = L.fold([{ at: t0, event: 'queued', step: 'F5' }, { at: t0, event: 'start', step: 'F5', agent: 'researcher', tool_use_id: 'a' }, { at: t0, event: 'start', step: 'F6', agent: 'synthesiser' }, { at: t0, event: 'finish', agent: 'researcher', tool_use_id: 'a' }]);
+  eq(f.queued.size, 0, 'a start takes the ticket out of up next'); eq(f.open.has('F6'), true); eq(f.open.has('F5'), false); eq(f.finished.has('F5'), true);
+  eq(L.fold([{ at: '2020-01-01T00:00:00Z', event: 'start', step: 'F5', agent: 'x' }]).open.size, 0, 'an abandoned start goes stale');
+  const bg = L.fold([{ at: t0, event: 'start', step: 'F2', package: 'a', agent: 'strategist', tool_use_id: 'u1' }, { at: t0, event: 'start', step: 'F2', package: 'b', agent: 'strategist', tool_use_id: 'u2' }, { at: t0, event: 'launched', tool_use_id: 'u1', agent_id: 'AAA111' }, { at: t0, event: 'finish', agent: 'strategist', agent_id: 'AAA111' }]);
+  eq([...bg.open.keys()].join(), 'F2 · b', 'a background agent that reports closes its own ticket, not its twin');
+  koru(['queue', 'F0'], true); koru(['queue', 'Z9'], true);
+  const snap = JSON.parse(koru(['live', '--json']));
+  eq(snap.columns.length, 6); if (!snap.tickets.length) throw new Error('no tickets');
+  const ready = snap.tickets.find((x) => x.column === 'ready' && x.kind === 'agent');
+  if (!ready) console.log('      (no ready agent ticket at this point)');
+  if (ready) {
+    has(koru(['queue', ready.step, ...(ready.package ? ['--package', ready.package] : []), '--name', 'Owen Hale']), 'Queued');
+    eq(JSON.parse(koru(['live', '--json'])).tickets.find((x) => x.key === ready.key).column, 'queued');
+    eq(JSON.parse(koru(['next', '--json'])).queued[0].step, ready.step);
+    const prompt = `WORK ORDER ${ready.step}${ready.package ? ` [${ready.package}]` : ''} · ${ready.title}`;
+    guard('PreToolUse', { tool_name: 'Agent', tool_use_id: 'tu1', tool_input: { subagent_type: `koru:${ready.agent}`, prompt, description: ready.step } });
+    const w = JSON.parse(koru(['live', '--json']));
+    eq(w.tickets.find((x) => x.key === ready.key).column, 'working'); eq(w.agents.find((a) => a.key === ready.agent).working[0], ready.key);
+    guard('PostToolUse', { tool_name: 'Agent', tool_use_id: 'tu1', tool_input: { subagent_type: `koru:${ready.agent}`, prompt }, tool_response: 'done' });
+    eq(JSON.parse(koru(['live', '--json'])).tickets.find((x) => x.key === ready.key).column, 'ready', 'the agent reported but the step is not done until its cards say so');
+  }
+  has(koru(['live']), 'live.html');
+});
+
 console.log(`\n${pass} passed, ${fail} failed.`);
 if (!process.env.KORU_KEEP) fs.rmSync(dir, { recursive: true, force: true });
 process.exit(fail ? 1 : 0);
