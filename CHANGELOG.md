@@ -2,6 +2,10 @@
 
 All notable changes to SkillCloud. Maintainers: bump `VERSION` and add an entry here in the same commit — the self-update prompt reads this file to show "what's new".
 
+## 0.12.1 — 2026-11-26
+
+- The sidequest check reads the installed version. An old 3.x copy left in the plugin cache no longer triggers a false "agents may be refused" warning.
+
 ## 0.12.0 — 2026-11-26
 
 SkillCloud is a Claude Code plugin.
