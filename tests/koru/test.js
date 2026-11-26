@@ -553,6 +553,12 @@ t('a shared page carries the feedback layer, and its export imports as Playback'
   has(out, 'Download feedback'); has(out, 'koru-feedback:'); eq((out.match(/<\/body>/g) || []).length, 1, 'one body close');
   has(S.withFeedback('<p>no body</p>', 'x'), 'id="kfb"');
 });
+t('a missing Direction threshold is its own rule, so the planner can step past it until Tests exist', () => {
+  const K = require(path.join(REPO, 'lib', 'core.js'));
+  const d = K.cardFromText('---\nid: DIR-099\ntype: DIR\ntitle: x\nstage: explore\nstatus: draft\n---\n# x\n', 'DIR-099.md');
+  const p = K.checkShape(d, { engagement: {} }).filter((x) => /threshold/i.test(x.msg));
+  eq(p.length > 0, true, 'flagged'); eq(p.every((x) => x.rule === 'threshold'), true, 'rule');
+});
 t('compare drafts a fair Decision; matrix drafts state cells from Permissions roles', () => {
   has(koru(['compare', 'DIR-001', 'DIR-001']), 'factors are written before the options');
   const n = koru(['matrix', 'SCR-001']);
