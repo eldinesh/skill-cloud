@@ -15,6 +15,8 @@
 # Compatible with macOS /bin/bash 3.2. No network.
 
 set -u
+# Split only on newlines: project folders often have spaces in their names ("Collaterals Final 2").
+IFS=$'\n'
 ROOT="${SC_PROJECT:-$(pwd)}"
 cd "$ROOT" || exit 2
 SC_REPO="$(cd "$(dirname "$0")/.." && pwd)"

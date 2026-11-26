@@ -194,6 +194,8 @@ Run the frontier (`skillcloud-board frontier`). For each ticket on it:
 7. **Record** the caught counts and any breaks in `ux/team/ledger.md` (from `resources/ledger-template.md`), then `skillcloud-board html`.
 8. **Report** in three lines: produced (paths, status), checker verdict and tool result, what's next on the frontier.
 
+**The plan's yes covers the whole stage.** After it, keep running the frontier until the stage's gate, or until something needs a person: a `needs-you` ticket, a stranded ticket, a `hitl` task, an escalation (charter Art. 7), or a blocker after two rounds. Don't stop between jobs to ask "continue?". Report each job in its three lines and move on. Gates and human calls are where you stop. Asking again for work already approved is noise.
+
 Specialists can't spawn other agents, so you do all routing. Two frontier tickets may run concurrently only when their lanes, inputs and `uses` are independent, for example the researcher's test script and the designer's prototypes. Run them as background agents, then end the turn and let the returns arrive. Never poll or sleep-wait for an agent.
 
 `hitl` tickets are never dispatched. Fieldwork, test sessions and client calls are people's work. When one reaches the frontier, say what's needed, who does it, and what to bring back (transcripts or notes into `ux/intake/raw/`), then stop. When the person says it's done, mark it `done` and continue.

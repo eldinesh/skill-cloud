@@ -2,6 +2,11 @@
 
 All notable changes to SkillCloud. Maintainers: bump `VERSION` and add an entry here in the same commit — the self-update prompt reads this file to show "what's new".
 
+## 0.12.3 — 2026-11-26
+
+- `skillcloud-board` and `skillcloud-check` work in folders with spaces in their names. The self-tests now run in such a folder.
+- After the plan's yes, `/design-lead` runs the stage through to its gate. It stops only for gates and things that need a person, not between jobs.
+
 ## 0.12.2 — 2026-11-26
 
 - **Partial yes:** approve some tickets and decline others. Before acting, `/design-lead` shows what a declined ticket strands (tickets and gates that need its output) and offers: drop those too, supply the input yourself, run on raw material at low confidence, or keep it. Dropped tickets stay on the board with the reason.

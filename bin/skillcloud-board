@@ -12,6 +12,8 @@
 # Compatible with macOS /bin/bash 3.2. No network, no dependencies beyond awk/sed.
 
 set -u
+# Split only on newlines: project folders often have spaces in their names ("Collaterals Final 2").
+IFS=$'\n'
 ROOT="${SC_PROJECT:-$(pwd)}"
 BOARD="$ROOT/ux/team/board"
 

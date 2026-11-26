@@ -6,7 +6,7 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 REPO=$(cd "$HERE/../.." && pwd)
 CHECK="$REPO/bin/skillcloud-check"
 BOARD="$REPO/bin/skillcloud-board"
-WORK=$(mktemp -d "${TMPDIR:-/tmp}/sc-team-test.XXXXXX")
+WORK=$(mktemp -d "${TMPDIR:-/tmp}/sc team test.XXXXXX")   # a space on purpose: real project folders have them
 trap 'rm -rf "$WORK"' EXIT
 cp -R "$HERE/fixture/." "$WORK/"
 cd "$WORK" || exit 2
