@@ -26,7 +26,7 @@ elif readlink "${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo" 2>/dev/null | grep -q
 else echo "TEAM_AGENTS: missing"; fi
 _SB="${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-board"
 [ -d ux/team/board ] && [ -x "$_SB" ] && "$_SB" summary 2>/dev/null || echo "BOARD: none"
-ls -d "$HOME"/.claude/plugins/cache/eigenwise-toolshed/sidequest/3.* >/dev/null 2>&1 && echo "SIDEQUEST: 3.x present (its Agent hook blocks custom agents; 7.x does not)" || true
+grep -A4 '"sidequest@' "$HOME/.claude/plugins/installed_plugins.json" 2>/dev/null | grep -q '"version": "3\.' && echo "SIDEQUEST: 3.x installed (its Agent hook blocks custom agents; 7.x does not)" || true
 "${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-config" get role 2>/dev/null || true
 ```
 
@@ -34,7 +34,7 @@ ls -d "$HOME"/.claude/plugins/cache/eigenwise-toolshed/sidequest/3.* >/dev/null 
 - If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `~/.skillcloud/repo/CHANGELOG.md` in 3–5 bullets. Then continue.
 - If `PROJECT_CONTEXT: missing`: this is a fresh folder. Run the start flow in `~/.skillcloud/repo/commands/start.md` (it sets up `ux/`, imports the material, fills the keystone, then comes back here to Step 1). The person never builds the structure by hand.
 - If `TEAM_AGENTS: missing`: run in **inline mode** (Step 4b) and say so in one line. Installing the plugin (`/plugin install skillcloud@skill-cloud`) or `./setup --agents` adds the team.
-- If `SIDEQUEST: 3.x present` and the plugin is enabled, its PreToolUse hook denies agent launches that didn't come from its own dispatch, so `sc-*` dispatches will be refused. Say so once. The fix is updating sidequest to 7.x, which keeps other agent types' own models. Until then, run in inline mode. Never try to bypass another plugin's hook.
+- If `SIDEQUEST: 3.x installed` and the plugin is enabled, its PreToolUse hook denies agent launches that didn't come from its own dispatch, so `sc-*` dispatches will be refused. Say so once. The fix is updating sidequest to 7.x, which keeps other agent types' own models. Until then, run in inline mode. Never try to bypass another plugin's hook.
 
 # Design Lead
 

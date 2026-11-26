@@ -211,7 +211,7 @@ AWANT=$("$SC/repo/bin/skillcloud-config" get agents 2>/dev/null)
 ACOUNT=0
 for a in "$AGENTS"/sc-*.md; do [ -L "$a" ] && [ -e "$a" ] && ACOUNT=$((ACOUNT + 1)); done
 echo "team_agents: ${AWANT:-unset} ($ACOUNT linked of $(ls "$SC/repo/agents"/sc-*.md 2>/dev/null | wc -l | tr -d ' '))"
-ls -d "$HOME"/.claude/plugins/cache/eigenwise-toolshed/sidequest/3.* >/dev/null 2>&1 && echo "sidequest_3x: present (blocks sc-* agent launches)" || true
+grep -A4 '"sidequest@' "$HOME/.claude/plugins/installed_plugins.json" 2>/dev/null | grep -q '"version": "3\.' && echo "sidequest_3x: installed (blocks sc-* agent launches)" || true
 for t in skillcloud-check skillcloud-board; do [ -x "$SC/repo/bin/$t" ] && echo "tool $t: OK" || echo "tool $t: MISSING"; done
 echo "doctor: done"
 ```
@@ -227,7 +227,7 @@ Grade it:
 | `linked_skills: 0` | FAIL | Re-run `setup` — nothing is linked, so no SkillCloud skill can trigger. |
 | anything under `broken_symlinks:` | WARN | Re-run `setup` — it relinks the role's skills and prunes dead links. |
 | `team_agents: yes` with fewer linked than in the repo | WARN | Re-run `setup --agents`. `/design-lead` falls back to inline mode until then. |
-| `sidequest_3x: present` | WARN | Its hook refuses agent launches it didn't dispatch. Update sidequest to 7.x, or `/design-lead` runs inline. |
+| `sidequest_3x: installed` | WARN | Its hook refuses agent launches it didn't dispatch. Update sidequest to 7.x, or `/design-lead` runs inline. |
 | `tool …: MISSING` | FAIL | The clone is incomplete. `git -C ~/.skillcloud/repo status`, then re-run `setup --update`. |
 | anything under `collisions:` | WARN | A real file or folder in `~/.claude/skills` shadows a SkillCloud skill — remove or rename it, or re-run `setup --force` to replace it. |
 
