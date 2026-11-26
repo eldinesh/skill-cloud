@@ -11,25 +11,39 @@ description: |
   Nielsen's heuristics", or "systematically inspect this flow".
   Proactively invoke when the user wants full usability coverage of a named flow rather than
   reaction-style feedback, or before usability testing to clear known issues cheaply.
-  Use after /design-brief or a /design-critique; feeds /accessibility-audit or a fix round. (skillcloud)
+  Use after /design-brief or a /design-critique; feeds /accessibility-audit or a fix round. In a Koru project it runs as H4 of koru-harden and writes FND cards. (skillcloud)
 ---
 
 ## Preamble (run first)
 
 ```bash
-_UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 2>/dev/null || true)
+_UPD=$(command -v skillcloud-update-check >/dev/null 2>&1 && skillcloud-update-check 2>/dev/null || "${CLAUDE_PLUGIN_ROOT:-${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo}/bin/skillcloud-update-check" 2>/dev/null || true)
 [ -n "$_UPD" ] && echo "$_UPD" || true
+[ -f koru/engagement.md ] && { (command -v koru >/dev/null 2>&1 && koru context || node "${CLAUDE_PLUGIN_ROOT:-${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo}/lib/koru.js" context) >/dev/null 2>&1; echo "KORU_PROJECT: yes (follow Koru mode)"; }
 [ -f "ux/project-context.md" ] && echo "PROJECT_CONTEXT: present" || echo "PROJECT_CONTEXT: missing"
 ```
 
-- If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `~/.skillcloud/repo/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
-- If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `~/.skillcloud/repo/CHANGELOG.md` in 3–5 bullets. Then continue.
+- If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `${CLAUDE_PLUGIN_ROOT}/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
+- If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `${CLAUDE_PLUGIN_ROOT}/CHANGELOG.md` in 3–5 bullets. Then continue.
+- If `KORU_PROJECT: yes`: read **Koru mode** below before anything else. It overrides this skill's Produces, Next and Handoff.
 - If `PROJECT_CONTEXT: missing`: create a minimal `ux/project-context.md` from the template in `engagement-guardrails` — infer the project name and domain from the material at hand, state the inference in one line so the user can correct it, and continue. Never ask administrative questions (project type, classification, permissions — defaults exist); but if something material to the work itself is unclear — who the participants are, what decision the output should inform — ask that one sharp question before producing.
 
 ## Contract
 - **Consumes:** the flows/screens under evaluation (Figma links, screenshots, prototype, or described flows), `ux/design/brief.md` (optional — supplies personas and tasks), `ux/project-context.md` (always)
 - **Produces:** `ux/design/heuristic-eval.md`
 - **Next:** /accessibility-audit — heuristic and a11y findings overlap but don't substitute; or a fix round, then /design-critique on the revision
+
+<!-- koru-mode:start (generated from lib/methods.js by tools/weave.js; do not edit by hand) -->
+## Koru mode
+
+When `koru/engagement.md` exists, this skill is step **H4** of `koru-harden`, run by the **Quality** agent, and its output is cards, not files:
+
+- **Reads:** `SCR`, `STA` cards (`koru list --type …`, `koru show ID`), plus `ux/project-context.md`, which Koru generates from the engagement and `koru/client.md` (read-only).
+- **Writes:** `FND`. Each violation becomes a Finding with evidence: expert, the heuristic, a severity 0 to 4 and a link to the Screen (tests SCR-002: …). Expert Findings never support an Insight on their own.
+- **Never writes** `ux/design/heuristic-eval.md` or anything else under `ux/`: the hook refuses it, because a second source of truth would skip the quote checks, provenance and sign-off.
+- **Next:** ignore this skill's own "Next" and "Handoff" lines. The next step is whatever `koru next` says.
+- **Domain:** take the domain, register and data rules from `ux/project-context.md`. The worked examples in this skill are illustrations; for enterprise SaaS use roles such as admin, approver and operator, and constraints such as SSO, tenants, permission tiers, bulk actions, audit logs and legacy shells.
+<!-- koru-mode:end -->
 
 # Heuristic Evaluation
 

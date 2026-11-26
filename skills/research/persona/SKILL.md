@@ -10,25 +10,39 @@ description: |
   "turn the research into personas".
   Proactively invoke when synthesis artifacts show distinct behavioral clusters and design
   work is starting without an agreed user model.
-  Use after /affinity-mapping or /cross-study-synthesis; feeds /journey-map. (skillcloud)
+  Use after /affinity-mapping or /cross-study-synthesis; feeds /journey-map. In a Koru project it runs as F7 of koru-frame and writes SEG cards. (skillcloud)
 ---
 
 ## Preamble (run first)
 
 ```bash
-_UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 2>/dev/null || true)
+_UPD=$(command -v skillcloud-update-check >/dev/null 2>&1 && skillcloud-update-check 2>/dev/null || "${CLAUDE_PLUGIN_ROOT:-${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo}/bin/skillcloud-update-check" 2>/dev/null || true)
 [ -n "$_UPD" ] && echo "$_UPD" || true
+[ -f koru/engagement.md ] && { (command -v koru >/dev/null 2>&1 && koru context || node "${CLAUDE_PLUGIN_ROOT:-${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo}/lib/koru.js" context) >/dev/null 2>&1; echo "KORU_PROJECT: yes (follow Koru mode)"; }
 [ -f "ux/project-context.md" ] && echo "PROJECT_CONTEXT: present" || echo "PROJECT_CONTEXT: missing"
 ```
 
-- If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `~/.skillcloud/repo/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
-- If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `~/.skillcloud/repo/CHANGELOG.md` in 3–5 bullets. Then continue.
+- If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `${CLAUDE_PLUGIN_ROOT}/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
+- If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `${CLAUDE_PLUGIN_ROOT}/CHANGELOG.md` in 3–5 bullets. Then continue.
+- If `KORU_PROJECT: yes`: read **Koru mode** below before anything else. It overrides this skill's Produces, Next and Handoff.
 - If `PROJECT_CONTEXT: missing`: create a minimal `ux/project-context.md` from the template in `engagement-guardrails` — infer the project name and domain from the material at hand, state the inference in one line so the user can correct it, and continue. Never ask administrative questions (project type, classification, permissions — defaults exist); but if something material to the work itself is unclear — who the participants are, what decision the output should inform — ask that one sharp question before producing.
 
 ## Contract
 - **Consumes:** `ux/synthesis/*` (at least `ux/synthesis/interview-synthesis.md` required; affinity-map, cross-study, jobs-to-be-done sharpen the clusters), `ux/project-context.md` (always)
 - **Produces:** `ux/personas/<slug>.md` (one file per persona)
 - **Next:** /journey-map — walk the primary persona through the scenario the evidence cares most about
+
+<!-- koru-mode:start (generated from lib/methods.js by tools/weave.js; do not edit by hand) -->
+## Koru mode
+
+When `koru/engagement.md` exists, this skill is step **F7** of `koru-frame`, run by the **Synthesiser** agent, and its output is cards, not files:
+
+- **Reads:** `FND`, `DAT`, `CTX` cards (`koru list --type …`, `koru show ID`), plus `ux/project-context.md`, which Koru generates from the engagement and `koru/client.md` (read-only).
+- **Writes:** `SEG`. One Segment card per role or segment the evidence shows (koru new SEG "…" --field kind=role). Evidence section names the Data and Findings; "Differs by" says what sets it apart. No invented names, photos or demographics. Findings, Studies, Tests and state cells reference the SEG id.
+- **Never writes** `ux/personas/*.md` or anything else under `ux/`: the hook refuses it, because a second source of truth would skip the quote checks, provenance and sign-off.
+- **Next:** ignore this skill's own "Next" and "Handoff" lines. The next step is whatever `koru next` says.
+- **Domain:** take the domain, register and data rules from `ux/project-context.md`. The worked examples in this skill are illustrations; for enterprise SaaS use roles such as admin, approver and operator, and constraints such as SSO, tenants, permission tiers, bulk actions, audit logs and legacy shells.
+<!-- koru-mode:end -->
 
 # Persona
 

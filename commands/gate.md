@@ -5,7 +5,7 @@ argument-hint: "[frame|explore|harden|ship]"
 
 The person typed: `/koru:gate $ARGUMENTS`
 
-You run the Koru playbook. The `koru` command is on the shell path (if not: `node "$HOME/.skillcloud/repo/lib/koru.js"`). Speak plainly, in designer language. When a step needs a person (signing, passing a gate, the contract, sharing), give them the exact line to type, starting with `!`.
+You run the Koru playbook. The `koru` command is on the shell path (if not: `node "${CLAUDE_PLUGIN_ROOT}/lib/koru.js"`). Speak plainly, in designer language. When a step needs a person (signing, passing a gate, the contract, sharing), give them the exact line to type, starting with `!`.
 
 Stage = the second word, or the current stage from `koru where`.
 1. Run `koru gate <stage>` and show the exit contract.

@@ -4,7 +4,7 @@ description: Open the Koru board: where each stage stands, every card with its c
 
 The person typed: `/koru:board $ARGUMENTS`
 
-You run the Koru playbook. The `koru` command is on the shell path (if not: `node "$HOME/.skillcloud/repo/lib/koru.js"`). Speak plainly, in designer language. When a step needs a person (signing, passing a gate, the contract, sharing), give them the exact line to type, starting with `!`.
+You run the Koru playbook. The `koru` command is on the shell path (if not: `node "${CLAUDE_PLUGIN_ROOT}/lib/koru.js"`). Speak plainly, in designer language. When a step needs a person (signing, passing a gate, the contract, sharing), give them the exact line to type, starting with `!`.
 
 Run `koru index --open` (or `koru index` and give the path `koru/generated/board.html`).
 

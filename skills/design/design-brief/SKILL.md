@@ -11,25 +11,39 @@ description: |
   Proactively invoke when ux/insight-report.md exists and the user starts describing screens,
   flows, or Figma work with no ux/design/brief.md on disk.
   The research-to-design bridge: consumes /insight-report; feeds Figma exploration, then
-  /design-critique. (skillcloud)
+  /design-critique. In a Koru project it runs as F12 of koru-frame and writes BRF cards. (skillcloud)
 ---
 
 ## Preamble (run first)
 
 ```bash
-_UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 2>/dev/null || true)
+_UPD=$(command -v skillcloud-update-check >/dev/null 2>&1 && skillcloud-update-check 2>/dev/null || "${CLAUDE_PLUGIN_ROOT:-${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo}/bin/skillcloud-update-check" 2>/dev/null || true)
 [ -n "$_UPD" ] && echo "$_UPD" || true
+[ -f koru/engagement.md ] && { (command -v koru >/dev/null 2>&1 && koru context || node "${CLAUDE_PLUGIN_ROOT:-${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo}/lib/koru.js" context) >/dev/null 2>&1; echo "KORU_PROJECT: yes (follow Koru mode)"; }
 [ -f "ux/project-context.md" ] && echo "PROJECT_CONTEXT: present" || echo "PROJECT_CONTEXT: missing"
 ```
 
-- If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `~/.skillcloud/repo/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
-- If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `~/.skillcloud/repo/CHANGELOG.md` in 3–5 bullets. Then continue.
+- If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `${CLAUDE_PLUGIN_ROOT}/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
+- If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `${CLAUDE_PLUGIN_ROOT}/CHANGELOG.md` in 3–5 bullets. Then continue.
+- If `KORU_PROJECT: yes`: read **Koru mode** below before anything else. It overrides this skill's Produces, Next and Handoff.
 - If `PROJECT_CONTEXT: missing`: create a minimal `ux/project-context.md` from the template in `engagement-guardrails` — infer the project name and domain from the material at hand, state the inference in one line so the user can correct it, and continue. Never ask administrative questions (project type, classification, permissions — defaults exist); but if something material to the work itself is unclear — who the participants are, what decision the output should inform — ask that one sharp question before producing.
 
 ## Contract
 - **Consumes:** `ux/insight-report.md` (declared input — if missing, say so and offer /insight-report, or proceed from what the user provides), `ux/sprint/blueprint.md` (when the project ran /sense-shape-steer — its scope, patterns, and thresholds are brief constraints), `ux/personas/*.md` and `ux/journeys/*.md` (optional), `ux/project-context.md` (always)
 - **Produces:** `ux/design/brief.md`
 - **Next:** Figma exploration against the brief, then /design-critique — the first structured look at what exploration produced
+
+<!-- koru-mode:start (generated from lib/methods.js by tools/weave.js; do not edit by hand) -->
+## Koru mode
+
+When `koru/engagement.md` exists, this skill is step **F12** of `koru-frame`, run by the **Strategist** agent, and its output is cards, not files:
+
+- **Reads:** `PRB`, `HMW`, `INS`, `CTX`, `OPP` cards (`koru list --type …`, `koru show ID`), plus `ux/project-context.md`, which Koru generates from the engagement and `koru/client.md` (read-only).
+- **Writes:** `BRF`. Fill the one Brief card (koru new BRF): problem, outcome, scope, out of scope, constraints, each citing its Problem and Insights. The engagement lead signs it and the client sponsor co-signs.
+- **Never writes** `ux/design/brief.md` or anything else under `ux/`: the hook refuses it, because a second source of truth would skip the quote checks, provenance and sign-off.
+- **Next:** ignore this skill's own "Next" and "Handoff" lines. The next step is whatever `koru next` says.
+- **Domain:** take the domain, register and data rules from `ux/project-context.md`. The worked examples in this skill are illustrations; for enterprise SaaS use roles such as admin, approver and operator, and constraints such as SSO, tenants, permission tiers, bulk actions, audit logs and legacy shells.
+<!-- koru-mode:end -->
 
 # Design Brief
 

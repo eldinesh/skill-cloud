@@ -11,25 +11,39 @@ description: |
   or "what does engineering need to build this".
   Proactively invoke when designs are called final or approved and implementation is next,
   with no ux/delivery/handoff-*.md covering that scope.
-  Use after /design-rationale; /figma-hygiene gates readiness; /design-qa-checklist verifies the build. (skillcloud)
+  Use after /design-rationale; /figma-hygiene gates readiness; /design-qa-checklist verifies the build. In a Koru project it runs as S4 of koru-ship and writes HND cards. (skillcloud)
 ---
 
 ## Preamble (run first)
 
 ```bash
-_UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 2>/dev/null || true)
+_UPD=$(command -v skillcloud-update-check >/dev/null 2>&1 && skillcloud-update-check 2>/dev/null || "${CLAUDE_PLUGIN_ROOT:-${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo}/bin/skillcloud-update-check" 2>/dev/null || true)
 [ -n "$_UPD" ] && echo "$_UPD" || true
+[ -f koru/engagement.md ] && { (command -v koru >/dev/null 2>&1 && koru context || node "${CLAUDE_PLUGIN_ROOT:-${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo}/lib/koru.js" context) >/dev/null 2>&1; echo "KORU_PROJECT: yes (follow Koru mode)"; }
 [ -f "ux/project-context.md" ] && echo "PROJECT_CONTEXT: present" || echo "PROJECT_CONTEXT: missing"
 ```
 
-- If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `~/.skillcloud/repo/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
-- If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `~/.skillcloud/repo/CHANGELOG.md` in 3–5 bullets. Then continue.
+- If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `${CLAUDE_PLUGIN_ROOT}/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
+- If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes between the two versions from `${CLAUDE_PLUGIN_ROOT}/CHANGELOG.md` in 3–5 bullets. Then continue.
+- If `KORU_PROJECT: yes`: read **Koru mode** below before anything else. It overrides this skill's Produces, Next and Handoff.
 - If `PROJECT_CONTEXT: missing`: create a minimal `ux/project-context.md` from the template in `engagement-guardrails` — infer the project name and domain from the material at hand, state the inference in one line so the user can correct it, and continue. Never ask administrative questions (project type, classification, permissions — defaults exist); but if something material to the work itself is unclear — who the participants are, what decision the output should inform — ask that one sharp question before producing.
 
 ## Contract
 - **Consumes:** the final designs (Figma), `ux/design/components/*.md` (optional — slot in by reference), `ux/design/rationale.md` (optional — cite DEC entries instead of re-arguing), `ux/design/accessibility-audit.md` (optional — build-stage annotations land here), `ux/design/copy/*.md` (optional), `ux/project-context.md` (always)
 - **Produces:** `ux/delivery/handoff-<scope>.md`
 - **Next:** /design-qa-checklist after implementation — the QA pass checks the build against exactly this document
+
+<!-- koru-mode:start (generated from lib/methods.js by tools/weave.js; do not edit by hand) -->
+## Koru mode
+
+When `koru/engagement.md` exists, this skill is step **S4** of `koru-ship`, run by the **Engineer** agent, and its output is cards, not files:
+
+- **Reads:** `SCR`, `STA`, `TKT`, `API`, `DEC` cards (`koru list --type …`, `koru show ID`), plus `ux/project-context.md`, which Koru generates from the engagement and `koru/client.md` (read-only).
+- **Writes:** `HND`. Fill the Handoff card: in, not in, decisions, who to ask, rabbit holes, no-gos. Field shapes and error codes belong on data contracts (API), acceptance criteria on Tickets.
+- **Never writes** `ux/delivery/handoff-*.md` or anything else under `ux/`: the hook refuses it, because a second source of truth would skip the quote checks, provenance and sign-off.
+- **Next:** ignore this skill's own "Next" and "Handoff" lines. The next step is whatever `koru next` says.
+- **Domain:** take the domain, register and data rules from `ux/project-context.md`. The worked examples in this skill are illustrations; for enterprise SaaS use roles such as admin, approver and operator, and constraints such as SSO, tenants, permission tiers, bulk actions, audit logs and legacy shells.
+<!-- koru-mode:end -->
 
 # Handoff Spec
 

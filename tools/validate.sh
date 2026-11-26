@@ -68,6 +68,8 @@ if [ -f "$REPO_ROOT/.claude-plugin/plugin.json" ]; then
     claude plugin validate "$REPO_ROOT" >/tmp/koru-validate.log 2>&1 || { cat /tmp/koru-validate.log; fail "plugin" "claude plugin validate failed"; }
   fi
   if command -v node >/dev/null 2>&1; then
+    node "$REPO_ROOT/tools/weave.js" --check || fail "tools/weave" "a method skill is out of date with lib/methods.js (run node tools/weave.js)"
+    for a in $(node -e "console.log(Object.keys(require('$REPO_ROOT/lib/methods').AGENTS).join(' '))"); do [ -f "$REPO_ROOT/agents/$a.md" ] || fail "agents/$a" "agent named in lib/methods.js has no file"; done
     node "$REPO_ROOT/tests/koru/test.js" >/tmp/koru-test.log 2>&1 || { tail -40 /tmp/koru-test.log; fail "tests/koru" "engine tests failed"; }
     echo "koru: $(tail -1 /tmp/koru-test.log)"
   fi

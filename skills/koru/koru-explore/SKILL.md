@@ -18,7 +18,7 @@ description: |
 ## Preamble (run first)
 
 ```bash
-command -v koru >/dev/null 2>&1 || koru() { node "$HOME/.skillcloud/repo/lib/koru.js" "$@"; }
+command -v koru >/dev/null 2>&1 || koru() { node "${CLAUDE_PLUGIN_ROOT:-${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo}/lib/koru.js" "$@"; }
 koru where --brief 2>/dev/null || echo "NO_KORU_PROJECT"
 koru gate frame >/dev/null 2>&1 && echo "FRAME: ready or passed" || echo "FRAME: not passed"
 [ -f "ux/project-context.md" ] && echo "PROJECT_CONTEXT: present" || echo "PROJECT_CONTEXT: missing"

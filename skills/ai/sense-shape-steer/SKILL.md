@@ -10,26 +10,40 @@ description: |
   "what should the AI do here", "is AI right for this", or "teach me the framework".
   Proactively suggest when a project involves designing an AI feature or experience and its
   role, risks, or success criteria aren't defined yet.
-  Three modes: run, facilitate, learn. Feeds /design-brief; alternate entry to /ux-pipeline. (skillcloud)
+  Three modes: run, facilitate, learn. Feeds /design-brief; alternate entry to /ux-pipeline. In a Koru project it runs as F11 of koru-frame and writes OPP/MET cards. (skillcloud)
 ---
 
 ## Preamble (run first)
 
 ```bash
-_UPD=$("${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-update-check" 2>/dev/null || true)
+_UPD=$(command -v skillcloud-update-check >/dev/null 2>&1 && skillcloud-update-check 2>/dev/null || "${CLAUDE_PLUGIN_ROOT:-${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo}/bin/skillcloud-update-check" 2>/dev/null || true)
 [ -n "$_UPD" ] && echo "$_UPD" || true
+[ -f koru/engagement.md ] && { (command -v koru >/dev/null 2>&1 && koru context || node "${CLAUDE_PLUGIN_ROOT:-${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo}/lib/koru.js" context) >/dev/null 2>&1; echo "KORU_PROJECT: yes (follow Koru mode)"; }
 [ -f "ux/project-context.md" ] && echo "PROJECT_CONTEXT: present" || echo "PROJECT_CONTEXT: missing"
 ls ux/sprint 2>/dev/null && echo "SPRINT: artifacts exist" || echo "SPRINT: none"
 ```
 
-- If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `~/.skillcloud/repo/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
-- If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes from `~/.skillcloud/repo/CHANGELOG.md` in 3–5 bullets. Then continue.
+- If `UPGRADE_AVAILABLE <old> <new>`: follow the **Upgrade flow** in `${CLAUDE_PLUGIN_ROOT}/skills/core/skillcloud/SKILL.md`, then return and continue this skill.
+- If `JUST_UPGRADED <old> <new>`: say "SkillCloud v<new> (just updated)" and summarize the user-facing changes from `${CLAUDE_PLUGIN_ROOT}/CHANGELOG.md` in 3–5 bullets. Then continue.
+- If `KORU_PROJECT: yes`: read **Koru mode** below before anything else. It overrides this skill's Produces, Next and Handoff.
 - If `PROJECT_CONTEXT: missing`: create a minimal `ux/project-context.md` from the template in `engagement-guardrails` — infer the project name and domain from the material at hand, state the inference in one line so the user can correct it, and continue. Never ask administrative questions (project type, classification, permissions — defaults exist); but if something material to the work itself is unclear — who the participants are, what decision the output should inform — ask that one sharp question before producing.
 
 ## Contract
 - **Consumes:** the AI opportunity as the user describes it; any existing research (`ux/insight-report.md`, `ux/synthesis/*` — optional but gold for SENSE), `ux/project-context.md` (always)
 - **Produces:** `ux/sprint/` — opportunity-statement.md, pattern-decisions.md, storyboard.md, touchpoint-map.md, steer-plan.md, blueprint.md
 - **Next:** /design-brief — the blueprint is its declared input when design continues in the pipeline; /usability-test-plan consumes the steer-plan's thresholds
+
+<!-- koru-mode:start (generated from lib/methods.js by tools/weave.js; do not edit by hand) -->
+## Koru mode
+
+When `koru/engagement.md` exists, this skill is step **F11** of `koru-frame`, run by the **Strategist** agent, and its output is cards, not files:
+
+- **Reads:** `INS`, `JOB`, `PRB`, `FLW` cards (`koru list --type …`, `koru show ID`), plus `ux/project-context.md`, which Koru generates from the engagement and `koru/client.md` (read-only).
+- **Writes:** `OPP`, `MET`. Sense: AI opportunities become Opportunity cards with kind: ai and the AI opportunity statement. Shape: trust and failure behaviour become rows on state cells in Harden. Steer: the measures become Metric cards with a baseline, events and an owner.
+- **Never writes** `ux/sprint/*.md` or anything else under `ux/`: the hook refuses it, because a second source of truth would skip the quote checks, provenance and sign-off.
+- **Next:** ignore this skill's own "Next" and "Handoff" lines. The next step is whatever `koru next` says.
+- **Domain:** take the domain, register and data rules from `ux/project-context.md`. The worked examples in this skill are illustrations; for enterprise SaaS use roles such as admin, approver and operator, and constraints such as SSO, tenants, permission tiers, bulk actions, audit logs and legacy shells.
+<!-- koru-mode:end -->
 
 # Sense-Shape-Steer
 

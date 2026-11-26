@@ -171,6 +171,49 @@ t('Problem, HMW and Brief chain', () => {
   koru(['sign', 'BRF-001', '--name', 'Avery', '--role', 'engagement lead']);
   koru(['sign', 'BRF-001', '--cosign', '--name', 'Pat']);
 });
+t('the Frame gate asks for a Study, Segments and the enterprise structure', () => {
+  const out = koru(['gate', 'frame'], true);
+  has(out, '✗ Study plan written'); has(out, '✗ Segments are cards'); has(out, '✗ Structure: current flow'); has(out, '✗ Structure: permissions by role');
+  koru(['new', 'STU', 'Adjuster interviews', '--field', 'method=semi-structured interviews, 9 sessions']);
+  fill('STU-001', { 'Research questions': 'How do adjusters decide whether to trust an assignment?', Method: 'Interviews, because trust is a story question.', Participants: 'Adjusters with 1+ years, 3 per region.', Guide: 'Warm-up, last claim story, probes on re-checking.', Consent: 'Recorded consent naming Anthropic as AI processor.' });
+  koru(['new', 'SEG', 'Adjuster', '--field', 'kind=role', '--link', 'supports FND-001: re-checks by hand']);
+  fill('SEG-001', { Who: 'Claims adjusters handling 20 to 40 claims a day.', Evidence: 'FND-001 (2 of 9 re-check by hand).' });
+  fill('FND-001', {}, {});
+  koru(['new', 'FLW', 'Claim intake today', '--field', 'kind=current', '--link', 'supports FND-001: observed re-checking']);
+  fill('FLW-001', { Steps: '| # | Step | Actor | Workaround or pain | Handoff |\n| --- | --- | --- | --- | --- |\n| 1 | Claim arrives | system | | to adjuster |\n| 2 | Re-check owner | adjuster | exports to a spreadsheet | to lead |' });
+  koru(['new', 'OBJ', 'Claims object model']);
+  fill('OBJ-001', { Objects: '| Object | Key attributes | Relationships | Actions |\n| --- | --- | --- | --- |\n| Claim | id, value, region | has one owner | assign, reassign |\n| Adjuster | region, load | owns claims | accept, decline |' });
+  koru(['new', 'PRM', 'Who may assign']);
+  fill('PRM-001', { Matrix: '| Action | adjuster | lead |\n| --- | --- | --- |\n| Accept assignment | own | yes |\n| Reassign | request | yes |' });
+  has(koru(['check', 'PRM-001']), 'No blocking problems');
+});
+t('in a Koru project, method skills write cards, never ux/ files (hook)', () => {
+  const w = (f) => guard('PreToolUse', { tool_name: 'Write', tool_input: { file_path: path.join(dir, f), content: 'x' } });
+  const d = w('ux/personas/adjuster.md');
+  eq(decision(d), 'deny'); has(d.hookSpecificOutput.permissionDecisionReason, 'SEG');
+  eq(decision(w('ux/project-context.md')), 'deny');
+  eq(decision(guard('PreToolUse', { tool_name: 'Bash', tool_input: { command: 'echo x > ux/synthesis/affinity-map.md' } })), 'deny');
+  has(koru(['context']), 'ux/project-context.md');
+  has(fs.readFileSync(path.join(dir, 'ux/project-context.md'), 'utf8'), 'generated from koru/engagement.md');
+});
+t('each agent writes only its own card types; checkers write nothing (hook)', () => {
+  const as = (agent, command) => decision(guard('PreToolUse', { tool_name: 'Bash', agent_type: agent, tool_input: { command } }));
+  eq(as('koru:researcher', 'koru new FND "x" --link "supports DAT-001: y"'), 'allow');
+  eq(as('koru:researcher', 'koru new PRB "x"'), 'deny');
+  eq(as('koru:architect', 'koru new FLW "x"'), 'allow');
+  eq(as('koru:research-checker', 'koru pack frame'), 'allow');
+  eq(as('koru:research-checker', 'koru new FND "x"'), 'deny');
+  eq(decision(guard('PreToolUse', { tool_name: 'Edit', agent_type: 'koru:research-checker', tool_input: { file_path: card('FND-001'), old_string: 'count: 2 of 9', new_string: 'count: 2 of 9' } })), 'deny');
+  eq(decision(guard('PreToolUse', { tool_name: 'Edit', agent_type: 'koru:designer', tool_input: { file_path: card('PRM-001'), old_string: 'Who may assign', new_string: 'Who may assign claims' } })), 'deny');
+});
+t('the planner computes the next steps and writes work orders', () => {
+  const out = koru(['next', '--stage', 'frame']);
+  has(out, 'F14'); has(out, 'research-checker');
+  const j = JSON.parse(koru(['next', '--json', '--stage', 'frame']));
+  if (!j.steps.find((x) => x.id === 'F10').done) throw new Error('F10 should be done: ' + JSON.stringify(j.steps.find((x) => x.id === 'F10')));
+  const order = koru(['next', '--order', 'F14']);
+  has(order, 'WORK ORDER F14'); has(order, '[BLOCKER|MAJOR|MINOR|NOTE][RULE-ID][CARD-ID]');
+});
 t('an open Conflict blocks the Frame gate', () => {
   koru(['new', 'CON', 'PRD says leads assign; interviews say adjusters self-assign']);
   fill('CON-001', { Positions: '- PRD: leads assign (document)\n- Interviews: adjusters self-assign (observed)' }, { resolution: 'open' });
@@ -181,7 +224,7 @@ t('the gate needs a checker review newer than the last change', () => {
   has(koru(['gate', 'frame'], true), '✗ Checker review record for frame');
   fs.writeFileSync(path.join(dir, 'findings.md'), '1. [INS-001] No contradicting evidence searched — open\n2. [FND-001] Count is 2 of 9; insight reads as general — open\n');
   koru(['review', 'frame', '--checker', 'research-checker', '--file', 'findings.md']);
-  has(koru(['gate', 'frame'], true), '✗ Every checker finding has a disposition');
+  has(koru(['gate', 'frame'], true), 'has a disposition');
   let s = read('REV-001').replace('searched — open', 'searched — fixed').replace('general — open', 'general — accepted risk');
   put('REV-001', s);
   // An edit after the review, by anyone, needs a new review unless a "fixed" finding names the card.
@@ -278,7 +321,19 @@ t('a Decision has one Approver and factors before options', () => {
   fill('DEC-001', {}, { approver: 'Avery', outcome: 'Go with the explainable queue', client_commitment: 'Pat committed at Playback Zero 2026-11-26' });
   has(koru(['sign', 'DEC-001', '--name', 'Lee', '--role', 'design lead'], true), 'Only the Approver');
   koru(['sign', 'DEC-001', '--name', 'Avery']);
-  fs.writeFileSync(path.join(dir, 'f2.md'), '1. [DIR-001] Prototype lacks the wrong-suggestion case — fixed\n');
+  has(koru(['gate', 'explore'], true), '✗ Every Direction has a Test card');
+  koru(['new', 'TST', 'Accept a routed claim without re-checking', '--link', 'tests DIR-001: core claim', '--field', 'task=Accept the next claim', '--field', 'hard_case=wrong owner suggested', '--field', 'segment=SEG-001', '--field', 'threshold=nice if most do']);
+  has(koru(['threshold', 'TST-001', '--set', 'most adjusters'], true), 'is a number');
+  koru(['threshold', 'TST-001', '--set', '7 of 10 accept unaided']);
+  eq(decision(guard('PreToolUse', { tool_name: 'Bash', tool_input: { command: 'koru result TST-001 --passed 8 --of 10' } })), 'deny');
+  has(koru(['result', 'TST-001', '--passed', '6', '--of', '10']), 'not met');
+  has(read('DEC-002'), 'missed its threshold');
+  koru(['sign', 'TST-001', '--name', 'Sam', '--role', 'research owner']);
+  fill('DEC-002', { Question: 'Iterate or accept?', Factors: 'Evidence, time', Options: '| accept | | |' }, { approver: 'Lee', outcome: 'Accept: the misses were the wrong-owner case we fix in Harden' });
+  koru(['sign', 'DEC-002', '--name', 'Lee']);
+  koru(['new', 'FLW', 'Claim intake with reasons', '--field', 'kind=future', '--link', 'serves DIR-001: future flow', '--link', 'cites FLW-001: replaces']);
+  fill('FLW-002', { Steps: '| # | Step | Actor | Workaround or pain | Handoff |\n| --- | --- | --- | --- | --- |\n| 1 | Claim arrives with a reason | system | | to adjuster |\n| 2 | Accept or correct | adjuster | | |' });
+  fs.writeFileSync(path.join(dir, 'f2.md'), '1. [MAJOR][DC-06][DIR-001] Prototype lacks the wrong-suggestion case · evidence: no ?state for it · confidence: high — fixed\n2. [MINOR][DC-09][DIR-001] Dense table header · evidence: 11px labels · confidence: low — rejected: labels are 12px tokens\n');
   koru(['review', 'explore', '--checker', 'direction-checker', '--file', 'f2.md']);
   koru(['sign', 'REV-002', '--name', 'Lee', '--role', 'design lead']);
   has(koru(['gate', 'explore']), 'Ready to pass');
@@ -299,6 +354,10 @@ t('unclassified elements and blank state cells block the gate', () => {
   fill('STA-002', {}, { resolution: 'n/a: the review page has no page-level load' });
   koru(['new', 'MET', 'Reassignment rate', '--field', 'level=core', '--field', 'threshold=under 5% of claims reassigned']);
   fill('MET-001', { 'Feedback loop': 'Weekly reassignment log review.' });
+  has(koru(['check', 'MET-001'], true), 'Baseline');
+  fill('MET-001', {}, { baseline: '18% reassigned (Q3 log)', source: 'assignment log', events: 'claim_assigned, claim_reassigned', metric_owner: 'Head of claims ops', guardrail: 'time to first touch does not rise' });
+  has(koru(['gate', 'harden'], true), '✗ Permissions matrix (PRM) signed');
+  koru(['sign', 'PRM-001', '--name', 'Avery', '--role', 'engagement lead']);
   koru(['sign', 'MET-001', '--name', 'Avery', '--role', 'engagement lead']);
   koru(['sign', 'SCR-001', 'STA-001', 'STA-002', '--name', 'Lee', '--role', 'design lead']);
   fs.writeFileSync(path.join(dir, 'f3.md'), '1. [STA-002] n/a reason is thin — accepted risk\n');
@@ -344,6 +403,9 @@ t('the Ship gate needs a handoff with rabbit holes and no-gos', () => {
   koru(['review', 'ship', '--checker', 'spec-checker', '--file', 'f4.md']);
   has(koru(['gate', 'ship'], true), '✗ Handoff note complete');
   fill('HND-001', { In: 'Assignment review', 'Not in': 'Bulk reassignment', Decisions: 'DEC-001', 'Who to ask': 'Lee', 'Rabbit holes': 'Reason text length', 'No-gos': 'No auto-accept' });
+  has(koru(['gate', 'ship'], true), '✗ Every Screen has a data contract');
+  koru(['new', 'API', 'Assignment review contract', '--field', 'screen=SCR-001']);
+  fill('API-001', { Fields: '| Field | Type | Required | Source | Validation |\n| --- | --- | --- | --- | --- |\n| claimId | string | yes | claims API | uuid |', Errors: '| Code | When | Message the user sees | State |\n| --- | --- | --- | --- |\n| 409 | claim already reassigned | This claim was just reassigned to someone else. | STA-002 |' });
   koru(['review', 'ship', '--checker', 'spec-checker', '--file', 'f4.md']);
   koru(['sign', 'REV-005', '--name', 'Eng', '--role', 'engineer']);
   has(koru(['gate', 'ship']), 'Ready to pass');
@@ -352,9 +414,9 @@ t('the Ship gate needs a handoff with rabbit holes and no-gos', () => {
 console.log('\nChange travels both ways');
 t('a build decision supersedes nothing silently and flags what it touches', () => {
   koru(['decide', 'new', 'API cannot sort by owner', '--affects', 'SCR-001', '--why', 'sorting removed']);
-  fill('DEC-002', { Question: 'Drop owner sort?', Factors: 'Feasibility', Options: '| drop | | |' }, { approver: 'Eng', outcome: 'Drop owner sort' });
-  has(koru(['decide', 'impact', 'DEC-002']), 'TKT-001');
-  has(koru(['sign', 'DEC-002', '--name', 'Eng']), 'Flagged for writeback: SCR-001');
+  fill('DEC-003', { Question: 'Drop owner sort?', Factors: 'Feasibility', Options: '| drop | | |' }, { approver: 'Eng', outcome: 'Drop owner sort' });
+  has(koru(['decide', 'impact', 'DEC-003']), 'TKT-001');
+  has(koru(['sign', 'DEC-003', '--name', 'Eng']), 'Flagged for writeback: SCR-001');
   has(koru(['where']), 'writeback');
 });
 t('revising the flagged Screen makes its Ticket stale once re-signed', () => {
@@ -414,6 +476,97 @@ t('session start gives the rules and a recap', () => {
 t('outside a Koru project the hooks stay out of the way', () => {
   const r = spawnSync('node', [GUARD, 'PreToolUse'], { input: JSON.stringify({ cwd: os.tmpdir(), tool_name: 'Bash', tool_input: { command: 'koru sign X' } }), encoding: 'utf8' });
   eq(r.stdout, '');
+});
+
+
+console.log('\nTeam, rigour and the loops back in');
+const koruAs = (email, args, expectFail) => {
+  const r = spawnSync('node', [KORU, ...args], { cwd: dir, encoding: 'utf8', env: { ...process.env, KORU_ROOT: '', KORU_SIGNER_EMAIL: email } });
+  const out = (r.stdout || '') + (r.stderr || '');
+  if (!expectFail && r.status !== 0) throw new Error(`koru ${args.join(' ')} failed:\n${out}`);
+  if (expectFail && r.status === 0) throw new Error(`koru ${args.join(' ')} should have failed:\n${out}`);
+  return out;
+};
+const engFile = path.join(dir, 'koru/engagement.md');
+const engBefore = fs.readFileSync(engFile, 'utf8');
+t('signatures are checked against the people list and the git identity', () => {
+  fs.writeFileSync(engFile, engBefore.replace(/^people: \[\].*$/m, 'people:\n  - Sam Rivera <sam@example.com>: research owner\n  - Lee Park <lee@example.com>: design lead, designer'));
+  koru(['new', 'SEG', 'Team lead', '--field', 'kind=role', '--link', 'supports FND-001: leads rebalance']);
+  fill('SEG-002', { Who: 'Team leads who rebalance queues.', Evidence: 'FND-001.' });
+  has(koruAs('lee@example.com', ['sign', 'SEG-002', '--name', 'Sam Rivera', '--role', 'research owner'], true), 'you cannot sign as Sam Rivera');
+  has(koruAs('lee@example.com', ['sign', 'SEG-002', '--name', 'Lee Park', '--role', 'research owner'], true), 'not research owner');
+  has(koruAs('nobody@example.com', ['sign', 'SEG-002', '--name', 'Sam Rivera', '--role', 'research owner'], true), 'not on the engagement');
+  koruAs('sam@example.com', ['sign', 'SEG-002', '--name', 'Sam Rivera', '--role', 'research owner']);
+  has(read('SEG-002'), 'signature:'); has(read('SEG-002'), 'signed_email: sam@example.com');
+});
+t('a signed card edited outside Koru is caught by koru verify and the gate', () => {
+  const before = read('SEG-002');
+  put('SEG-002', before.replace('Team leads who rebalance queues.', 'Team leads who own every queue.'));
+  has(koru(['verify'], true), 'changed after it was signed');
+  has(koru(['gate', 'frame'], true), 'changed outside Koru: SEG-002');
+  put('SEG-002', before);
+  koru(['verify']);
+  fs.writeFileSync(engFile, engBefore);
+});
+t('two people minting the same id is caught and fixed', () => {
+  const src = card('SEG-002');
+  const clash = src.replace('team-lead', 'team-lead-copy');
+  fs.writeFileSync(clash, fs.readFileSync(src, 'utf8').replace('title: Team lead', 'title: Regional manager').replace(/^created: .*$/m, 'created: 2099-01-01T00:00:00Z').replace(/^status: final$/m, 'status: draft'));
+  has(koru(['ids'], true), 'SEG-002 is used twice');
+  has(koru(['ids', '--fix']), 'SEG-002 → SEG-003');
+  has(read('SEG-003'), 'Regional manager');
+  koru(['ids']);
+});
+t('the AI draft is compared with what a person signs (human edit ratio)', () => {
+  koru(['new', 'SEG', 'Auditor', '--field', 'kind=role']);
+  fill('SEG-004', { Who: 'Internal auditors who sample assigned claims.', Evidence: 'CTX-001 users.' });
+  guard('PostToolUse', { tool_name: 'Edit', session_id: 's1', agent_type: 'koru:synthesiser', tool_input: { file_path: card('SEG-004') } });
+  fill('SEG-004', { Who: 'Internal auditors who sample assigned claims every month and flag reassignments.' });
+  has(koru(['sign', 'SEG-004', '--name', 'Sam', '--role', 'research owner']), 'of the AI draft');
+  has(read('SEG-004'), 'human_edit:');
+  has(koru(['stats']), 'AI drafts signed: 1');
+  has(koru(['stats']), 'synthesiser');
+});
+t('people record AI mistakes they caught; Claude cannot', () => {
+  eq(decision(guard('PreToolUse', { tool_name: 'Bash', tool_input: { command: 'koru caught SEG-004 "x"' } })), 'deny');
+  koru(['caught', 'SEG-004', 'it invented a monthly cadence', '--name', 'Sam']);
+  has(koru(['stats']), 'Mistakes people caught (koru caught): 1');
+  has(koru(['stats']), 'rejected (checker was wrong) 1');
+});
+t('the severity floor follows the rigour profile', () => {
+  const K = require(path.join(REPO, 'lib', 'core.js'));
+  const rev = K.cardFromText('---\nid: REV-099\ntype: REV\ntitle: x\ngate: frame\nchecker: c\nchecklist_version: v\n---\n## Findings\n\n1. [MINOR][RC-02][FND-001] causal word · evidence: "because" · confidence: low — open\n', 'REV-099.md');
+  const blocks = (rigour) => K.checkShape(rev, { engagement: { rigour } }).filter((p) => p.level === 'block').length;
+  eq(blocks('standard') > 0, true, 'standard');
+  eq(blocks('sprint'), 0, 'sprint');
+  const row = K.findingRows(rev.sections.findings)[0];
+  eq(row.severity, 'minor'); eq(row.rule, 'RC-02'); eq(row.cards[0], 'FND-001'); eq(row.confidence, 'low');
+});
+t('client feedback comes back as a Playback card with typed rows', () => {
+  fs.writeFileSync(path.join(dir, 'feedback.json'), JSON.stringify({ comments: [{ anchor: 'SCR-001', state: 'STA-001', text: 'Leads need to see who reassigned it', author: 'Pat', role: 'client sponsor' }, { anchor: 'SCR-001', text: 'Love the colours', author: 'Pat' }] }));
+  has(koru(['playback', 'import', 'feedback.json', '--kind', 'zero']), '2 piece(s) of feedback');
+  has(koru(['check', 'PLB-001'], true), 'needs a type');
+});
+t('compare drafts a fair Decision; matrix drafts state cells from Permissions roles', () => {
+  has(koru(['compare', 'DIR-001', 'DIR-001']), 'factors are written before the options');
+  const n = koru(['matrix', 'SCR-001']);
+  has(n, 'state cell(s) drafted'); has(n, '2 role(s)');
+  if (!fs.readdirSync(path.join(dir, 'koru/cards')).some((f) => /^STA-\d+-assignment-review-lead-loading/.test(f))) throw new Error('no lead loading cell');
+});
+t('a stage pack condenses the stage for the checker', () => {
+  has(koru(['pack', 'frame']), 'pack-frame.md');
+  has(fs.readFileSync(path.join(dir, 'koru/generated/pack-frame.md'), 'utf8'), '# Stage pack: frame');
+});
+t('planted-defect evals score a checker', () => {
+  fs.writeFileSync(path.join(dir, 'planted.json'), JSON.stringify({ checker: 'research-checker', defects: [{ card: 'INS-001', rule: 'RC-04' }, { card: 'FND-001', rule: 'RC-01' }] }));
+  fs.writeFileSync(path.join(dir, 'found.md'), '1. [MAJOR][RC-04][INS-001] no contradicting evidence · evidence: no link · confidence: high — open\n2. [MINOR][RC-02][CTX-001] noise · evidence: x · confidence: low — open\n');
+  has(koru(['eval', 'score', '--expected', 'planted.json', '--file', 'found.md']), 'recall 0.5');
+});
+t('the skills are woven from one map and the doctor proves the hooks fire', () => {
+  const w = spawnSync('node', [path.join(REPO, 'tools', 'weave.js'), '--check'], { encoding: 'utf8' });
+  eq(w.status, 0, w.stderr);
+  has(koru(['doctor']), 'Hooks fire');
+  has(koru(['skills', 'persona']), 'writes SEG'.replace('writes SEG', 'Writes:** `SEG`'));
 });
 
 console.log(`\n${pass} passed, ${fail} failed.`);

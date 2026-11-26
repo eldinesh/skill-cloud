@@ -2,6 +2,7 @@
 name: koru-deliverables
 version: 3.0.0-alpha.1
 bundle: koru
+disable-model-invocation: true
 stage: explore
 description: |
   How Koru builds and shares what clients see: a standalone HTML prototype, Figma frames,
@@ -15,7 +16,7 @@ description: |
 ## Preamble (run first)
 
 ```bash
-command -v koru >/dev/null 2>&1 || koru() { node "$HOME/.skillcloud/repo/lib/koru.js" "$@"; }
+command -v koru >/dev/null 2>&1 || koru() { node "${CLAUDE_PLUGIN_ROOT:-${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo}/lib/koru.js" "$@"; }
 grep -E '^(deliverables|design_system|ai_tier):' koru/engagement.md 2>/dev/null || echo "NO_KORU_PROJECT"
 ls koru/deliverables 2>/dev/null
 [ -f "ux/project-context.md" ] && echo "PROJECT_CONTEXT: present" || echo "PROJECT_CONTEXT: missing"
