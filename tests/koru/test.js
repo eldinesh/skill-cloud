@@ -147,6 +147,12 @@ t('a person decides by picking an option, then Claude runs the person-only comma
   const contract = { tool_name: 'Bash', tool_input: { command: 'koru contract --tier internal --data-class confidential --processor Anthropic' }, ...sess };
   guard('PostToolUse', { tool_name: 'AskUserQuestion', tool_use_id: 'q4', tool_input: { questions: [{ question: 'What may AI do with this client\'s material?', header: 'AI use', options: [{ label: 'Internal' }, { label: 'Full' }] }, { question: 'How sensitive is the data?', header: 'Data', options: [{ label: 'Confidential' }, { label: 'Personal' }] }] }, tool_response: { answers: { 'What may AI do with this client\'s material?': 'Internal', 'How sensitive is the data?': 'Confidential' } }, ...sess });
   eq(decision(guard('PreToolUse', contract)), 'allow');
+  // The plain one-question form.
+  const allowHere = { tool_name: 'Bash', tool_input: { command: 'koru contract --allow here' }, ...sess };
+  eq(decision(guard('PreToolUse', allowHere)), 'deny');
+  guard('PostToolUse', { tool_name: 'AskUserQuestion', tool_use_id: 'q6', tool_input: { questions: [{ question: 'What may Claude do with Client\'s material?', header: 'AI use', options: [{ label: 'Work with it here (Recommended)' }, { label: 'Also update their Figma and Jira' }, { label: 'Keep it away from AI' }] }] }, tool_response: { answers: { 'What may Claude do with Client\'s material?': 'Work with it here (Recommended)' } }, ...sess });
+  eq(decision(guard('PreToolUse', { ...allowHere, tool_input: { command: 'koru contract --allow tools' } })), 'deny', 'a "here" answer does not open Figma and Jira');
+  eq(decision(guard('PreToolUse', allowHere)), 'allow');
   // An Insight in the person's own words, or the reading they picked.
   const ins = { tool_name: 'Bash', tool_input: { command: 'koru new INS "Adjusters reroute claims because the queue hides urgency"' }, ...sess };
   eq(decision(guard('PreToolUse', ins)), 'deny');

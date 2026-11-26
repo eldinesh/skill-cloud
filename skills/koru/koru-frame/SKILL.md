@@ -24,7 +24,7 @@ koru where --brief 2>/dev/null || echo "NO_KORU_PROJECT"
 ```
 
 - If `NO_KORU_PROJECT`: run `/koru:start` first. Nothing is generated before the engagement pack and the contract exist.
-- If the recap says the contract is not set: ask the person what the client's paperwork allows, as options (see `/koru:start`, step 8), and run `koru contract` with their answer. Research data stays closed to you until they do; you can still do desk research and the Context card.
+- If the recap says it is not decided what Claude may do with the client's material: ask the one question from `/koru:start` (step 8) and run `koru contract --allow …` with their answer. Research data stays closed to you until they do; you can still do desk research and the Context card.
 
 ## Contract
 - **Consumes:** `koru/engagement.md` (switches and contract, always), `koru/client.md`, the client brief and call notes, pseudonymised transcripts in `koru/raw/`, `ux/project-context.md` when the project also uses SkillCloud (domain and data rules, see `engagement-guardrails`)

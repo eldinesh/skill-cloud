@@ -43,16 +43,16 @@ If you also installed SkillCloud the old way (`./setup`), the research and desig
 
 Open the project folder in the Claude desktop app (Code) and type `/koru:start`. That is the only command anyone needs to remember.
 
-- **In a new folder** it walks you through setup in a few rounds of questions you answer by clicking: what kind of project, what the client gets, the design system, how careful the gates are, who is on the team, and what the client's contract allows AI to do. It opens the folders you need to drop files into, codes participant names in transcripts automatically, and offers to start the agents.
+- **In a new folder** it walks you through setup in a few rounds of questions you answer by clicking: what kind of project, what the client gets, the design system, how careful the gates are, who is on the team, and what Claude may do with the client's material (one question: work with it here, also update their Figma and Jira, or keep it away from AI). It opens the folders you need to drop files into, codes participant names in transcripts automatically, and offers to start the agents.
 - **In a project already set up** it greets you, says where things stand in two lines, and offers what you can do next: let the agents carry on, go through what is waiting for you (signatures, test results, checker findings, one at a time), open the boards, or add something from the client.
 
 Claude runs every command itself. You never type one.
 
 ## How a person decides (desktop-first)
 
-Signing, setting the contract, rating an Insight's confidence, recording a test result, answering a checker's finding, passing a gate and sharing with the client stay people's decisions. In the desktop app they are a question with options: "Sign BRF-001 as Lena Park (design lead)?" with **Sign it** and **Not yet**. When you pick yes, Claude runs the command.
+Signing, deciding what Claude may do with the client's material, rating an Insight's confidence, recording a test result, answering a checker's finding, passing a gate and sharing with the client stay people's decisions. In the desktop app they are a question with options: "Sign BRF-001 as Lena Park (design lead)?" with **Sign it** and **Not yet**. When you pick yes, Claude runs the command.
 
-The hooks make this safe. They record the option a person picked (and the person's own chat messages), and a person-only command goes through only when a fresh answer from that session names what the command does (the card ids, the stage, the contract values) and says yes. Each answer is used once. An agent can never use one, and a "Not yet" is never read as yes. An Insight's claim must be words the person wrote or the reading they picked. The log records each decision with the question and the answer.
+The hooks make this safe. They record the option a person picked (and the person's own chat messages), and a person-only command goes through only when a fresh answer from that session names what the command does (the card ids, the stage, what Claude may do) and says yes. Each answer is used once. An agent can never use one, and a "Not yet" is never read as yes. An Insight's claim must be words the person wrote or the reading they picked. The log records each decision with the question and the answer.
 
 Power users can still run any `koru` command in a terminal.
 
@@ -102,7 +102,7 @@ The full engine is `koru help`: cards, tests and decisions, gates, moments, the 
 | --- | --- |
 | Claude never signs, sets confidence, writes an Insight, or passes a gate | Edits that touch `status: final`, sign-off fields or confidence, any INS card write, and the person-only commands are refused |
 | A signed card changes only as a new version; an accepted Decision only by a superseding one | Edits to final cards are refused; `koru revise` and `supersedes` links are the way |
-| Consent before AI sees research | Research data is closed until a person sets the contract; Data cards need consent naming the AI processor |
+| Consent before AI sees research | Research data is closed until a person decides what Claude may do with the client's material (`koru contract --allow here\|tools\|none`); Data cards need consent naming the AI processor |
 | Pseudonymise first | Originals and the name map live in `koru/raw/originals` and `koru/private`, which Claude can never read; `koru pseudonymise` makes the readable copy |
 | Quotes are exact | Every Finding quote is checked word for word against its transcript, with speaker and timestamp, before the card is saved |
 | Synthetic output is never evidence | Synthetic Findings and any "supports" link to a Hypothesis are refused |
