@@ -1,9 +1,18 @@
-# The design team
+# Koru Studio: the design team
+
+## The Koru framework, baked in
+
+- **Five designer moments per stage.** Claude proposes with sources and confidence, and the designer decides. The orange calls on the boards are the designer's: confirming type and scope, deciding conflicts, writing the problem, giving each direction, choosing with evidence, cutting edge cases, AI and craft calls, writing ticket intent. The design lead stops at each moment with one proposal and the one decision needed.
+- **Every stage's playbook is a skill:** `/koru-studio:frame`, `/koru-studio:explore`, `/koru-studio:harden`, `/koru-studio:ship`, each with its steps, "only if it applies", "Claude handles it, designer checks", the checks table (judgement checks only a designer can pass), the outputs and who signs.
+- **Four gates, all in the same format:** the lead calls the gate → an AI audit in a fresh context fills every question (Pass with evidence / Gap / Can't tell) → the decider marks every Gap Fix or Waive (★ can't be waived; a waiver needs a reason, an owner and a due date) → the next stage's lead accepts the handoff → it's logged. The board pane shows each open Gap with Fix and Waive buttons.
+- **Standing logs:** parking lot · conflict log (every conflict leaves Frame with a status) · decision cards · feedback log (one row per point, every source) · AI quality log (every AI mistake caught, all stages) · design change log.
+
+
 
 SkillCloud runs a project as a design team made of agents, with Claude at its core and people in charge. Claude does the depth and the volume: every state, every source line, every rule checked on every screen. People keep the judgement: framing, accepting evidence, choosing a direction, passing the rules, agreeing feasibility, signing off.
 
 ```
-/skillcloud:start     in any folder: sets it up from whatever material is there and proposes the first plan
+/koru-studio:start     in any folder: sets it up from whatever material is there and proposes the first plan
 /design-lead          "where are we?" · "take this to the brief" · "run Explore" · "sign off the pack as Ben Ito"
 ```
 
@@ -105,7 +114,7 @@ Every stage works whether the client has a design system or not: **library in co
 
 ```
 /plugin marketplace add eldinesh/skill-cloud     # or a local checkout: /plugin marketplace add ~/Developer/SkillCloud
-/plugin install skillcloud@skill-cloud
+/plugin install koru-studio@koru
 ```
 
 The plugin brings the skills, the 8 agents (named `skillcloud:sc-<role>`), the `/board`, `/signoff` and `/decide` commands, and two hooks:

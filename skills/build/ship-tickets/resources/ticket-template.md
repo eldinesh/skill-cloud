@@ -15,6 +15,11 @@ updated: <yyyy-mm-dd>
 **User story:** As a <role>, I want <thing>, so that <outcome>.
 **Traces:** FL-01.S01, FL-01.S02 · JOB-01 · D-007, DEC-03
 
+**Intent:** why this exists (JOB-01: book a suitable room fast at peak times)
+- **Must not change:** <what the design protects, e.g. "the reason line sits above the Book button">
+- **Can flex:** <where engineering judgement is welcome, e.g. "skeleton shimmer, list page size 25–100">
+- **Edge cases that matter:** <from the prioritised list: now cases this ticket owns>
+
 **Context:** brief `ux/design/brief.md` · prototype `ux/explore/<dir>/prototype.html?state=ready` · deliverable route `/` · Figma <frame link or none>
 
 ## Acceptance criteria

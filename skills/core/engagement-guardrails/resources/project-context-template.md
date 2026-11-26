@@ -47,6 +47,10 @@ updated: <yyyy-mm-dd>
 | Design lead | <name> | hardened design |
 | Rulebook owner | <name> | rulebook checks, rulebook changes |
 | Engineer | <name> | feasibility (Harden), handoff review (Ship) |
+| Decision owner (client) | <name> | scope, business, priority; agrees the brief and AI on their data in writing |
+| Explore lead | <name> | accepts Frame's handoff (Gate 1) |
+| Harden lead | <name> | accepts Explore's handoff (Gate 2) |
+| Ship lead | <name> | accepts Harden's handoff (Gate 3) |
 
 One person can hold several roles. These are agency staff or client approvers. Names here are fine. Research participants are never named anywhere.
 

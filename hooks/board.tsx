@@ -1,24 +1,24 @@
-// SkillCloud board: a pane beside the chat and a band above the prompt, drawn from the
+// Koru Studio board: a pane beside the chat and a band above the prompt, drawn from the
 // project's ticket files (ux/team/board/*.md). The pane never writes a ticket or signs
 // anything: every control sends the person's own words to the session, and /design-lead
 // records them. Claude never signs.
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import type { BoardView, HistoryEvent, Ticket } from '../types'
+import type { BoardView, GateGap, HistoryEvent, Ticket } from '../types'
 
-const PANE = 'skillcloud-board'
-const TITLE = 'SkillCloud board'
+const PANE = 'studio-board'
+const TITLE = 'Koru Studio board'
 const DIR = 'ux/team/board'
 
-const board = atom({ plugin: 'skillcloud', key: 'board' } as const,
-  { isProject: false, hasBoard: false, project: '', tickets: [] } as BoardView, { shape: 'board-1' })
-const history = atom({ plugin: 'skillcloud', key: 'history' } as const, [] as HistoryEvent[], { shape: 'history-1' })
-const picks = atom({ plugin: 'skillcloud', key: 'picks' } as const, {} as Record<string, 'approve' | 'decline'>)
-const names = atom({ plugin: 'skillcloud', key: 'names' } as const, {} as Record<string, string>)
-const notes = atom({ plugin: 'skillcloud', key: 'notes' } as const, {} as Record<string, string>)
-const opened = atom({ plugin: 'skillcloud', key: 'opened' } as const, '')
-const sent = atom({ plugin: 'skillcloud', key: 'sent' } as const, {} as Record<string, string>)
+const board = atom({ plugin: 'koru-studio', key: 'board' } as const,
+  { isProject: false, hasBoard: false, project: '', tickets: [], gaps: [] } as BoardView, { shape: 'board-2' })
+const history = atom({ plugin: 'koru-studio', key: 'history' } as const, [] as HistoryEvent[], { shape: 'history-1' })
+const picks = atom({ plugin: 'koru-studio', key: 'picks' } as const, {} as Record<string, 'approve' | 'decline'>)
+const names = atom({ plugin: 'koru-studio', key: 'names' } as const, {} as Record<string, string>)
+const notes = atom({ plugin: 'koru-studio', key: 'notes' } as const, {} as Record<string, string>)
+const opened = atom({ plugin: 'koru-studio', key: 'opened' } as const, '')
+const sent = atom({ plugin: 'koru-studio', key: 'sent' } as const, {} as Record<string, string>)
 
 // ---------------------------------------------------------------- reading the board
 
@@ -68,9 +68,26 @@ export const parseTicket = (text: string, file: string, mtimeMs: number): Ticket
     what: body('what'),
     doneWhen: body('done when'),
     log: body('log').split('\n').filter(l => l.trim().startsWith('-')).slice(-4),
+    moment: clean(fm.moment),
     file,
     mtimeMs,
   }
+}
+
+// A gate sheet's open Gaps: AI said Gap / Can't tell, and no person has decided yet.
+export const parseGaps = (text: string, file: string): GateGap[] => {
+  const gate = /^#\s+(.+)$/m.exec(text)?.[1]?.trim() ?? file
+  const out: GateGap[] = []
+  for (const line of text.split('\n')) {
+    const cells = line.split('|').map(c => c.trim())
+    // | id | question | ★ | evidence | fix at | AI verdict | human decision | owner |
+    if (cells.length < 9 || !/^[A-H][0-9]$/.test(cells[1] ?? '')) continue
+    const verdict = cells[6] ?? ''
+    const decided = (cells[7] ?? '').length > 0
+    if (decided || !/^(gap|can.?t tell)/i.test(verdict)) continue
+    out.push({ gate, file, id: cells[1] ?? '', question: cells[2] ?? '', blocking: (cells[3] ?? '').includes('★'), fixAt: cells[5] ?? '', verdict })
+  }
+  return out
 }
 
 type Cached = { mtimeMs: number; ticket: Ticket }
@@ -99,10 +116,21 @@ const refresh = async ($: EngineInterface): Promise<void> => {
     }
   }
   tickets.sort((a, b) => order(a) - order(b) || a.id.localeCompare(b.id, undefined, { numeric: true }))
-  const signature = `${isProject}|${hasBoard}|${project}|` + tickets.map(t => `${t.file}:${t.mtimeMs}`).join(',')
+  const gaps: GateGap[] = []
+  let gateSig = ''
+  if (isProject && (await $.fs.exists('ux/team/gates').catch(() => false))) {
+    const sheets: { name: string; kind: string; mtimeMs: number }[] = await $.fs.list('ux/team/gates').catch(() => [])
+    for (const sheet of sheets) {
+      if (sheet.kind !== 'file' || !/-gate-v\d+-(draft|review)\.md$/.test(sheet.name)) continue
+      gateSig += `${sheet.name}:${sheet.mtimeMs},`
+      const text: string = await $.fs.read(`ux/team/gates/${sheet.name}`).catch(() => '')
+      gaps.push(...parseGaps(text, sheet.name))
+    }
+  }
+  const signature = `${isProject}|${hasBoard}|${project}|${gateSig}|` + tickets.map(t => `${t.file}:${t.mtimeMs}`).join(',')
   if (signature === lastSignature) return
   lastSignature = signature
-  await update($, board, () => ({ isProject, hasBoard, project, tickets }))
+  await update($, board, () => ({ isProject, hasBoard, project, tickets, gaps }))
 }
 
 const STAGES = ['frame', 'explore', 'harden', 'ship', 'learn']
@@ -172,7 +200,7 @@ const sync = async ($: EngineInterface): Promise<void> => {
       await update($, history, () => events.slice(-60))
     } catch { /* keep what we had */ }
   }
-  await run($, [`${bin}/skillcloud-board`, 'html'])
+  await run($, [`${bin}/studio-board`, 'html'])
 }
 
 const KIND_WORD: Record<string, string> = {
@@ -186,7 +214,7 @@ export const register: Register = on => {
   let timer: { cancel: () => void } | undefined
 
   on('session.start', async ($, e, next) => {
-    await $.command.register({ name: 'skillcloud-board', description: 'Open the SkillCloud team board beside the chat' })
+    await $.command.register({ name: 'studio-board', description: 'Open the SkillCloud team board beside the chat' })
     await refresh($)
     timer?.cancel()
     try { timer = $.clock.every(3000, () => { void refresh($) }) } catch { timer = undefined }
@@ -196,11 +224,11 @@ export const register: Register = on => {
     return next(e)
   })
 
-  on('command.run', { command: 'skillcloud-board' }, async $ => {
+  on('command.run', { command: 'studio-board' }, async $ => {
     await refresh($)
     const view = await read($, board)
     await $.ui.open({ id: PANE, title: view.project ? `${TITLE} · ${view.project}` : TITLE })
-    if (!view.isProject) return { text: 'This folder is not a SkillCloud project yet. Run /skillcloud:start to set it up.' }
+    if (!view.isProject) return { text: 'This folder is not a Koru Studio project yet. Run /koru-studio:start to set it up.' }
     const s = sort(view.tickets)
     return { text: `Board open: ${s.waiting.length} wait on you, ${s.doing.length} running, ${s.ready.length} ready, ${s.proposed.length} proposed.` }
   })
@@ -225,7 +253,7 @@ export const register: Register = on => {
     ].filter(Boolean)
     return (
       <Box gap={1}>
-        <Text color={s.waiting.length ? 'warning' : 'subtle'}>SkillCloud · {parts.length ? parts.join(' · ') : 'all done'}</Text>
+        <Text color={s.waiting.length ? 'warning' : 'subtle'}>Koru Studio · {parts.length ? parts.join(' · ') : 'all done'}</Text>
         <Button key="open-board" label="Board" plain onPress={() => { void $.ui.open({ id: PANE, title: TITLE }) }} />
       </Box>
     )
@@ -246,9 +274,9 @@ export const register: Register = on => {
     if (!view.isProject) {
       return (
         <Box flexDirection="column" gap={1}>
-          <Text>This folder isn't a SkillCloud project yet.</Text>
+          <Text>This folder isn't a Koru Studio project yet.</Text>
           <Button key="start" label="Set it up" variant="primary"
-            onPress={() => { void $.prompt.submit({ text: '/skillcloud:start', asUser: true }) }} />
+            onPress={() => { void $.prompt.submit({ text: '/koru-studio:start', asUser: true }) }} />
         </Box>
       )
     }
@@ -393,11 +421,58 @@ export const register: Register = on => {
       </Box>
     )
 
+    const MOMENTS: Record<string, string[]> = {
+      frame: ['Setup', 'Evidence and conflicts', 'Heuristics and audit', 'Framing', 'Sign-off'],
+      explore: ['Foundation and scope', 'Direction', 'Two directions', 'Evidence', 'Choice and sign-off'],
+      harden: ['Scope', 'Edge-case cut', 'Engineer and client', 'AI and craft calls', 'Sign-off'],
+      ship: ['Setup and plan', 'Deliverable', 'Tickets', 'Engineer review', 'Sign-off'],
+    }
+    const unfinished = view.tickets.filter(t => t.status !== 'done' && t.status !== 'dropped')
+    const now = unfinished.find(t => t.moment) ?? unfinished[0]
+    const stageName = now?.stage ? now.stage[0]?.toUpperCase() + now.stage.slice(1) : ''
+    const momentNo = Number(now?.moment ?? 0)
+    const momentName = now?.stage && momentNo ? MOMENTS[now.stage]?.[momentNo - 1] : undefined
+
+    const gapCard = (g: GateGap) => {
+      const key = `${g.file}:${g.id}`
+      const note = (typedNotes[key] ?? '').trim()
+      const done = wasSent[key]
+      return (
+        <Box key={`gap-${key}`} flexDirection="column" borderStyle="round" borderColor={g.blocking ? 'error' : 'warning'} paddingX={1} marginBottom={1}>
+          <Text bold wrap="wrap">{g.id}{g.blocking ? ' ★' : ''} <Text dimColor>{g.gate}</Text></Text>
+          <Text wrap="wrap">{g.question}</Text>
+          <Text dimColor wrap="wrap">AI: {g.verdict}</Text>
+          {done ? <Text color="success" wrap="wrap">Sent: {done}</Text> : (
+            <Box flexDirection="column">
+              {field('notes', key, g.blocking ? 'Note' : 'Waive reason', g.blocking ? 'optional note for the fix' : 'reason · owner · due date')}
+              <Box gap={1} flexWrap="wrap">
+                <Button key={`fix-${key}`} label={`Fix (back to ${g.fixAt || 'the step'})`} variant="primary"
+                  onPress={() => { void send($, key, `Fix ${g.id} on ${g.gate}: back to ${g.fixAt || 'the step named'}.${note ? ' ' + note : ''}`) }} />
+                {g.blocking
+                  ? <Text dimColor>★ blocks: can't be waived</Text>
+                  : <Button key={`waive-${key}`} label="Waive"
+                      onPress={() => { if (note) void send($, key, `Waive ${g.id} on ${g.gate} because ${note}`); else void $.ui.toast('A waiver needs a reason, an owner and a due date.') }} />}
+              </Box>
+            </Box>
+          )}
+        </Box>
+      )
+    }
+
     return (
       <Box flexDirection="column" width={width}>
+        {stageName ? (
+          <Box marginBottom={1}>
+            <Text bold>{stageName}</Text>
+            <Text dimColor>{momentName ? ` · moment ${momentNo} of 5: ${momentName}` : ''}</Text>
+          </Box>
+        ) : null}
         <Box flexDirection="column" marginBottom={1}>
-          {heading('Waits on you', s.waiting.length, 'warning')}
-          {s.waiting.length === 0 ? <Text dimColor>Nothing waits on you.</Text> : s.waiting.map(waitingCard)}
+          {heading('Waits on you', s.waiting.length + view.gaps.length, 'warning')}
+          {s.waiting.length + view.gaps.length === 0 ? <Text dimColor>Nothing waits on you.</Text> : null}
+          {view.gaps.length ? <Text dimColor wrap="wrap">Gate gaps: the AI audited, you decide. ★ gaps must be fixed; others can be fixed or waived.</Text> : null}
+          {view.gaps.map(gapCard)}
+          {s.waiting.map(waitingCard)}
         </Box>
         {proposedBlock}
         {section('Running', s.doing, t => t.route)}
@@ -420,7 +495,7 @@ export const register: Register = on => {
             <Button key="open-history" label="Open the board and full history"
               onPress={() => {
                 void (async () => {
-                  await run($, [`${$.plugin.root}/bin/skillcloud-board`, 'html'])
+                  await run($, [`${$.plugin.root}/bin/studio-board`, 'html'])
                   const r = await run($, ['open', 'ux/team/board.html'])
                   if (r.exitCode !== 0) await run($, ['xdg-open', 'ux/team/board.html'])
                 })()

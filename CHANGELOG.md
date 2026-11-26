@@ -2,6 +2,20 @@
 
 All notable changes to SkillCloud. Maintainers: bump `VERSION` and add an entry here in the same commit — the self-update prompt reads this file to show "what's new".
 
+## 1.0.0-alpha.1 (Koru Studio) — 2026-11-26
+
+The plugin is renamed **koru-studio** (branch `koru-studio`), and the Koru framework from the team's boards is baked in.
+
+- **Stage skills:** `frame` (v2), `explore` (v1), `harden` (v2), `ship` (v2). Each runs as five designer moments, with the full playbook and reference tables:
+  - **Frame:** three lanes and a join, input scenarios I1–I14 with confidence ceilings, the context sweep (C1–C12, D1–D10), the intake table, the starting point → path rule, whose word wins, the conflict rule and log, design-system messy cases, hard stakeholder cases.
+  - **Explore:** visual and UX tracks, the foundation audit F1–F12 → routes A–K, the Claude-readiness check, route × stage, visual and UI direction, feedback intake.
+  - **Harden:** the eight steps with the engineer feasibility gate and the client workshop.
+  - **Ship:** the eight steps with ticket intent.
+  - Each stage has its checks table (judgement checks only a designer can pass), "only if it applies", "Claude handles it", outputs and sign-offs.
+- **Four gates** as sheets (31, 40, 19 and 13 questions, ★ blocking), all following "AI reviews, people decide". Named audits and in-stage checks run in `sc-checker`.
+- **New roles:** decision owner (client), and Explore, Harden and Ship leads who accept handoffs. Cards: decision card, handoff card, AI quality log, design change log. Tickets gain an Intent block (must not change, can flex).
+- **Board pane:** shows the current stage and designer moment, and each gate's open Gaps with Fix and Waive (★ can't be waived).
+
 ## 0.14.0 — 2026-11-26
 
 Version control for everything a project produces, a visual lifecycle, and sidequest built in.

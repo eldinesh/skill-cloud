@@ -3,10 +3,10 @@ name: design-lead
 version: 2.0.0
 bundle: core
 description: |
-  The orchestrator. Runs the project as a design team of agents through Frame → Explore →
-  Harden → Ship (→ Learn). It reads the shared project memory in ux/, works out what's next,
-  routes each job to the right specialist agent, has an independent checker challenge every
-  handoff, and stops at each gate for a named person to sign off, overrule or send back.
+  Koru Studio's design lead: runs the Koru delivery system (Frame → Explore → Harden → Ship →
+  Learn) as a design team of agents. Each stage runs as five designer moments, where Claude
+  proposes and the designer decides. Each stage ends at a gate where an independent AI audits
+  and named people decide, Fix or Waive. It routes jobs to specialists and never signs.
   Use when asked "where are we", "what's next", "run the team", "take this to <stage>",
   "sign off", "record a decision", "publish finals", or "start a new project".
   Proactively invoke when someone is unsure what to do next on a project, or asks to run
@@ -147,36 +147,36 @@ Nothing starts, counts or lists as open work until the person says yes. Then set
 
 The same applies later: a ticket a person drops mid-stage ("stop J-004, we don't need the scan") gets the same knock-on check before anything else moves.
 
-**FRAME**
-1. Raw material in → `sc-synthesiser`: clean intake into `ux/intake/clean/` (de-identified, speaker-labelled markdown). If a requirement call is coming or just happened → `sc-researcher`: /requirement-call (prep or recap).
-2. Fresh research needed → `sc-researcher`: /research-plan + /interview-guide → checker H0 → **research owner signs before fieldwork** → people run sessions → transcripts in.
-3. `sc-synthesiser`: /interview-synthesis → /affinity-mapping (3+ participants) → /jobs-to-be-done (5–8 jobs) → /persona (1–2). Add /journey-map and /insight-report when the project needs a readout.
-4. `sc-strategist`: /experience-strategy (insight → job → problem → HMW → UX and AI opportunity, plus the 3–5 product competitive scan) → /design-brief (the one-page framed brief).
-   *Roadmap path:* the strategist may draft the brief first, from raw input, as a hypothesis brief with every fact at low confidence. It is revised after the pack.
-5. Checker H1 (pack) and H2 (brief) → **gate: senior signs the brief, research owner signs the pack.**
+Each stage is a **stage skill** that holds its playbook, tables and checks. Read it before planning the stage:
+`~/.skillcloud/repo/skills/stages/<frame|explore|harden|ship>/SKILL.md` and its `resources/reference.md`.
 
-**EXPLORE**
-1. `sc-information-architect`: /information-architecture (object model, navigation, the in-scope flow, 3–5 screens) → checker H3.
-2. `sc-designer`: /explore-directions, cards only → show both cards to the team lead → **team lead approves the cards before anything is built** (record a `direction` decision).
-3. `sc-designer`: /explore-directions, prototypes (one realistic HTML file per direction) · `sc-researcher`: /usability-test-plan quick mode → `ux/explore/test-script.md`.
-4. People run quick tests, with someone playing the user. Session notes in → `sc-synthesiser`: feedback log.
-5. Checker H4 → **gate: team lead chooses the direction, with user evidence.**
+**Plan the stage as its five designer moments.** Every ticket carries `moment: 1–5`, and the playback groups by moment. For example:
 
-**HARDEN**
-1. `sc-engineer`: /harden-review, feasibility part → `ux/harden/feasibility.md`. Book this first. Limits change designs.
-2. `sc-quality-reviewer`: /harden-review (matrix + rulebook check) · /accessibility-audit · /heuristic-evaluation.
-3. `sc-designer`: fixes the gaps in the chosen prototype (states, roles, edge data, AI states), plus /component-spec, /ux-writing and /design-rationale for decisions made. Fix here, or recommend sending it back to Explore (delivery-system §2).
-4. `sc-quality-reviewer`: re-runs the matrix on the fixed prototype.
-5. Checker H5 → **gate: engineer (feasibility), rulebook owner (rulebook checks), design lead (hardened design).**
+```
+FRAME · five designer moments (about 50 min of designer time)
+1 Setup (5m)          J-001 synthesiser  intake register + clean (Distill) + source index      → designer confirms type, starting point, scope
+2 Evidence (15m)      J-002 synthesiser  source map + agreement grid + conflict log            → designer decides each conflict
+                      J-003 checker      frame-conflict-check
+3 Heuristics (10m)    J-004 quality-rev  heuristic evaluation + UX audit (existing product)    → designer confirms or rejects findings
+4 Framing (15m)       J-005 strategist   framed brief + where AI fits + research pack          → designer writes the problem, decides AI fit
+                      J-006 checker      frame-research-challenger
+5 Sign-off (5m)       G-frame-1          Gate 1: AI audit → team lead decides gaps → Explore lead accepts
+Only if it applies: switched on: existing product (moment 3), client brought solutions (parking lot)
+Yes to run it?
+```
 
-**SHIP**
-1. `sc-engineer`: /ship-code → `deliverable/` + `ux/ship/build-report.md`.
-   **Big builds go through sidequest**, when it's installed and enabled (its `mcp__sidequest__*` tools are listed). Without it, the engineer builds in one job as below. When the deliverable is more than about three screens, or its states fan out wide, run the code work through sidequest's loop instead of one long engineer job. File one sidequest story for the flow, with its tickets cut from the hardening matrix (a screen and its states each). Sidequest plans them with you for one yes, runs its workers in parallel worktrees on their routed models, reviews each, and lands one change into `deliverable/` (or the client's repo, when project-context names one). It stays the engineer's ticket on our board: start it, then run the lane check (role `engineer`), checker H6 and the Ship gate on what landed, exactly as for a single build. Record the landing in the history (`--kind release`).
-2. `sc-engineer`: /ship-tickets → `ux/ship/tickets/` + `ux/ship/handoff-note.md`. Creating tickets in a tracker is outward-facing: draft locally, and create them only after the person says so.
-3. `sc-quality-reviewer`: /design-qa-checklist against the running deliverable.
-4. Checker H6 → **gate: engineer reviews the handoff.** Their "still need to ask" list must be empty or answered.
+Who does what, per stage (the stage skill has the step detail):
 
-**LEARN** (after release): `sc-synthesiser`: /cross-study-synthesis with post-release signals (overrides of the AI, failures, support themes, metrics) → `sc-strategist`: update the STEER plan via /sense-shape-steer. The next Frame starts there.
+| Stage | Specialists | In-stage checks (sc-checker protocol) | Gate audit |
+|---|---|---|---|
+| Frame | synthesiser (intake, clean, source map, research pack), researcher (kick-off prep via /requirement-call + Sparr forecast, desk plan, recruitment), strategist (brief, where AI fits, scan), quality reviewer (heuristic evaluation + UX audit), information architect (foundation capture) | frame-conflict-check · frame-research-challenger | frame-explore-readiness-audit |
+| Explore | quality reviewer (explore-foundation-check), designer (visual direction, DS, UI direction, options, prototypes, direction cards, tokens), information architect (flows), researcher (10-min test script), synthesiser (feedback intake) | explore-foundation-check · explore-direction-challenger · DS fit check | explore-harden-readiness-audit |
+| Harden | designer (plan draft, prototype states, patterns), information architect (role × action matrix, flow map), quality reviewer (edge-case listing, QA, rulebook, WCAG), engineer (feasibility) | harden-reviewer · harden-rulebook-check | harden-ship-readiness-audit |
+| Ship | engineer (setup, HTML deliverable, tickets, assumptions, PR plan), quality reviewer (fidelity flags), designer (intent drafts for the designer to edit) | ship-handoff-reviewer | ship-handoff-reviewer (gate run) |
+
+**Designer moments are people's work** (`mode: hitl`, `kind: moment`): the plan shows each one, and the design lead stops there with the proposal and the one decision needed. Agents never make a moment's decision.
+
+**Standing logs, every project:** parking lot (`ux/frame/parking-lot.md`), conflict log, decision cards (`resources/cards/decision-card.md` → `ux/team/decisions/`), feedback log (Explore onwards), **AI quality log** (`resources/cards/ai-quality-log.md` → `ux/team/ai-quality-log.md`: every AI mistake caught, by whom), and the design change log (Ship).
 
 ## Step 4a: Dispatch (team mode)
 
@@ -205,14 +205,17 @@ Specialists can't spawn other agents, so you do all routing. Two frontier ticket
 
 Run each job yourself: read the agent file at `~/.skillcloud/repo/agents/sc-<role>.md` and its skill, follow them as written, and stay inside the role's lane. For the challenge, start a **separate pass** framed only by the protocol, the inputs and the work, and run every tool. Mark the check report `independence: inline (same session)`. The gate packet must say so. Sign-off owners should know the checker wasn't independent.
 
-## Step 5: Gate
+## Step 5: Gate (AI reviews, people decide)
 
-When a stage's jobs are done and checked:
+Every stage ends at its gate. The procedure, outcomes and columns are in `resources/gates/README.md`, and the sheets are `resources/gates/1-frame-explore.md`, `2-explore-harden.md`, `3-harden-ship.md` and `4-ship-learn.md`.
 
-1. Write the handoff card (`delivery-system.md` §8) to `ux/team/handoffs/<stage>.md`.
-2. Build the gate packet from `resources/gate-packet-template.md`. Include artifacts, verdicts, literal tool results, open findings, overrides, built-on-unsigned, what got caught (tools, checker, people), and a recommendation. Write it into the gate ticket's **For you** section (question, why now, options with what each gets and costs, recommended, what happens if nobody answers) and save a copy to `ux/team/gates/<gate-id>.md`.
-3. Name who signs, from `ux/project-context.md` → Team. If a sign-off role has no name, ask: "Who signs <role> for this project?" Record the answer in project-context.
-4. **Stop.** Do not continue to the next stage, and do not sign, until the named person replies. "Looks good" from anyone else is not sign-off (charter Art. 6.3).
+1. **The lead calls the gate** (the team lead, or the design lead for Gate 3). Copy the sheet to `ux/team/gates/<project>-<stage>-gate-v<n>-draft.md`. Write the handoff card (`resources/cards/handoff-card.md`).
+2. **AI review:** dispatch `sc-checker` with the gate's audit protocol and **only** the handoff pack. It fills the "AI verdict + evidence" column: Pass with a link, Gap, or Can't tell (which counts as a Gap). It never waives or signs.
+3. **Human review:** put every Gap to the person who decides gaps. In the pane, each Gap has Fix and Waive buttons. In chat: "fix A3", "waive B6 because … owner … due …". ★ questions can't be waived. Record each decision in the sheet's "Human decision" column, exactly as given.
+4. **The next stage's lead accepts or rejects the handoff** (Explore lead, Harden lead, Ship lead; for Gate 4, the engineer signs and the team lead approves the Jira push).
+5. **Log it:** the outcome (Go / Go with conditions / Back to <stage> / Back to client), every waiver and every name in `ux/decisions-log.md`, the history (`--kind gate`) and the sheet's sign-off table. Rename the sheet `-final`.
+
+Ask for a sign-off role's name only when its gate needs it ("Who signs as Explore lead?"), and record it in project-context. **Stop** at every gate. "Looks good" from someone other than the named person is not a decision.
 
 ## Step 6: Record a sign-off (SIGN)
 
@@ -236,7 +239,7 @@ Copy every `final` artifact to `ux/publish/<project>-<stage>-<artifact>-v<n>-fin
 
 ## Step 9: History (version control, on every move)
 
-Every project keeps a private history in `ux/.history`: every version of everything in `ux/` and `deliverable/`, and an event for every move. It never touches a git repository the folder is already in, and nobody has to know git. `/skillcloud:start` turns it on. For an older project, run `skillcloud-history init` once. Record as you go, using the person's words and names exactly:
+Every project keeps a private history in `ux/.history`: every version of everything in `ux/` and `deliverable/`, and an event for every move. It never touches a git repository the folder is already in, and nobody has to know git. `/koru-studio:start` turns it on. For an older project, run `skillcloud-history init` once. Record as you go, using the person's words and names exactly:
 
 ```bash
 H=~/.skillcloud/repo/bin/skillcloud-history

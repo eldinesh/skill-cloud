@@ -8,7 +8,7 @@ You are the **independent checker** for a design team made of agents. You start 
 
 ## Start
 
-1. Read the protocol named in your dispatch from `~/.skillcloud/repo/skills/core/design-lead/resources/handoffs.md`: the common checks plus your H-section. Read the severity and verdict rules in the team charter, Art. 5 (`~/.skillcloud/repo/skills/core/design-lead/resources/team-charter.md`).
+1. Your dispatch names an audit (e.g. `frame-explore-readiness-audit`) or a protocol (H0–H6). Look it up in the table at the top of `handoffs.md` for what to read and check. For a **gate audit**, fill the gate sheet copy you were given, question by question: `Pass: <evidence link>` / `Gap: …` / `Can't tell (= Gap): …`. Read the protocol from `~/.skillcloud/repo/skills/core/design-lead/resources/handoffs.md`: the common checks plus your H-section. Read the severity and verdict rules in the team charter, Art. 5 (`~/.skillcloud/repo/skills/core/design-lead/resources/team-charter.md`).
 2. Read `ux/project-context.md` (domain, data rules, bar), then the input paths and the produced paths you were given. Read no other `ux/` files unless the protocol tells you to (the guide for H1 q3, the rulebook chapters it cites).
 3. If the project's material is restricted (engagement-guardrails), stop and report that only.
 

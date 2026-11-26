@@ -1,6 +1,15 @@
-# SkillCloud
+# Koru Studio
 
-Internal skill system for UX work. One repo, versioned, curated — research and design skills wired as a pipeline, where each step's output feeds the next step's input. Private; not for distribution.
+The Koru delivery system as a design team of agents: **Frame → Explore → Harden → Ship → Learn**. Each stage runs as **five designer moments**: Claude proposes everything with its source and confidence, and the designer decides. Each stage ends at a **gate**, where an independent AI audits every question and named people decide (Fix or Waive). Claude never signs. Built on SkillCloud's skills, agents, board, rulebook and history. Private; not for distribution.
+
+| Stage | Five designer moments | Gate |
+|---|---|---|
+| **Frame** v2 | Setup · Evidence and conflicts · Heuristics and audit · Framing · Sign-off | 1 Frame → Explore (senior, research owner, team lead, Explore lead) |
+| **Explore** v1 | Foundation and scope · Direction · Two directions · Evidence · Choice and sign-off | 2 Explore → Harden (team lead, Harden lead) |
+| **Harden** v2 | Scope · Edge-case cut · Engineer and client · AI and craft calls · Sign-off | 3 Harden → Ship (engineer, rulebook owner, design lead, Ship lead) |
+| **Ship** v2 | Setup and plan · Deliverable · Tickets · Engineer review · Sign-off | 4 Ship → Learn (design lead, engineer, team lead) |
+
+The stage playbooks live in `skills/stages/` (with every table: input scenarios, context sweep, intake, conflict rule, foundation routes A–K, feedback intake, edge-case workshop, ticket intent). The gate sheets are in `skills/core/design-lead/resources/gates/`.
 
 ## Install
 
@@ -9,13 +18,13 @@ Internal skill system for UX work. One repo, versioned, curated — research and
 ```
 /plugin marketplace add Eigenwise/eigenwise-toolshed   # optional: sidequest runs big Ship builds
 /plugin install sidequest@eigenwise-toolshed
-/plugin marketplace add eldinesh/skill-cloud            # private repo: uses your GitHub access
-/plugin install skillcloud@skill-cloud
+/plugin marketplace add eldinesh/skill-cloud            # private repo: uses your GitHub access (branch koru-studio until merged)
+/plugin install koru-studio@koru
 ```
 
-In the desktop app, where `/plugin` doesn't run: click **+** next to the prompt box, then **Plugins**, then **Add marketplace** for each marketplace above, then add **skillcloud** (and **sidequest**). Or run the same lines once from Terminal with `claude plugin …`. The desktop app reads the same install.
+In the desktop app, where `/plugin` doesn't run: click **+** next to the prompt box, then **Plugins**, then **Add marketplace** for each marketplace above, then add **koru-studio** (and **sidequest**). Or run the same lines once from Terminal with `claude plugin …`. The desktop app reads the same install.
 
-Then open (or create) a folder for the project, start Claude Code in it, and run `/skillcloud:start`. It sets everything up from whatever material is in the folder and proposes the first plan.
+Then open (or create) a folder for the project, start Claude Code in it, and run `/koru-studio:start`. It sets everything up from whatever material is in the folder and proposes the first plan.
 
 Trying a branch or a local checkout: `/plugin marketplace add ~/Developer/SkillCloud`, then the same install. Update with `/plugin update skillcloud`.
 

@@ -1,5 +1,7 @@
 # The delivery system — stages, handoffs, sign-offs
 
+> **Koru Studio:** each stage's full playbook (five designer moments, steps, tables, checks) is its stage skill in `skills/stages/`, and the gates are in `resources/gates/` (AI audits, people decide Fix or Waive). Where this file and a stage skill disagree on a stage's content, the stage skill wins.
+
 Every project runs the same way, from brief to build: **Frame → Explore → Harden → Ship**, with **Learn** after release feeding the next Frame. Each stage starts only from the previous stage's **signed-off** output and hands one output on. AI drafts and checks the work. Named people decide.
 
 This file is the reference the design lead (orchestrator), every specialist agent and every checker reads. When a rule here and a skill disagree, this file wins for *sequencing and sign-off*, and the skill wins for *how the work is done*.
@@ -102,6 +104,10 @@ Named in `ux/project-context.md` → **Team**. One person can hold several roles
 | Design lead | Hardened design |
 | Rulebook owner | Rulebook checks; rulebook chapter changes |
 | Engineer | Feasibility (Harden); handoff review (Ship) |
+| Decision owner (client) | Scope, business, priority; the brief and AI on their data, in writing |
+| Explore / Harden / Ship lead | Accepts the previous stage's handoff at its gate |
+| Decision owner (client) | Scope, business, priority; the brief and AI on their data, in writing |
+| Explore / Harden / Ship lead | Accepts the previous stage's handoff at its gate |
 
 ---
 

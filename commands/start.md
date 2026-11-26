@@ -1,5 +1,5 @@
 ---
-description: Set up this folder as a SkillCloud project (structure, context, rulebook, your material) and propose the first plan
+description: Set up this folder as a Koru Studio project (structure, context, rulebook, your material) and propose the first plan
 argument-hint: [optional: project name, or what this project is]
 ---
 
@@ -11,7 +11,7 @@ The person opened a folder and wants to start. They don't set anything up by han
 "${SKILLCLOUD_HOME:-$HOME/.skillcloud}/repo/bin/skillcloud-init" --import
 ```
 
-If it prints `STOP` (home, Desktop, Downloads or Documents), say in one line that each project needs its own folder, offer to create `~/Projects/<name>` and to move there, and stop until they answer. If the folder is already a SkillCloud project (`EXISTS ux/project-context.md`), skip to step 4: it's a resume, not a start.
+If it prints `STOP` (home, Desktop, Downloads or Documents), say in one line that each project needs its own folder, offer to create `~/Projects/<name>` and to move there, and stop until they answer. If the folder is already a Koru Studio project (`EXISTS ux/project-context.md`), skip to step 4: it's a resume, not a start.
 
 ## 2. Read the material and fill the keystone
 
@@ -32,7 +32,7 @@ Never write participant names anywhere. The material is raw until the synthesise
 - the folder is ready, with `ux/` (and how many files were imported, originals untouched)
 - the project, domain, design-system situation and stack you inferred, in one line, for them to correct
 - anything that looks sensitive or restricted, if so
-- where the board is (`/skillcloud:board`)
+- where the board is (`/koru-studio:board`)
 
 ## 4. Hand over to the design lead
 

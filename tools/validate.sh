@@ -38,7 +38,7 @@ for skill_md in "$REPO_ROOT"/skills/*/*/SKILL.md; do
   echo "$fm" | grep -q 'Use when' || fail "$rel" "description missing 'Use when' routing grammar"
   echo "$fm" | grep -q '(skillcloud)' || fail "$rel" "description missing (skillcloud) tag"
 
-  if [ "$group" = "research" ] || [ "$group" = "design" ] || [ "$group" = "ai" ] || [ "$group" = "build" ]; then
+  if [ "$group" = "research" ] || [ "$group" = "design" ] || [ "$group" = "ai" ] || [ "$group" = "build" ] || [ "$group" = "stages" ]; then
     grep -q '^## Contract' "$skill_md" || fail "$rel" "missing '## Contract' block"
     grep -q 'Consumes' "$skill_md" || fail "$rel" "contract missing Consumes"
     grep -q 'Produces' "$skill_md" || fail "$rel" "contract missing Produces"
@@ -104,6 +104,16 @@ PV=$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$REPO_RO
 MV=$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$REPO_ROOT/.claude-plugin/marketplace.json" 2>/dev/null | head -1)
 [ "$MV" = "$PV" ] || fail ".claude-plugin/marketplace.json" "plugin version '$MV' != plugin.json '$PV'"
 [ ! -e "$REPO_ROOT/agents/_common.md" ] || fail "agents/" "non-agent files in agents/ load as agents in the plugin"
+
+# --- gate sheets: every gate has questions, blocking stars, outcomes and a sign-off table
+for gs in "$REPO_ROOT"/skills/core/design-lead/resources/gates/[0-9]-*.md; do
+  [ -f "$gs" ] || continue
+  gn=$(basename "$gs" .md)
+  grep -qE '^\| [A-H][0-9] \|' "$gs" || fail "gates/$gn" "no question rows"
+  grep -q '★' "$gs" || fail "gates/$gn" "no blocking (★) questions"
+  grep -q 'Outcomes' "$gs" || fail "gates/$gn" "missing outcomes"
+  grep -q '| Sign-off |' "$gs" || fail "gates/$gn" "missing sign-off table"
+done
 
 # --- tool self-tests (fixture project with planted defects) ------------------
 if [ -x "$REPO_ROOT/tests/team/run.sh" ]; then

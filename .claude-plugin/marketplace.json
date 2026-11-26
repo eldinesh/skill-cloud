@@ -1,13 +1,15 @@
 {
-  "name": "skill-cloud",
-  "owner": { "name": "SkillCloud maintainers" },
-  "description": "Internal design-ops plugins.",
+  "name": "koru",
+  "owner": {
+    "name": "SkillCloud maintainers"
+  },
+  "description": "Koru design-ops plugins.",
   "plugins": [
     {
-      "name": "skillcloud",
+      "name": "koru-studio",
       "source": "./",
-      "description": "A design team made of agents, with Claude at its core and people in charge: Frame, Explore, Harden, Ship with named sign-offs.",
-      "version": "0.14.1",
+      "description": "The Koru delivery system as a design team of agents: five designer moments per stage, AI-audited gates, named sign-offs.",
+      "version": "1.0.0-alpha.1",
       "category": "productivity"
     }
   ]

@@ -22,7 +22,7 @@ cd "$ROOT" || exit 2
 GD="ux/.history"
 g() { git --git-dir="$GD" --work-tree=. -c core.quotePath=false "$@"; }
 
-need() { [ -d "$GD" ] || { echo "No history yet: run 'skillcloud-history init' (or /skillcloud:start)."; exit 3; }; }
+need() { [ -d "$GD" ] || { echo "No history yet: run 'skillcloud-history init' (or /koru-studio:start)."; exit 3; }; }
 
 paths() { # what the history tracks, only if present
   [ -d ux ] && echo ux

@@ -1,5 +1,27 @@
 # Handoff challenge protocols
 
+## Koru Studio's named audits (what the boards call them → what runs)
+
+Every audit runs in `sc-checker`, in a **fresh context, read-only**, seeing only the inputs it is given. Tools come first, as below.
+
+| Named audit | When | Reads | Checks (source of truth) | Also runs |
+|---|---|---|---|---|
+| **frame-conflict-check** | Frame, moment 2 | source map, conflict log, raw sources | Frame reference §4 + the context-sweep checks in §"Checks while producing" | H1 q7 (contradictions) |
+| **frame-research-challenger** | Frame step 14 | brief, research pack, source map | Frame checks table (confidence cap, solution bias, one page, traceability, limits, evidence per item, leading quotes) | H1, H2 |
+| **frame-explore-readiness-audit** | Gate 1 | the handoff pack only | `gates/1-frame-explore.md`, every question | — |
+| **explore-foundation-check** | Explore step 1 | Figma MCP, repo, brand docs | Explore reference §0 (F1–F12, Claude-readiness check) | — |
+| **explore-direction-challenger** | Explore step 9 | the two direction cards, option sketches, pack | Explore checks table (really different, JTBD coverage, copying, card before showing) | H4 q1–q2 |
+| **DS fit check** | Explore step 4 | DS + DS.md only | Explore reference §2: build a screen; any hard-coded value or invented component is a gap | `skillcloud-check tokens` |
+| **explore-harden-readiness-audit** | Gate 2 | the Harden input pack only | `gates/2-explore-harden.md` | — |
+| **harden-reviewer** | Harden steps 3 and 6 | prototype (review bar), role matrix | role × action × state × data gaps; Harden checks table rows Roles to Edge cases | H5 q1–q2 |
+| **harden-rulebook-check** | Harden QA step | prototype, rulebook chapters, tokens | rulebook, design-system and accessibility rows; WCAG 2.2 AA scan | H5 q3, `contrast`, axe |
+| **harden-ship-readiness-audit** | Gate 3 | the hardened pack only | `gates/3-harden-ship.md` | — |
+| **ship-handoff-reviewer** | Ship step 5, and Gate 4 | deliverable, tickets, handoff note | reads as an engineer: every question it would still ask; Ship checks table; at Gate 4, `gates/4-ship-learn.md` | H6 (re-runs the deliverable's checks) |
+
+**Gate audits fill the sheet's "AI verdict + evidence" column**, one row per question: `Pass: <link to file:line>`, `Gap: <what's missing>`, or `Can't tell (= Gap): <why>`. No Pass without a linked piece of evidence. Never write in the Human decision column, never waive, never sign. Count the Gaps, flagging ★ ones, at the top of the sheet.
+
+**Judgement checks (★J) are never passed by an audit.** The audit only reports whether the designer's evidence exists (who wrote the problem sentence, a decision card with a named person). The designer passes them.
+
 The checker agent (`sc-checker`) runs one protocol per handoff. Each protocol lists what the checker receives, the tools it runs **first**, the questions it must answer, and what counts as a blocker. Severity and verdict rules are in `team-charter.md` Article 5. Write the report to `ux/team/checks/<job-id>.md` from `check-report-template.md`.
 
 `skillcloud-check` lives at `~/.skillcloud/repo/bin/skillcloud-check`. Run it from the project root. Paste its output literally, and never summarise a FAIL line away.

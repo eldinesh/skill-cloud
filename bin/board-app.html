@@ -308,7 +308,7 @@ body.calm .card, body.calm .ev, body.calm .stage.current .bar { animation: none 
     var tree = document.getElementById('tree'); if (!tree) return;
     tree.innerHTML = '';
     var list = E.filter(matches);
-    if (!E.length) { tree.appendChild(el('p', 'empty', 'No history yet. It starts when the project is set up with /skillcloud:start.')); return; }
+    if (!E.length) { tree.appendChild(el('p', 'empty', 'No history yet. It starts when the project is set up with /koru-studio:start.')); return; }
     if (!list.length) { tree.appendChild(el('p', 'empty', 'Nothing matches.')); return; }
     var lastDay = '', lastStage = '';
     var latest = E[E.length - 1].id;

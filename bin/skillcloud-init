@@ -125,10 +125,10 @@ if ! grep -qF "$MARK_S" CLAUDE.md 2>/dev/null; then
   {
     [ -s CLAUDE.md ] && echo ""
     echo "$MARK_S"
-    echo "## SkillCloud project"
+    echo "## Koru Studio project"
     echo ""
-    echo "This folder is a SkillCloud project. Its memory is \`ux/\`: start from \`ux/project-context.md\` (it outranks chat memory) and the board in \`ux/team/board/\`."
-    echo "Run work through /skillcloud:design-lead (\"where are we\", \"what's next\"). It routes jobs to the design team and stops at each gate for the named person."
+    echo "This folder is a Koru Studio project. Its memory is \`ux/\`: start from \`ux/project-context.md\` (it outranks chat memory) and the board in \`ux/team/board/\`."
+    echo "Run work through /koru-studio:design-lead (\"where are we\", \"what's next\"). It routes jobs to the design team and stops at each gate for the named person."
     echo "Only final artifacts are inputs. Claude never signs: sign-offs are typed by the named person and recorded in \`ux/decisions-log.md\`."
     echo "$MARK_E"
   } >> CLAUDE.md
@@ -138,4 +138,4 @@ fi
 # 7. version history: every job, sign-off and decision from here on is kept, and nothing is ever rewritten
 "$REPO/bin/skillcloud-history" init 2>/dev/null | sed 's/^/        /' || true
 
-echo "NEXT    fill ux/project-context.md from the material, then /skillcloud:design-lead proposes the first plan"
+echo "NEXT    fill ux/project-context.md from the material, then /koru-studio:design-lead proposes the first plan"

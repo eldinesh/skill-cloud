@@ -16,8 +16,19 @@ export type Ticket = {
   what: string
   doneWhen: string
   log: string[]
+  moment: string
   file: string
   mtimeMs: number
+}
+
+export type GateGap = {
+  gate: string
+  file: string
+  id: string
+  question: string
+  blocking: boolean
+  fixAt: string
+  verdict: string
 }
 
 export type HistoryEvent = {
@@ -40,11 +51,12 @@ export type BoardView = {
   hasBoard: boolean
   project: string
   tickets: Ticket[]
+  gaps: GateGap[]
 }
 
 declare module 'claude-code' {
   interface PluginState {
-    skillcloud: {
+    'koru-studio': {
       board: Shaped<BoardView>
       history: Shaped<HistoryEvent[]>
       picks: Record<string, 'approve' | 'decline'>

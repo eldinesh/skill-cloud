@@ -7,7 +7,8 @@ Every piece of team work is a ticket: one markdown file in `ux/team/board/<id>.m
 id: J-007
 title: Synthesise sessions P01–P06 into themes and jobs
 stage: frame                 # frame | explore | harden | ship | learn
-kind: job                    # job (an agent does it) · gate (a sign-off) · human (people do it: fieldwork, a test session, a client call)
+kind: job                    # job (an agent does it) · moment (a designer decides) · gate (AI audit + people decide) · human (people do it: fieldwork, a test, a client call)
+moment: 2                    # which of the stage's five designer moments this serves (1–5)
 mode: afk                    # afk: an agent can finish it alone · hitl: needs a person, never dispatched
 role: synthesiser            # who works it (job) or who signs (gate: senior | research-owner | team-lead | design-lead | rulebook-owner | engineer)
 status: ready                # proposed | ready | doing | review | done | needs-you | dropped
